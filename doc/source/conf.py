@@ -79,7 +79,7 @@ MOCK_MODULES = [
     'suds', 'matplotlib.ticker', 'matplotlib.colorbar',
     'matplotlib.dates', 'scipy.optimize', 'scipy.ndimage',
     'matplotlib.figure', 'scipy.ndimage.interpolation', 'bs4',
-    'matplotlib.animation','matplotlib_toolkits.axes_grid1',
+    'matplotlib.animation','mpl_toolkits','mpl_toolkits.axes_grid1',
     'h5py','numpy.ma','matplotlib.cbook','matplotlib.axes','matplotlib.transforms',
     'matplotlib.gridspec','matplotlib.artist','matplotlib.axis','matplotlib.collections',
     'matplotlib.contour','matplotlib.path','matplotlib.patches']
