@@ -108,8 +108,22 @@ class FortranFile(file):
 
 class VACfile(FortranFile): #TODO: Make this not a subclass of FortranFile
     def __init__(self,fname,mode='r',buf=0):
-        """Based on FortranFile has been modified to read VAC / SAC output files.
+        """
+        Base input class for VAC Unformatted binary files.        
+        Based on FortranFile has been modified to read VAC / SAC output files.
        
+       Parameters
+       ----------
+       fname:    string
+           Input Filename
+       
+       mode: {'r' | 'w'}
+           I/O mode (only 'r' is fully supported)
+       
+       buf: int
+           underlying I/O buffer size
+       Returns
+       -------
         Reads a iteration into the following structure:
            file.header: -Dictionary containging
                         -filehead: string at begging of file
