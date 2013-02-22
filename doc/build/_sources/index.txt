@@ -10,8 +10,9 @@ Contents:
 
 .. toctree::
    :maxdepth: 2
+
    intro
-   guide/index
+   reference/index
 
 Indices and tables
 ==================

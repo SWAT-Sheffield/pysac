@@ -1,0 +1,263 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Input / Output &mdash; pySAC 0.0.1a documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '0.0.1a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="pySAC 0.0.1a documentation" href="../index.html" />
+    <link rel="up" title="pySAC Code Guide" href="index.html" />
+    <link rel="next" title="Plotting" href="plotting.html" />
+    <link rel="prev" title="pySAC Code Guide" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plotting.html" title="Plotting"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="pySAC Code Guide"
+             accesskey="P">previous</a> |</li>
+        <li><a href="../index.html">pySAC 0.0.1a documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">pySAC Code Guide</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="input-output">
+<span id="io"></span><h1>Input / Output<a class="headerlink" href="#input-output" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="introduction">
+<h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
+<p>Hello World</p>
+<span class="target" id="module-pysac.io"></span><p>Created on Thu Oct  6 12:53:52 2011</p>
+<p>&#64;author: Stuart Mumford</p>
+<p>FortranFile stolen from: Neil Martinsen-Burrell [via Enthought Mailing list]</p>
+<dl class="class">
+<dt id="pysac.io.FortranFile">
+<em class="property">class </em><tt class="descclassname">pysac.io.</tt><tt class="descname">FortranFile</tt><big>(</big><em>fname</em>, <em>mode='r'</em>, <em>buf=0</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#FortranFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.FortranFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>File with methods for dealing with fortran unformatted data files</p>
+<dl class="method">
+<dt id="pysac.io.FortranFile.readInts">
+<tt class="descname">readInts</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#FortranFile.readInts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.FortranFile.readInts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in an array of integers with error checking</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.FortranFile.readReals">
+<tt class="descname">readReals</tt><big>(</big><em>prec='d'</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#FortranFile.readReals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.FortranFile.readReals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in an array of reals (given precision) with error checking</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.FortranFile.readRecord">
+<tt class="descname">readRecord</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#FortranFile.readRecord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.FortranFile.readRecord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read a single fortran record</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.FortranFile.readString">
+<tt class="descname">readString</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#FortranFile.readString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.FortranFile.readString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read in a string with error checking</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.FortranFile.setEndian">
+<tt class="descname">setEndian</tt><big>(</big><em>c</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#FortranFile.setEndian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.FortranFile.setEndian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set endian to big (c=&#8217;&gt;&#8217;) or little (c=&#8217;&lt;&#8217;) or native (c=&#8217;&#64;&#8217;)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><cite>c</cite> : string</td>
+</tr>
+</tbody>
+</table>
+<p>The endian-ness to use when reading from this file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.FortranFile.writeReals">
+<tt class="descname">writeReals</tt><big>(</big><em>reals</em>, <em>prec='d'</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#FortranFile.writeReals"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.FortranFile.writeReals" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write an array of floats in given precision</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><dl class="first last docutils">
+<dt><cite>reals</cite> <span class="classifier-delimiter">:</span> <span class="classifier">array</span></dt>
+<dd><p class="first last">Data to write</p>
+</dd>
+<dt><cite>prec</cite> <span class="classifier-delimiter">:</span> <span class="classifier">string</span></dt>
+<dd><p class="first last">Character code for the precision to use in writing</p>
+</dd>
+</dl>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.FortranFile.writeString">
+<tt class="descname">writeString</tt><big>(</big><em>s</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#FortranFile.writeString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.FortranFile.writeString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a string</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters :</th><td class="field-body"><ul class="first last simple">
+<li><cite>s</cite>: the string to write</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysac.io.SACdata">
+<em class="property">class </em><tt class="descclassname">pysac.io.</tt><tt class="descname">SACdata</tt><a class="reference internal" href="../_modules/pysac/io.html#SACdata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACdata" title="Permalink to this definition">¶</a></dt>
+<dd><p>A class containing conservative varible definitions and sac only data 
+update methods. Designed to be subclassed, so SACfile and SAChdf5 can share
+common methods without horrible file inheratance</p>
+<dl class="method">
+<dt id="pysac.io.SACdata.get_thermalp">
+<tt class="descname">get_thermalp</tt><big>(</big><em>beta=False</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SACdata.get_thermalp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACdata.get_thermalp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate Thermal pressure from varibles</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysac.io.SACfile">
+<em class="property">class </em><tt class="descclassname">pysac.io.</tt><tt class="descname">SACfile</tt><big>(</big><em>fname</em>, <em>mode='r'</em>, <em>buf=0</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SACfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACfile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specification of VACFile for the reading of SAC files, to calculate the
+total from the background and pertuabation parts.
+Also defines:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>w_sac: Dict, containing conservative varibles as sum of</dt>
+<dd>background and pertubation parts.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="class">
+<dt id="pysac.io.SAChdf5">
+<em class="property">class </em><tt class="descclassname">pysac.io.</tt><tt class="descname">SAChdf5</tt><big>(</big><em>fname</em>, <em>mode='r'</em>, <em>buf=0</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SAChdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SAChdf5" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specification of VAChdf5 for the reading of SACHDF5 files, to calculate the
+total from the background and pertuabation parts.
+Also defines:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>w_sac: Dict, containing conservative varibles as sum of</dt>
+<dd>background and pertubation parts.</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Input / Output</a><ul>
+<li><a class="reference internal" href="#introduction">Introduction</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">pySAC Code Guide</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plotting.html"
+                        title="next chapter">Plotting</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="../_sources/reference/io.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plotting.html" title="Plotting"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="pySAC Code Guide"
+             >previous</a> |</li>
+        <li><a href="../index.html">pySAC 0.0.1a documentation</a> &raquo;</li>
+          <li><a href="index.html" >pySAC Code Guide</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Stuart Mumford.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
