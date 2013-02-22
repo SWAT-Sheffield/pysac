@@ -22,7 +22,7 @@ class Mock(object):
     def __call__(self, *args, **kwargs):
         return Mock()
     
-    def __new__(*args):
+    def __new__(*args,**kwargs):
         pass
     
     __add__  = __mul__  = __getitem__ = __setitem__ = \
