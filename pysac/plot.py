@@ -63,12 +63,20 @@ class BaseArtist():
         raise NotImplementedError("This needs to be subclassed")
         
 
-class ImageArtist(BaseArtist):
+class Image(BaseArtist):
     """ Plots an imageartist on subplot """
-    
-    def __init__(self, datakey):
+    pass
+            
+class Subplot():
+#        #create the subplot properties dictionary
+#        subaxprops = {'subkey':self.sub_key, 'title':title,
+#                      'fieldlines':fieldlines, 'colorbar':colorbar,
+#                      'tbar':tbar, 'labels':labels,'nonuniform':nonuniform,
+#                      'arr_slice':arr_slice,'cmap':cmap,'norm':norm}   
+    def __init__(self,subkey,datakey):
+        self.subkey = subkey
         self.datakey = datakey
-    
+        self.artists = []
     def set_cmap(self,cmap):
         if (cmap and not isinstance(cmap,mpl.colors.Colormap)):
             #Then it should be a string
@@ -95,25 +103,6 @@ class ImageArtist(BaseArtist):
                 or 'fixedcentre for SACplot.FixedCentre()""")
         else:
             self.norm = norm
-    
-    def plot(self):
-        """ This needs to draw the image to the axes, not anything else """
-        im = subplot.axes.imshow(self.data.T,origin='lower',norm=self.norm,
-                         cmap=self.cmap)
-        
-        return im,
-            
-class Subplot():
-#        #create the subplot properties dictionary
-#        subaxprops = {'subkey':self.sub_key, 'title':title,
-#                      'fieldlines':fieldlines, 'colorbar':colorbar,
-#                      'tbar':tbar, 'labels':labels,'nonuniform':nonuniform,
-#                      'arr_slice':arr_slice,'cmap':cmap,'norm':norm}   
-    def __init__(self,subkey):
-        self.subkey = subkey
-        self.datakey = datakey # This needs to move from here!!
-        self.artists = [] # This becomes a list of artist instances
-
 
         
     
@@ -141,9 +130,6 @@ class SACplot():
         #This prevents multiple file reads
         self.currentrecord = None
         self.explots = []
-        
-        self.nc = None
-        self.nr = None
 
     def grid_spec(self,nc,nr,**kwargs):
         """ Set Row / Coloumn layout of subplots and subplotparams """
@@ -155,53 +141,6 @@ class SACplot():
         else:
             self.fig.subplots_adjust(top=0.88,wspace=0.2,left=0.05,
                                       right=0.93,hspace=0.4,bottom=0.05)
-
-    def subplot(self, row, col, num, title='', labels=[]):
-        """ Add a new subplot to the figure
-        
-        Parameters
-        ----------
-        
-        row:    int
-                The number of rows in subplot grid.
-        
-        col:    int
-                The number of columns in the subplot grid.
-        
-        num:    int
-                The index of this axes (rows first)
-        """
-        if self.nc or self.nr:
-            if self.nc != col or self.nr != row:
-                raise ValueError("""Specified row and column values do not
-                                    match already specified values""")
-        else:
-            self.nc = col
-            self.nr = row
-                
-        self.sub_key += 1 #Depreciated!
-
-        subplot = Subplot(num)
-        subplot.labels = list(labels)      
-        subplot.title = title
-        
-        self.subplots.append(subplot)
-        
-
-    def add_img(self,datakey,colorbar=False,arr_slice=np.s_[...],
-                cmap=None,norm=None):
-
-        #Work with last created subplot object
-        subplot = self.subplots[-1]
-        subplot.colorbar = colorbar
-        
-        image = ImageArtist(datakey)
-        image.arr_slice = arr_slice
-        image.set_cmap(cmap)
-        image.set_norm(norm)
-        
-        subplot.artists.append(image)
-        
     def add_tbar(self):
         self.HAS_tbar = True
         bax = self.fig.add_axes([0.4,0.93,0.2,0.01])
@@ -210,7 +149,58 @@ class SACplot():
         bax.yaxis.set_major_locator(mpl.ticker.NullLocator())
         bax.set_xlim((self.f.t_start,self.f.t_end))
         bax.set_ylabel(r"$t=$",rotation='horizontal')
+
+
+    def add_img(self,datakey,title='',fieldlines=False,colorbar=False,labels=[],
+                arr_slice=np.s_[...],cmap=None,norm=None):
+    
+        #TODO: This can be removed in favor of auto subplot counting each time
+        # this routine is called.
+        #HOWEVER: Need a way to determine number of coloumns?!
+        if self.sub_key > self.nc * self.nr:
+            raise Exception("grid_spec wrong or too many plots added!")
+            
+        #Create a subplot object
+        subplot = Subplot(self.sub_key,datakey)
+        subplot.colorbar = colorbar
+        subplot.labels = list(labels)
+        subplot.arr_slice = arr_slice
+        subplot.title = title
         
+
+        subplot.set_cmap(cmap)
+        
+        subplot.set_norm(norm)
+        
+        if isinstance(fieldlines,list):
+            #if self.fieldseeds is already defined just say NO
+            if isinstance(self.fieldseeds,list):
+                raise ValueError("You can only specify fieldline parameters in the first frame")
+            #Where fieldlines is a list of parameters make sure its 3 pars long
+            if len(fieldlines) != 3:
+                raise Exception("""fieldlines should be list: [ax,denisty,dS] 
+                                or boolean""" )
+            ax = fieldlines[0]
+            density = fieldlines[1]
+            dS = fieldlines[2]
+            #make the lines
+            self.fieldseeds = self.seed_generator(ax,density)
+            self.dS = dS
+                    
+        elif isinstance(fieldlines,bool):
+           pass #Store in subaxprobs and be merry
+           
+        elif not(isinstance(fieldlines,bool)) or not(isinstance(fieldlines,list)):
+            raise TypeError("fieldlines argument must be Boolean or List")
+            
+        else:
+            #Catch all
+            raise Exception("Something is wrong with fieldlines argument")
+        subplot.fieldlines = fieldlines
+
+        self.subplots.append(subplot)
+        self.sub_key += 1
+    
     def _read_data(self,keys,i):
         """Read and process a step of data."""
         if self.currentrecord != i:
@@ -266,6 +256,7 @@ class SACplot():
             subplot.data = self._read_data(subplot.datakey,i)
             subplot.data = subplot.data[subplot.arr_slice]
             subplot.t = [self.f.header['t']]
+#            import pdb; pdb.set_trace()
             if self.fieldseeds and subplot.fieldlines:
                 #Make and store fieldlines for this datapoint
                 ##This almost certainly could be done better::
@@ -282,36 +273,35 @@ class SACplot():
             subplot.axes.axis(subplot.extent)
         self.subplots = []
     
-    def get_subplot_extent(self,subplot): #TODO: Fix this!
+    def get_subplot_extent(self,subplot):
         #Get Required data
-        pass
-#        arr_slice = subplot.arr_slice
-#        if not arr_slice == np.s_[...]:
-#            dims = np.array(list((type(s)!=int for s in arr_slice))).nonzero()[0]
-#            dims -= 2
-#            dims = np.abs(dims)
-#        else:
-#            dims = [0,1]
-#        subplot.yy = dims[1]
-#        subplot.xx = dims[0]
-#        subplot.xc = self.f.x[subplot.xx][arr_slice]
-#        subplot.yc = self.f.x[subplot.yy][arr_slice]
-#        #Define the extent of the grid
-#        extent = np.array((np.min(subplot.xc),
-#                            np.max(subplot.xc),
-#                            np.min(subplot.yc),
-#                            np.max(subplot.yc)))
-#        subplot.extent = extent
+            arr_slice = subplot.arr_slice
+            if not arr_slice == np.s_[...]:
+                dims = np.array(list((type(s)!=int for s in arr_slice))).nonzero()[0]
+                dims -= 2
+                dims = np.abs(dims)
+            else:
+                dims = [0,1]
+            subplot.yy = dims[1]
+            subplot.xx = dims[0]
+            subplot.xc = self.f.x[subplot.xx][arr_slice]
+            subplot.yc = self.f.x[subplot.yy][arr_slice]
+            #Define the extent of the grid
+            extent = np.array((np.min(subplot.xc),
+                                np.max(subplot.xc),
+                                np.min(subplot.yc),
+                                np.max(subplot.yc)))
+            subplot.extent = extent
     
     def _draw_axes(self, subplot):
         subplot.axes = self.fig.add_subplot(self.nc,self.nr,subplot.subkey)
         subplot.axes.set_title(subplot.title)
-#        subplot.axes.axis(subplot.extent)
+        subplot.axes.axis(subplot.extent)
         
-#        mega = mpl.ticker.FuncFormatter(lambda x,pos:"$%1.1f$"%(x/1e6)) #TODO: this should be kwarg
-#        subplot.axes.xaxis.set_major_formatter(mega)
-#        subplot.axes.xaxis.set_major_locator(mpl.ticker.MaxNLocator(5))
-#        subplot.axes.yaxis.set_major_formatter(mega)
+        mega = mpl.ticker.FuncFormatter(lambda x,pos:"$%1.1f$"%(x/1e6)) #TODO: this should be kwarg
+        subplot.axes.xaxis.set_major_formatter(mega)
+        subplot.axes.xaxis.set_major_locator(mpl.ticker.MaxNLocator(5))
+        subplot.axes.yaxis.set_major_formatter(mega)
         
     def _draw_img(self,subplot):
         """This handels the mpl plotting functions."""
