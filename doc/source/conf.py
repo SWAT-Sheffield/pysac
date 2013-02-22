@@ -21,7 +21,10 @@ class Mock(object):
 	
     def __call__(self, *args, **kwargs):
         return Mock()
-
+    
+    def __new__(*args):
+        pass
+    
     __add__  = __mul__  = __getitem__ = __setitem__ = \
 __delitem__ = __sub__ =  __floordiv__ = __mod__ = __divmod__ = \
 __pow__ = __lshift__ = __rshift__ = __and__ = __xor__ = __or__ = \
