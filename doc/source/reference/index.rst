@@ -1,11 +1,14 @@
-================
-pySAC Code Guide
-================
+===========
+pySAC Guide
+===========
 
-Welcome to the Source code guide.
+Welcome to the guide.
+
+Contents
+^^^^^^^^
 
 .. toctree::
-    :maxdepth:2
+    :maxdepth: 2
 
     io   
     plotting

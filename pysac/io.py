@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Oct  6 12:53:52 2011
-
-@author: Stuart Mumford
-
-FortranFile stolen from: Neil Martinsen-Burrell [via Enthought Mailing list]
-"""
 
 import struct
 import h5py
 from numpy import reshape, zeros
 
 class FortranFile(file):
-    """File with methods for dealing with fortran unformatted data files"""
+    """
+    File with methods for dealing with fortran unformatted data files
+    
+    Credit
+    ------
+    Neil Martinsen-Burrell [via Enthought Mailing list]
+    """
 
     def __init__(self,fname, mode='r', buf=0):
          """Open the file for writing, defaults to big endian."""
