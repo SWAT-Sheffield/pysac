@@ -13,3 +13,4 @@ Hello World
 
 .. automodule:: pysac.plot
     :members:
+    :undoc-members:
