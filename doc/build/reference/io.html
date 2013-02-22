@@ -156,10 +156,50 @@
 update methods. Designed to be subclassed, so SACfile and SAChdf5 can share
 common methods without horrible file inheratance</p>
 <dl class="method">
+<dt id="pysac.io.SACdata.convert_B">
+<tt class="descname">convert_B</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SACdata.convert_B"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACdata.convert_B" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.SACdata.get_bgp">
+<tt class="descname">get_bgp</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SACdata.get_bgp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACdata.get_bgp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.SACdata.get_bgtemp">
+<tt class="descname">get_bgtemp</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SACdata.get_bgtemp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACdata.get_bgtemp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.SACdata.get_cs">
+<tt class="descname">get_cs</tt><big>(</big><em>p=None</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SACdata.get_cs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACdata.get_cs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.SACdata.get_temp">
+<tt class="descname">get_temp</tt><big>(</big><em>p=None</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SACdata.get_temp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACdata.get_temp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="pysac.io.SACdata.get_thermalp">
 <tt class="descname">get_thermalp</tt><big>(</big><em>beta=False</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SACdata.get_thermalp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACdata.get_thermalp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate Thermal pressure from varibles</p>
 </dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.SACdata.get_total_p">
+<tt class="descname">get_total_p</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SACdata.get_total_p"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACdata.get_total_p" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.SACdata.get_va">
+<tt class="descname">get_va</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SACdata.get_va"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACdata.get_va" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.SACdata.update_w_sac">
+<tt class="descname">update_w_sac</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SACdata.update_w_sac"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACdata.update_w_sac" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </dd></dl>
 
@@ -170,25 +210,72 @@ common methods without horrible file inheratance</p>
 total from the background and pertuabation parts.
 Also defines:</p>
 <blockquote>
-<div><dl class="docutils">
-<dt>w_sac: Dict, containing conservative varibles as sum of</dt>
-<dd>background and pertubation parts.</dd>
-</dl>
-</div></blockquote>
+<div>w_sac: Dict, containing conservative varibles as sum of
+background and pertubation parts.</div></blockquote>
+<dl class="method">
+<dt id="pysac.io.SACfile.readstep">
+<tt class="descname">readstep</tt><big>(</big><em>i=0</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SACfile.readstep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SACfile.readstep" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
 <dt id="pysac.io.SAChdf5">
 <em class="property">class </em><tt class="descclassname">pysac.io.</tt><tt class="descname">SAChdf5</tt><big>(</big><em>fname</em>, <em>mode='r'</em>, <em>buf=0</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SAChdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SAChdf5" title="Permalink to this definition">¶</a></dt>
-<dd><p>Specification of VAChdf5 for the reading of SACHDF5 files, to calculate the
-total from the background and pertuabation parts.
+<dd><dl class="docutils">
+<dt>Specification of VAChdf5 for the reading of SACHDF5 files, to calculate the</dt>
+<dd><p class="first">total from the background and pertuabation parts.
 Also defines:</p>
-<blockquote>
+<blockquote class="last">
 <div><dl class="docutils">
 <dt>w_sac: Dict, containing conservative varibles as sum of</dt>
 <dd>background and pertubation parts.</dd>
 </dl>
 </div></blockquote>
+</dd>
+</dl>
+<dl class="method">
+<dt id="pysac.io.SAChdf5.readrecord">
+<tt class="descname">readrecord</tt><big>(</big><em>i=0</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#SAChdf5.readrecord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.SAChdf5.readrecord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysac.io.VACfile">
+<em class="property">class </em><tt class="descclassname">pysac.io.</tt><tt class="descname">VACfile</tt><big>(</big><em>fname</em>, <em>mode='r'</em>, <em>buf=0</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#VACfile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.VACfile" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pysac.io.VACfile.readParams">
+<tt class="descname">readParams</tt><big>(</big><em>prec='d'</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#VACfile.readParams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.VACfile.readParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads the Params line which is a mix of Ints and Reals</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.VACfile.readrecord">
+<tt class="descname">readrecord</tt><big>(</big><em>i</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#VACfile.readrecord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.VACfile.readrecord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.VACfile.readstep">
+<tt class="descname">readstep</tt><big>(</big><em>i=0</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#VACfile.readstep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.VACfile.readstep" title="Permalink to this definition">¶</a></dt>
+<dd><p>reads one time step of data</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysac.io.VAChdf5">
+<em class="property">class </em><tt class="descclassname">pysac.io.</tt><tt class="descname">VAChdf5</tt><big>(</big><em>filename</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#VAChdf5"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.VAChdf5" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pysac.io.VAChdf5.readrecord">
+<tt class="descname">readrecord</tt><big>(</big><em>i</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#VAChdf5.readrecord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.VAChdf5.readrecord" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.io.VAChdf5.readstep">
+<tt class="descname">readstep</tt><big>(</big><em>i=0</em><big>)</big><a class="reference internal" href="../_modules/pysac/io.html#VAChdf5.readstep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.io.VAChdf5.readstep" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>

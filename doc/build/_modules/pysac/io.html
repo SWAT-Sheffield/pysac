@@ -158,7 +158,7 @@
              <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s">&#39;Error reading record from data file&#39;</span><span class="p">)</span>
          <span class="k">return</span> <span class="n">data_str</span>
 </div></div>
-<span class="k">class</span> <span class="nc">VACfile</span><span class="p">(</span><span class="n">FortranFile</span><span class="p">):</span> <span class="c">#TODO: Make this not a subclass of FortranFile</span>
+<div class="viewcode-block" id="VACfile"><a class="viewcode-back" href="../../reference/io.html#pysac.io.VACfile">[docs]</a><span class="k">class</span> <span class="nc">VACfile</span><span class="p">(</span><span class="n">FortranFile</span><span class="p">):</span> <span class="c">#TODO: Make this not a subclass of FortranFile</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span><span class="n">buf</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Based on FortranFile has been modified to read VAC / SAC output files.</span>
 <span class="sd">       </span>
@@ -189,11 +189,11 @@
         
         <span class="k">print</span> <span class="s">&quot;File is </span><span class="si">%i</span><span class="s"> Records Long&quot;</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">num_records</span>
             
-    <span class="k">def</span> <span class="nf">readrecord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
+<div class="viewcode-block" id="VACfile.readrecord"><a class="viewcode-back" href="../../reference/io.html#pysac.io.VACfile.readrecord">[docs]</a>    <span class="k">def</span> <span class="nf">readrecord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">recordsize</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">readstep</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">readParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prec</span><span class="o">=</span><span class="s">&#39;d&#39;</span><span class="p">):</span>
+    </div>
+<div class="viewcode-block" id="VACfile.readParams"><a class="viewcode-back" href="../../reference/io.html#pysac.io.VACfile.readParams">[docs]</a>    <span class="k">def</span> <span class="nf">readParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">prec</span><span class="o">=</span><span class="s">&#39;d&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Reads the Params line which is a mix of Ints and Reals&quot;&quot;&quot;</span>
         <span class="c">#Check that prec is spec&#39;d proper        </span>
         <span class="k">if</span> <span class="n">prec</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&#39;d&#39;</span><span class="p">,</span><span class="s">&#39;f&#39;</span><span class="p">]:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Not an appropriate precision&#39;</span><span class="p">)</span>
@@ -201,8 +201,8 @@
         <span class="n">data_str</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">readRecord</span><span class="p">()</span>
         <span class="n">pars</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ENDIAN</span><span class="o">+</span><span class="s">&#39;idiii&#39;</span><span class="p">,</span><span class="n">data_str</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">pars</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">readstep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    </div>
+<div class="viewcode-block" id="VACfile.readstep"><a class="viewcode-back" href="../../reference/io.html#pysac.io.VACfile.readstep">[docs]</a>    <span class="k">def</span> <span class="nf">readstep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;reads one time step of data&quot;&quot;&quot;</span>
         <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">reshape</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span> <span class="n">transpose</span>
         
@@ -242,12 +242,12 @@
 <span class="c">#==============================================================================</span>
 <span class="c">#         SAC calculated varible methods</span>
 <span class="c">#==============================================================================</span>
-
+</div></div>
 <div class="viewcode-block" id="SACdata"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SACdata">[docs]</a><span class="k">class</span> <span class="nc">SACdata</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot; A class containing conservative varible definitions and sac only data </span>
 <span class="sd">    update methods. Designed to be subclassed, so SACfile and SAChdf5 can share</span>
 <span class="sd">    common methods without horrible file inheratance &quot;&quot;&quot;</span>
-    <span class="k">def</span> <span class="nf">update_w_sac</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SACdata.update_w_sac"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SACdata.update_w_sac">[docs]</a>    <span class="k">def</span> <span class="nf">update_w_sac</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s">&#39;ndim&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">w_sac</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -266,8 +266,8 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">w_sac</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&#39;b1&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">&quot;b1&quot;</span><span class="p">]]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">&quot;bg1&quot;</span><span class="p">]]})</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">w_sac</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&#39;b2&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">&quot;b2&quot;</span><span class="p">]]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">&quot;bg2&quot;</span><span class="p">]]})</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">w_sac</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s">&#39;b3&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">&quot;b2&quot;</span><span class="p">]]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">&quot;bg3&quot;</span><span class="p">]]})</span>
-    
-    <span class="k">def</span> <span class="nf">convert_B</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    </div>
+<div class="viewcode-block" id="SACdata.convert_B"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SACdata.convert_B">[docs]</a>    <span class="k">def</span> <span class="nf">convert_B</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">sqrt</span>
         <span class="n">mu</span> <span class="o">=</span> <span class="mf">1.25663706e-6</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -277,7 +277,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">w_sac</span><span class="p">[</span><span class="s">&#39;b1&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">w_sac</span><span class="p">[</span><span class="s">&#39;b2&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">w_sac</span><span class="p">[</span><span class="s">&#39;b3&#39;</span><span class="p">]</span> <span class="o">*=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
-    
+    </div>
 <div class="viewcode-block" id="SACdata.get_thermalp"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SACdata.get_thermalp">[docs]</a>    <span class="k">def</span> <span class="nf">get_thermalp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">beta</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Calculate Thermal pressure from varibles &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
@@ -298,7 +298,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">p</span>
     </div>
-    <span class="k">def</span> <span class="nf">get_bgp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="SACdata.get_bgp"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SACdata.get_bgp">[docs]</a>    <span class="k">def</span> <span class="nf">get_bgp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">print</span> <span class="s">&quot;WARNING: Background Pressure will not work if inital conditions are not V=0&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="c">#raise NotImplementedError(&quot;This Dosen&#39;t work for 3D yet, go fix&quot;)</span>
@@ -313,8 +313,8 @@
             <span class="n">mp</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">&quot;bg1&quot;</span><span class="p">]]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">&quot;bg2&quot;</span><span class="p">]]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
             <span class="n">p</span> <span class="o">=</span> <span class="n">g1</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">&quot;eb&quot;</span><span class="p">]]</span> <span class="o">-</span> <span class="n">kp</span> <span class="o">-</span> <span class="n">mp</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">p</span>
-    
-    <span class="k">def</span> <span class="nf">get_total_p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    </div>
+<div class="viewcode-block" id="SACdata.get_total_p"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SACdata.get_total_p">[docs]</a>    <span class="k">def</span> <span class="nf">get_total_p</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
            <span class="n">gamma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s">&#39;eqpar&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
            
@@ -329,14 +329,14 @@
            <span class="k">return</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">therm</span> <span class="o">-</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">mag</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;This Dosen&#39;t work for 2D yet, go fix&quot;</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">get_temp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    </div>
+<div class="viewcode-block" id="SACdata.get_temp"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SACdata.get_temp">[docs]</a>    <span class="k">def</span> <span class="nf">get_temp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
             <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_thermalp</span><span class="p">()</span>
         <span class="n">T</span> <span class="o">=</span> <span class="p">(</span><span class="n">p</span> <span class="o">*</span> <span class="mf">1.2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mf">8.3e3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">w_sac</span><span class="p">[</span><span class="s">&#39;rho&#39;</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">T</span>
-    
-    <span class="k">def</span> <span class="nf">get_bgtemp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    </div>
+<div class="viewcode-block" id="SACdata.get_bgtemp"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SACdata.get_bgtemp">[docs]</a>    <span class="k">def</span> <span class="nf">get_bgtemp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">print</span> <span class="s">&quot;WARNING: Background Temprature will not work if inital conditions are not V=0&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="n">kp</span> <span class="o">=</span> <span class="mf">0.0</span><span class="c">#(self.w[self.w_[&quot;rhob&quot;]] * (self.w_sac[&#39;v1&#39;]**2 + self.w_sac[&#39;v2&#39;]**2 + self.w_sac[&#39;v3&#39;]**2))/2.</span>
@@ -347,13 +347,13 @@
             <span class="n">mp</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">&quot;bg1&quot;</span><span class="p">]]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">&quot;bg2&quot;</span><span class="p">]]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.</span>
             <span class="n">T</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">&quot;eb&quot;</span><span class="p">]]</span> <span class="o">-</span> <span class="n">kp</span> <span class="o">-</span> <span class="n">mp</span>
         <span class="k">return</span> <span class="n">T</span>
-    
-    <span class="k">def</span> <span class="nf">get_va</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    </div>
+<div class="viewcode-block" id="SACdata.get_va"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SACdata.get_va">[docs]</a>    <span class="k">def</span> <span class="nf">get_va</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">sqrt</span><span class="c">#, abs</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w_sac</span><span class="p">[</span><span class="s">&#39;b1&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w_sac</span><span class="p">[</span><span class="s">&#39;b2&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w_sac</span><span class="p">[</span><span class="s">&#39;b3&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w_sac</span><span class="p">[</span><span class="s">&#39;rho&#39;</span><span class="p">]))</span>
         <span class="c">#return (abs(self.w_sac[&#39;b1&#39;]) + abs(self.w_sac[&#39;b2&#39;]) + abs(self.w_sac[&#39;b3&#39;])) / sqrt(self.w_sac[&#39;rho&#39;])</span>
-    
-    <span class="k">def</span> <span class="nf">get_cs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    </div>
+<div class="viewcode-block" id="SACdata.get_cs"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SACdata.get_cs">[docs]</a>    <span class="k">def</span> <span class="nf">get_cs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">p</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">sqrt</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="p">:</span>
             <span class="n">p</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_thermalp</span><span class="p">()</span>
@@ -364,7 +364,7 @@
 <span class="c">#       END SAC calculated varible methods</span>
 <span class="c">#==============================================================================</span>
 
-</div>
+</div></div>
 <div class="viewcode-block" id="SACfile"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SACfile">[docs]</a><span class="k">class</span> <span class="nc">SACfile</span><span class="p">(</span><span class="n">VACfile</span><span class="p">,</span><span class="n">SACdata</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Specification of VACFile for the reading of SAC files, to calculate the</span>
 <span class="sd">       total from the background and pertuabation parts.</span>
@@ -375,7 +375,7 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span><span class="n">buf</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="n">VACfile</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">mode</span><span class="p">,</span><span class="n">buf</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">readstep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="SACfile.readstep"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SACfile.readstep">[docs]</a>    <span class="k">def</span> <span class="nf">readstep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="n">VACfile</span><span class="o">.</span><span class="n">readstep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
         <span class="sd">&quot;&quot;&quot;Need a good way of determining the number of varibles that are </span>
 <span class="sd">        background or pertuabation&quot;&quot;&quot;</span>
@@ -387,8 +387,8 @@
 <span class="c">#==============================================================================</span>
 <span class="c"># HDF5 File classes</span>
 <span class="c">#==============================================================================</span>
-</div>
-<span class="k">class</span> <span class="nc">VAChdf5</span><span class="p">():</span>
+</div></div>
+<div class="viewcode-block" id="VAChdf5"><a class="viewcode-back" href="../../reference/io.html#pysac.io.VAChdf5">[docs]</a><span class="k">class</span> <span class="nc">VAChdf5</span><span class="p">():</span>
     <span class="kn">import</span> <span class="nn">h5py</span>
     <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">filename</span><span class="p">):</span>
@@ -439,7 +439,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">t_end</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_group</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">num_records</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_group</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
     
-    <span class="k">def</span> <span class="nf">readrecord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
+<div class="viewcode-block" id="VAChdf5.readrecord"><a class="viewcode-back" href="../../reference/io.html#pysac.io.VAChdf5.readrecord">[docs]</a>    <span class="k">def</span> <span class="nf">readrecord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
         <span class="n">wstepname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">time_group</span><span class="o">.</span><span class="n">keys</span><span class="p">()[</span><span class="n">i</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s">&#39;it&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_group</span><span class="p">[</span><span class="n">wstepname</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s">&#39;it&#39;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">time_group</span><span class="p">[</span><span class="n">wstepname</span><span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s">&#39;t&#39;</span><span class="p">])</span>
@@ -453,12 +453,12 @@
         <span class="n">index</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s">&#39;varnames&#39;</span><span class="p">]))</span> <span class="k">if</span> <span class="ow">not</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s">&#39;varnames&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="p">[</span><span class="s">&quot;x&quot;</span><span class="p">,</span><span class="s">&quot;y&quot;</span><span class="p">,</span><span class="s">&quot;z&quot;</span><span class="p">])),</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s">&#39;ndim&#39;</span><span class="p">])</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s">&#39;varnames&#39;</span><span class="p">][</span><span class="n">index</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="s">&#39;nw&#39;</span><span class="p">]</span><span class="o">+</span><span class="n">index</span><span class="p">]):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">name</span><span class="p">:</span><span class="n">i</span><span class="p">})</span>
-
-    <span class="k">def</span> <span class="nf">readstep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+</div>
+<div class="viewcode-block" id="VAChdf5.readstep"><a class="viewcode-back" href="../../reference/io.html#pysac.io.VAChdf5.readstep">[docs]</a>    <span class="k">def</span> <span class="nf">readstep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">Warning</span><span class="p">(</span><span class="s">&quot;&quot;&quot;readstep() isn&#39;t implemented for the HDF5</span>
 <span class="s">        file, it will read first record unless i is specified&quot;&quot;&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">readrecord</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-
+</div></div>
 <div class="viewcode-block" id="SAChdf5"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SAChdf5">[docs]</a><span class="k">class</span> <span class="nc">SAChdf5</span><span class="p">(</span><span class="n">VAChdf5</span><span class="p">,</span><span class="n">SACdata</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Specification of VAChdf5 for the reading of SACHDF5 files, to calculate the</span>
 <span class="sd">       total from the background and pertuabation parts.</span>
@@ -469,13 +469,13 @@
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">mode</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span><span class="n">buf</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="n">VAChdf5</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span>
     
-    <span class="k">def</span> <span class="nf">readrecord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="SAChdf5.readrecord"><a class="viewcode-back" href="../../reference/io.html#pysac.io.SAChdf5.readrecord">[docs]</a>    <span class="k">def</span> <span class="nf">readrecord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="n">VAChdf5</span><span class="o">.</span><span class="n">readrecord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">)</span>
         <span class="sd">&quot;&quot;&quot;Need a good way of determining the number of varibles that are </span>
 <span class="sd">        background or pertuabation&quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">update_w_sac</span><span class="p">()</span>
-        </div>
+        </div></div>
 </pre></div>
 
           </div>

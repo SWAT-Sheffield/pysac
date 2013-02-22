@@ -8,6 +8,8 @@ FortranFile stolen from: Neil Martinsen-Burrell [via Enthought Mailing list]
 """
 
 import struct
+import h5py
+from numpy import reshape, zeros
 
 class FortranFile(file):
     """File with methods for dealing with fortran unformatted data files"""
@@ -166,7 +168,6 @@ class VACfile(FortranFile): #TODO: Make this not a subclass of FortranFile
     
     def readstep(self,i=0):
         """reads one time step of data"""
-        from numpy import reshape, zeros, transpose
         
         self.header = {}
         self.header['filehead'] = self.readRecord()
@@ -328,11 +329,12 @@ class SACdata():
 
 
 class SACfile(VACfile,SACdata):
-    """Specification of VACFile for the reading of SAC files, to calculate the
-       total from the background and pertuabation parts.
-       Also defines:
-           w_sac: Dict, containing conservative varibles as sum of
-                   background and pertubation parts.
+    """
+    Specification of VACFile for the reading of SAC files, to calculate the
+    total from the background and pertuabation parts.
+    Also defines:
+       w_sac: Dict, containing conservative varibles as sum of
+       background and pertubation parts.
        """
     def __init__(self,fname,mode='r',buf=0):
         VACfile.__init__(self,fname,mode,buf)
@@ -351,10 +353,9 @@ class SACfile(VACfile,SACdata):
 #==============================================================================
 
 class VAChdf5():
-    import h5py
-    from numpy import array
     def __init__(self,filename):
-        """Based on FortranFile has been modified to read VAC / SAC HDF5 files.
+        """
+        Based on FortranFile has been modified to read VAC / SAC HDF5 files.
        
         Reads a iteration into the following structure:
            file.header: -Dictionary containging
@@ -374,7 +375,7 @@ class VAChdf5():
         Largely the HDF5 file is designed so the functionality mimics the VAC
         binary file, i.e. all the vars are still in the W array etc.
         """
-        self.h5file = self.h5py.File(filename,'r')
+        self.h5file = h5py.File(filename,'r')
         #Open top level group
         if not("SACdata" in self.h5file.keys()):
             print """Are you sure this is a proper SAC HDF5 file?
@@ -422,7 +423,8 @@ class VAChdf5():
         self.readrecord(i)
 
 class SAChdf5(VAChdf5,SACdata):
-    """Specification of VAChdf5 for the reading of SACHDF5 files, to calculate the
+    """
+    Specification of VAChdf5 for the reading of SACHDF5 files, to calculate the
        total from the background and pertuabation parts.
        Also defines:
            w_sac: Dict, containing conservative varibles as sum of
