@@ -4,20 +4,19 @@
 
 :author: Stuart Mumford
 
-OOP SACplot!
+Library for doing 2D slices and animations of SAC / VAC output
 """
-
-import matplotlib as mpl
-mpl.rc('text',usetex=False)
+from __future__ import absolute_import, division
 
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import matplotlib.animation as animation
-from scipy import ndimage
 import numpy.ma as ma
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
-from CustomColourmaps import *
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+#from scipy import ndimage
+from pysac.plot.CustomColourmaps import *
 
 class FixedCentre(mpl.colors.Normalize):
     """
