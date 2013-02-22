@@ -81,7 +81,7 @@ MOCK_MODULES = [
     'matplotlib.figure', 'scipy.ndimage.interpolation', 'bs4',
     'matplotlib.animation',
     'h5py','numpy.ma','matplotlib.cbook','matplotlib.axes','matplotlib.transforms',
-    'matplotlib.gridspec']
+    'matplotlib.gridspec','matplotlib.artist']
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock(pi=math.pi, G=6.67364e-11)
 
