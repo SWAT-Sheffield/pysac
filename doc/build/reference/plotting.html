@@ -27,7 +27,7 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="top" title="pySAC 0.0.1a documentation" href="../index.html" />
-    <link rel="up" title="pySAC Code Guide" href="index.html" />
+    <link rel="up" title="pySAC Guide" href="index.html" />
     <link rel="prev" title="Input / Output" href="io.html" /> 
   </head>
   <body>
@@ -44,7 +44,7 @@
           <a href="io.html" title="Input / Output"
              accesskey="P">previous</a> |</li>
         <li><a href="../index.html">pySAC 0.0.1a documentation</a> &raquo;</li>
-          <li><a href="index.html" accesskey="U">pySAC Code Guide</a> &raquo;</li> 
+          <li><a href="index.html" accesskey="U">pySAC Guide</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -58,7 +58,133 @@
 <div class="section" id="introduction">
 <h2>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h2>
 <p>Hello World</p>
-<span class="target" id="module-pysac.plot"></span></div>
+<span class="target" id="module-pysac.plot"></span><span class="target" id="module-pysac.plot.plot"></span><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Created on:</th><td class="field-body">Thu May 17 16:56:35 2012</td>
+</tr>
+<tr class="field-even field"><th class="field-name">author:</th><td class="field-body">Stuart Mumford</td>
+</tr>
+</tbody>
+</table>
+<p>Library for doing 2D slices and animations of SAC / VAC output</p>
+<dl class="class">
+<dt id="pysac.plot.plot.BaseArtist">
+<em class="property">class </em><tt class="descclassname">pysac.plot.plot.</tt><tt class="descname">BaseArtist</tt><a class="reference internal" href="../_modules/pysac/plot/plot.html#BaseArtist"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.BaseArtist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to hold drawing routines for any type of image, line etc.</p>
+<dl class="method">
+<dt id="pysac.plot.plot.BaseArtist.plot">
+<tt class="descname">plot</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#BaseArtist.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.BaseArtist.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.plot.plot.BaseArtist.update">
+<tt class="descname">update</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#BaseArtist.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.BaseArtist.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysac.plot.plot.FixedCentre">
+<em class="property">class </em><tt class="descclassname">pysac.plot.plot.</tt><tt class="descname">FixedCentre</tt><big>(</big><em>vmin=None</em>, <em>vmax=None</em>, <em>clip=False</em><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#FixedCentre"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.FixedCentre" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalise with a Fixed Centre</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pysac.plot.plot.Image">
+<em class="property">class </em><tt class="descclassname">pysac.plot.plot.</tt><tt class="descname">Image</tt><a class="reference internal" href="../_modules/pysac/plot/plot.html#Image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.Image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots an imageartist on subplot</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pysac.plot.plot.SACanim">
+<em class="property">class </em><tt class="descclassname">pysac.plot.plot.</tt><tt class="descname">SACanim</tt><big>(</big><em>sacfile</em>, <em>figsize=(12</em>, <em>4)</em>, <em>therange=None</em>, <em>sup_title=''</em>, <em>interval=200</em>, <em>blit=True</em><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#SACanim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.SACanim" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a wrapper class for an animation routine.</p>
+<dl class="method">
+<dt id="pysac.plot.plot.SACanim.animate">
+<tt class="descname">animate</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#SACanim.animate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.SACanim.animate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads data, and plots requested subplots. Last routine to call.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysac.plot.plot.SACanim.new_frame_seq">
+<tt class="descname">new_frame_seq</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#SACanim.new_frame_seq"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.SACanim.new_frame_seq" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysac.plot.plot.SACplot">
+<em class="property">class </em><tt class="descclassname">pysac.plot.plot.</tt><tt class="descname">SACplot</tt><big>(</big><em>sacfile</em>, <em>sup_title=''</em>, <em>figsize=(12</em>, <em>4)</em><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#SACplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.SACplot" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pysac.plot.plot.SACplot.add_img">
+<tt class="descname">add_img</tt><big>(</big><em>datakey</em>, <em>title=''</em>, <em>fieldlines=False</em>, <em>colorbar=False</em>, <em>labels=</em><span class="optional">[</span><span class="optional">]</span>, <em>arr_slice=Ellipsis</em>, <em>cmap=None</em>, <em>norm=None</em><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#SACplot.add_img"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.SACplot.add_img" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.plot.plot.SACplot.add_tbar">
+<tt class="descname">add_tbar</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#SACplot.add_tbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.SACplot.add_tbar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.plot.plot.SACplot.fieldlines">
+<tt class="descname">fieldlines</tt><big>(</big><em>v1</em>, <em>v2</em>, <em>seeds</em>, <em>dS=1</em><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#SACplot.fieldlines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.SACplot.fieldlines" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple Euler fieldline integrator
+v1,v2 - y and x vectors
+seeds - array of coordinate (array indexes) pairs
+dS [optional] - step size</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysac.plot.plot.SACplot.get_subplot_extent">
+<tt class="descname">get_subplot_extent</tt><big>(</big><em>subplot</em><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#SACplot.get_subplot_extent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.SACplot.get_subplot_extent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.plot.plot.SACplot.grid_spec">
+<tt class="descname">grid_spec</tt><big>(</big><em>nc</em>, <em>nr</em>, <em>**kwargs</em><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#SACplot.grid_spec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.SACplot.grid_spec" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set Row / Coloumn layout of subplots and subplotparams</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysac.plot.plot.SACplot.plot">
+<tt class="descname">plot</tt><big>(</big><em>i</em><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#SACplot.plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.SACplot.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reads data, and plots requested subplots. Last routine to call.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysac.plot.plot.SACplot.seed_generator">
+<tt class="descname">seed_generator</tt><big>(</big><em>ax</em>, <em>density</em>, <em>dS</em><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#SACplot.seed_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.SACplot.seed_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the fieldline seeds</p>
+<p><em>ax</em> -Int (1,2,3,4) (top,bottom,left,right) - Side of grid to seed field lines
+<em>density</em> - Int (0-ng)- Field line density in grid points
+dS - Step size for fieldline calculation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pysac.plot.plot.SACplot.show">
+<tt class="descname">show</tt><big>(</big><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#SACplot.show"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.SACplot.show" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pysac.plot.plot.Subplot">
+<em class="property">class </em><tt class="descclassname">pysac.plot.plot.</tt><tt class="descname">Subplot</tt><big>(</big><em>subkey</em>, <em>datakey</em><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#Subplot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.Subplot" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pysac.plot.plot.Subplot.set_cmap">
+<tt class="descname">set_cmap</tt><big>(</big><em>cmap</em><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#Subplot.set_cmap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.Subplot.set_cmap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pysac.plot.plot.Subplot.set_norm">
+<tt class="descname">set_norm</tt><big>(</big><em>norm</em><big>)</big><a class="reference internal" href="../_modules/pysac/plot/plot.html#Subplot.set_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pysac.plot.plot.Subplot.set_norm" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
 </div>
 
 
@@ -113,7 +239,7 @@
           <a href="io.html" title="Input / Output"
              >previous</a> |</li>
         <li><a href="../index.html">pySAC 0.0.1a documentation</a> &raquo;</li>
-          <li><a href="index.html" >pySAC Code Guide</a> &raquo;</li> 
+          <li><a href="index.html" >pySAC Guide</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">

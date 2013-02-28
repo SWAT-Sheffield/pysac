@@ -83,16 +83,19 @@ MOCK_MODULES = [
     'matplotlib.dates', 'scipy.optimize', 'scipy.ndimage',
     'matplotlib.figure', 'scipy.ndimage.interpolation', 'bs4',
     'matplotlib.animation','mpl_toolkits','mpl_toolkits.axes_grid1',
-    'h5py','numpy.ma','matplotlib.cbook','matplotlib.axes','matplotlib.transforms',
-    'matplotlib.gridspec','matplotlib.artist','matplotlib.axis','matplotlib.collections',
-    'matplotlib.contour','matplotlib.path','matplotlib.patches','colormath','colormath.color_objects']
-for mod_name in MOCK_MODULES:
-    sys.modules[mod_name] = Mock(pi=math.pi, G=6.67364e-11)
+    'h5py','numpy.ma','matplotlib.cbook','matplotlib.axes',
+    'matplotlib.transforms', 'matplotlib.gridspec', 
+    'matplotlib.artist', 'matplotlib.axis','matplotlib.collections',
+    'matplotlib.contour','matplotlib.path','matplotlib.patches', 
+    'colormath','colormath.color_objects']
 
-sys.modules['numpy'] = Mock(pi=math.pi, G=6.67364e-11,
-                            ndarray=type('ndarray', (), {}),
-                            dtype=lambda _: Mock(_mock_repr='np.dtype(\'float32\')'))
-sys.modules['scipy.constants'] = Mock(pi=math.pi, G=6.67364e-11)
+#for mod_name in MOCK_MODULES:
+#    sys.modules[mod_name] = Mock(pi=math.pi, G=6.67364e-11)
+
+#sys.modules['numpy'] = Mock(pi=math.pi, G=6.67364e-11,
+#                            ndarray=type('ndarray', (), {}),
+#                            dtype=lambda _: Mock(_mock_repr='np.dtype(\'float32\')'))
+#sys.modules['scipy.constants'] = Mock(pi=math.pi, G=6.67364e-11)
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
