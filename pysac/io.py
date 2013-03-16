@@ -112,7 +112,7 @@ class FortranFile(file):
              raise IOError('Error reading record from data file')
          return data_str
 
-class VACfile(FortranFile):
+class VACfile():
     def __init__(self,fname,mode='r',buf=0):
         """
         Base input class for VAC Unformatted binary files.        
@@ -142,31 +142,32 @@ class VACfile(FortranFile):
             file.x : x array from file which is [ndim,[nx]] in size
         """
         #Do FORTRAN read init, set Endian for VAC/SAC files
-        FortranFile.__init__(self,fname,mode,buf)
-        self.setEndian('<')
-        self.readstep()
-        self.recordsize = self.tell()
+        self.file = FortranFile(fname,mode,buf)
+        self.file.setEndian('<')
+        self.process_step()
+        self.recordsize = self.file.tell()
         self.num_records = stat(fname).st_size / self.recordsize
         
         #Find out first and last time values        
         self.t_start = self.header['params'][1]
-        self.readrecord(self.num_records)
+        self.read_timestep(self.num_records)
         self.t_end = self.header['params'][1]
-        self.readrecord(1)
+        self.read_timestep(1)
         
         print "File is %i Records Long"%self.num_records
             
     def read_timestep(self,i):
-        self.seek(int(i-1) * self.recordsize)
-        self.readstep(i)
+        self.file.seek(int(i-1) * self.recordsize)
+        self.process_step(i)
     
     def readParams(self,prec='d'):
         """Reads the Params line which is a mix of Ints and Reals"""
         #Check that prec is spec'd proper        
-        if prec not in ['d','f']: raise ValueError('Not an appropriate precision')
+        if prec not in ['d','f']:
+            raise ValueError('Not an appropriate precision')
         #read in line
-        data_str = self.readRecord()
-        pars = struct.unpack(self.ENDIAN+'idiii',data_str)
+        data_str = self.file.readRecord()
+        pars = struct.unpack(self.file.ENDIAN+'idiii', data_str)
         return list(pars)
     
     def process_step(self):
@@ -176,7 +177,7 @@ class VACfile(FortranFile):
         Sets up the header and reads and reshapes the arrays
         """
         self.header = {}
-        self.header['filehead'] = self.readRecord()
+        self.header['filehead'] = self.file.readRecord()
         self.header['params'] = self.readParams()
         #params is: it, t, ndim, neqpar, nw
         self.header['it'] = self.header['params'][0]
@@ -184,27 +185,28 @@ class VACfile(FortranFile):
         self.header['ndim'] = self.header['params'][2]
         self.header['neqpar'] = self.header['params'][3]
         self.header['nw'] = self.header['params'][4]
-        self.header['nx'] = self.readInts()
-        self.header['eqpar'] = self.readReals()
-        self.header['varnames'] = self.readRecord().split()
+        self.header['nx'] = self.file.readInts()
+        self.header['eqpar'] = self.file.readReals()
+        self.header['varnames'] = self.file.readRecord().split()
 
-        self.x = self.readReals()
+        self.x = self.file.readReals()
         #s = self.header['nx'] + [self.header['ndim']]
         s = [self.header['params'][2]] + self.header['nx']
         #s = [self.header['params'][2]] + self.header['nx']
-        self.x = reshape(self.x,s,order='C') ## - Don't know! Array was wrong 
+        self.x = np.reshape(self.x,s,order='C') ## - Don't know! Array was wrong 
         #self.E = self.readReals()
         #self.E = reshape(self.E,s)
         #shape when using F order, makes me wonder!
         
-        self.w = zeros([self.header['params'][-1]]+self.header['nx'],order='C')
+        self.w = np.zeros([self.header['params'][-1]]+self.header['nx'],order='C')
         for i in xrange(0,self.header['params'][-1]):
-            self.w[i] = reshape(self.readReals(), self.header['nx'], order='C')
+            self.w[i] = np.reshape(self.file.readReals(), self.header['nx'], order='C')
         self.w_ = {}
         ndim = self.header['params'][2]
         nw = self.header['params'][-1]
         #find h in varnames (to prevent x y h bug in 3D file)
-        index = next((i for i in xrange(len(self.header['varnames'])) if not(self.header['varnames'][i] in ["x","y","z"])),ndim)
+        index = next((i for i in xrange(len(self.header['varnames']))
+                    if not(self.header['varnames'][i] in ["x","y","z"])),ndim)
         for i,name in enumerate(self.header['varnames'][index:nw+index]):
             self.w_.update({name:i})
 
@@ -305,6 +307,30 @@ class VACdata():
         filename: str
         
         filetype: { fortran binary | hdf5 }
+        """
+        pass
+    
+    def init_file():
+        """
+        Sets up a file for writing, in the case of HDF5 writes file level 
+        header.
+        
+        Parameters
+        ----------
+        
+        filename
+        
+        filetype {fortran | pyhdf}
+        """
+        pass
+    
+    def write_step():
+        """
+        Writes current class state as time step
+        
+        Parameters
+        ----------
+        iternation number???
         """
         pass
 
