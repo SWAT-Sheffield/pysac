@@ -3,7 +3,7 @@
 import struct
 import h5py
 import numpy as np
-from os import stat
+import os
 
 #==============================================================================
 # File I/O Classes
@@ -146,7 +146,7 @@ class VACfile():
         self.file.setEndian('<')
         self.process_step()
         self.recordsize = self.file.tell()
-        self.num_records = stat(fname).st_size / self.recordsize
+        self.num_records = os.stat(fname).st_size / self.recordsize
         
         #Find out first and last time values        
         self.t_start = self.header['params'][1]
@@ -284,21 +284,45 @@ class VACdata():
     """ This is a file type independant class that should expose a VACfile or
     VACHDF5 file so it is transparent to the end user. """
     
-    def __init__():
+    def __init__(self, filename, filetype='auto', mode='r'):
         """
         Create a VACdata class. This can be a read or a create to write 
         operation
         
         Parameters
         ----------
+        filename: str
         
         mode: {'r', 'w'}
             If read, pass onto open() and read a file
             If 'w' setup a class then save a time step.
         """
-        pass
+        
+        #Detect filetype and open file for reading.
+        if mode == 'r':
+            filePrefix, fileExt = os.path.splitext(filename)
+            if fileExt == 'h5':
+                self.filetype = 'hdf5'
+            elif fileExt in ['ini', 'out']:
+                self.filetype ='fort'
+            else:
+                if filetype == 'auto':
+                    raise TypeError("File type can not be automatically determined")
+                else:
+                    if filetype in ['hdf5', 'fort']:
+                        self.filetype = filetype
+                    else:
+                        raise ValueError("Specified filetype is not valid. Filetype should be one of { 'hdf5' | 'fort}")
+            
+            self.open(filename, self.filetype)
+            
+        elif mode == 'w':
+            raise NotImplementedError("Not supported yet")
+        else:
+            raise ValueError("mode should be one of { 'r' | 'w'}")
+        
     
-    def open():
+    def open(self, filename, filetype):
         """
         Opens a file dependant upon the extention or a manual flag
         
@@ -308,8 +332,32 @@ class VACdata():
         
         filetype: { fortran binary | hdf5 }
         """
-        pass
+        if filetype == 'hdf5':
+            self.file = VAChdf5(filename)
+        
+        elif filetype == 'fort':
+            self.file = VACfile(filename, mode='r')
+        
+        #Expose the interesting data
+        self.x = self.file.x
+        self.w = self.file.w
+        self.w_ = self.file.w_
+        self.header = self.file.header
+        self.t_start = self.file.t_start
+        self.t_end = self.file.t_end
+        self.num_records = self.file.num_records
     
+    def read_timestep(self, i):
+        """
+        Read in the specified time step
+        
+        Parameters
+        ----------        
+        i: int
+            Time Step number
+        """
+        self.file.read_timestep(i)
+        
     def init_file():
         """
         Sets up a file for writing, in the case of HDF5 writes file level 
