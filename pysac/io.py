@@ -2,7 +2,12 @@
 
 import struct
 import h5py
-from numpy import reshape, zeros
+import numpy as np
+from os import stat
+
+#==============================================================================
+# File I/O Classes
+#==============================================================================
 
 class FortranFile(file):
     """
@@ -107,7 +112,7 @@ class FortranFile(file):
              raise IOError('Error reading record from data file')
          return data_str
 
-class VACfile(FortranFile): #TODO: Make this not a subclass of FortranFile
+class VACfile(FortranFile):
     def __init__(self,fname,mode='r',buf=0):
         """
         Base input class for VAC Unformatted binary files.        
@@ -141,7 +146,6 @@ class VACfile(FortranFile): #TODO: Make this not a subclass of FortranFile
         self.setEndian('<')
         self.readstep()
         self.recordsize = self.tell()
-        from os import stat
         self.num_records = stat(fname).st_size / self.recordsize
         
         #Find out first and last time values        
@@ -152,7 +156,7 @@ class VACfile(FortranFile): #TODO: Make this not a subclass of FortranFile
         
         print "File is %i Records Long"%self.num_records
             
-    def readrecord(self,i):
+    def read_timestep(self,i):
         self.seek(int(i-1) * self.recordsize)
         self.readstep(i)
     
@@ -165,9 +169,12 @@ class VACfile(FortranFile): #TODO: Make this not a subclass of FortranFile
         pars = struct.unpack(self.ENDIAN+'idiii',data_str)
         return list(pars)
     
-    def readstep(self,i=0):
-        """reads one time step of data"""
+    def process_step(self):
+        """
+        Does the raw file processing for each timestep
         
+        Sets up the header and reads and reshapes the arrays
+        """
         self.header = {}
         self.header['filehead'] = self.readRecord()
         self.header['params'] = self.readParams()
@@ -182,7 +189,7 @@ class VACfile(FortranFile): #TODO: Make this not a subclass of FortranFile
         self.header['varnames'] = self.readRecord().split()
 
         self.x = self.readReals()
-#        s = self.header['nx'] + [self.header['ndim']]
+        #s = self.header['nx'] + [self.header['ndim']]
         s = [self.header['params'][2]] + self.header['nx']
         #s = [self.header['params'][2]] + self.header['nx']
         self.x = reshape(self.x,s,order='C') ## - Don't know! Array was wrong 
@@ -201,11 +208,107 @@ class VACfile(FortranFile): #TODO: Make this not a subclass of FortranFile
         for i,name in enumerate(self.header['varnames'][index:nw+index]):
             self.w_.update({name:i})
 
+class VAChdf5():
+    def __init__(self,filename):
+        """
+        Based on FortranFile has been modified to read VAC / SAC HDF5 files.
+       
+        Reads a iteration into the following structure:
+           file.header: -Dictionary containging
+                        -filehead: string at begging of file
+                        -params: Iteration Parameters, it, t, ndim, neqpar, nw
+                        -nx: Size of cordinate array [list]
+                        -eqpar: eqpar_ parameters [list]
+                        -varnames: list containg varible names for dimensions, nw and eqpar?
+            file.w : w array from file which is [params,[nx]] in size
+            file.w_: dict containing the {varname:index} pairs for the w array
+            file.x : x array from file which is [ndim,[nx]] in size
+        
+        Also creates HDF5 specific attributes:
+            file.sac_group - Holds the x and time_group attributes.
+            file.time_group - Holds the series of w arrays.
+        
+        Largely the HDF5 file is designed so the functionality mimics the VAC
+        binary file, i.e. all the vars are still in the W array etc.
+        """
+        self.h5file = h5py.File(filename,'r')
+        #Open top level group
+        if not("SACdata" in self.h5file.keys()):
+            print """Are you sure this is a proper SAC HDF5 file?
+                Opening first group."""
+            self.sac_group = self.h5file[self.h5file.keys()[0]]
+        else:
+            self.sac_group = self.h5file["SACdata"]
+            
+        self.x = self.sac_group['x']
+        
+        self.header = dict(self.sac_group.attrs)
+        self.header['neqpar'] = int(self.header['neqpar'])
+        self.header['ndim'] = int(self.header['ndim'])
+        try:
+            self.header['filehead'] = self.h5file.attrs['filehead'][0]
+        except:
+            pass
+        
+        self.time_group = self.sac_group['wseries']
+        self.header.update(dict(self.time_group.attrs))
+        self.header['varnames'] = self.header['varnames'][0].split()
+        self.readrecord(0)
+        self.t_start = self.header['t']
+        self.t_end = self.time_group.items()[-1][1].attrs['t'][0]
+        self.num_records = len(self.time_group.items())
+    
+    def read_timestep(self,i):
+        wstepname = self.time_group.keys()[i]
+        self.header['it'] = int(self.time_group[wstepname].attrs['it'])
+        self.header['t'] = float(self.time_group[wstepname].attrs['t'])
+        #to maintain backwards compatibility with VACfile
+        self.header['params'] = [self.header['it'], self.header['t'], 
+                                self.header['ndim'], self.header['neqpar'], 
+                                self.header['nw']]
+        
+        self.w = self.time_group[wstepname]
+        self.w_ = {}
+        index = next((i for i in xrange(len(self.header['varnames'])) if not(self.header['varnames'][i] in ["x","y","z"])),self.header['ndim'])
+        for i,name in enumerate(self.header['varnames'][index:self.header['nw']+index]):
+            self.w_.update({name:i})
+
+
 #==============================================================================
-#         SAC calculated varible methods
+# VAC / SAC data classes for UI and Output (hopefully)
 #==============================================================================
 
-class SACdata():
+class VACdata():
+    """ This is a file type independant class that should expose a VACfile or
+    VACHDF5 file so it is transparent to the end user. """
+    
+    def __init__():
+        """
+        Create a VACdata class. This can be a read or a create to write 
+        operation
+        
+        Parameters
+        ----------
+        
+        mode: {'r', 'w'}
+            If read, pass onto open() and read a file
+            If 'w' setup a class then save a time step.
+        """
+        pass
+    
+    def open():
+        """
+        Opens a file dependant upon the extention or a manual flag
+        
+        Parameters
+        ----------
+        filename: str
+        
+        filetype: { fortran binary | hdf5 }
+        """
+        pass
+
+class SACdata(VACdata):
     """ A class containing conservative varible definitions and sac only data 
     update methods. Designed to be subclassed, so SACfile and SAChdf5 can share
     common methods without horrible file inheratance """
@@ -321,121 +424,3 @@ class SACdata():
             p = self.get_thermalp()
         g1 = self.header['eqpar'][0]
         return sqrt((g1 * p) / self.w_sac['rho'])
-
-#==============================================================================
-#       END SAC calculated varible methods
-#==============================================================================
-
-
-class SACfile(VACfile,SACdata):
-    """
-    Specification of VACFile for the reading of SAC files, to calculate the
-    total from the background and pertuabation parts.
-    Also defines:
-       w_sac: Dict, containing conservative varibles as sum of
-       background and pertubation parts.
-       """
-    def __init__(self,fname,mode='r',buf=0):
-        VACfile.__init__(self,fname,mode,buf)
-    
-    def readstep(self,i=0):
-        VACfile.readstep(self,i)
-        """Need a good way of determining the number of varibles that are 
-        background or pertuabation"""
-        
-        #split up into background / pertubation varibles
-        self.update_w_sac()
-
-
-#==============================================================================
-# HDF5 File classes
-#==============================================================================
-
-class VAChdf5():
-    def __init__(self,filename):
-        """
-        Based on FortranFile has been modified to read VAC / SAC HDF5 files.
-       
-        Reads a iteration into the following structure:
-           file.header: -Dictionary containging
-                        -filehead: string at begging of file
-                        -params: Iteration Parameters, it, t, ndim, neqpar, nw
-                        -nx: Size of cordinate array [list]
-                        -eqpar: eqpar_ parameters [list]
-                        -varnames: list containg varible names for dimensions, nw and eqpar?
-            file.w : w array from file which is [params,[nx]] in size
-            file.w_: dict containing the {varname:index} pairs for the w array
-            file.x : x array from file which is [ndim,[nx]] in size
-        
-        Also creates HDF5 specific attributes:
-            file.sac_group - Holds the x and time_group attributes.
-            file.time_group - Holds the series of w arrays.
-        
-        Largely the HDF5 file is designed so the functionality mimics the VAC
-        binary file, i.e. all the vars are still in the W array etc.
-        """
-        self.h5file = h5py.File(filename,'r')
-        #Open top level group
-        if not("SACdata" in self.h5file.keys()):
-            print """Are you sure this is a proper SAC HDF5 file?
-                Opening first group."""
-            self.sac_group = self.h5file[self.h5file.keys()[0]]
-        else:
-            self.sac_group = self.h5file["SACdata"]
-            
-        self.x = self.sac_group['x']
-        
-        self.header = dict(self.sac_group.attrs)
-        self.header['neqpar'] = int(self.header['neqpar'])
-        self.header['ndim'] = int(self.header['ndim'])
-        try:
-            self.header['filehead'] = self.h5file.attrs['filehead'][0]
-        except:
-            pass
-        
-        self.time_group = self.sac_group['wseries']
-        self.header.update(dict(self.time_group.attrs))
-        self.header['varnames'] = self.header['varnames'][0].split()
-        self.readrecord(0)
-        self.t_start = self.header['t']
-        self.t_end = self.time_group.items()[-1][1].attrs['t'][0]
-        self.num_records = len(self.time_group.items())
-    
-    def readrecord(self,i):
-        wstepname = self.time_group.keys()[i]
-        self.header['it'] = int(self.time_group[wstepname].attrs['it'])
-        self.header['t'] = float(self.time_group[wstepname].attrs['t'])
-        #to maintain backwards compatibility with VACfile
-        self.header['params'] = [self.header['it'], self.header['t'], 
-                                self.header['ndim'], self.header['neqpar'], 
-                                self.header['nw']]
-        
-        self.w = self.time_group[wstepname]
-        self.w_ = {}
-        index = next((i for i in xrange(len(self.header['varnames'])) if not(self.header['varnames'][i] in ["x","y","z"])),self.header['ndim'])
-        for i,name in enumerate(self.header['varnames'][index:self.header['nw']+index]):
-            self.w_.update({name:i})
-
-    def readstep(self,i=0):
-        raise Warning("""readstep() isn't implemented for the HDF5
-        file, it will read first record unless i is specified""")
-        self.readrecord(i)
-
-class SAChdf5(VAChdf5,SACdata):
-    """
-    Specification of VAChdf5 for the reading of SACHDF5 files, to calculate the
-       total from the background and pertuabation parts.
-       Also defines:
-           w_sac: Dict, containing conservative varibles as sum of
-                   background and pertubation parts.
-       """
-    def __init__(self,fname,mode='r',buf=0):
-        VAChdf5.__init__(self,fname)
-    
-    def readrecord(self,i=0):
-        VAChdf5.readrecord(self,i)
-        """Need a good way of determining the number of varibles that are 
-        background or pertuabation"""
-
-        self.update_w_sac()
-        

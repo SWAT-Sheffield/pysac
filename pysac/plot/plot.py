@@ -223,6 +223,8 @@ class SACplot():
         #else do it yourself:
         elif key == 'pressure':
             data = self.f.get_thermalp()
+        elif key == 'magp':
+            therm, data = self.f.get_thermalp(beta=True)
         elif key == 'temp':
             data = self.f.get_temp()
         elif key == 'delta_p':
@@ -238,7 +240,7 @@ class SACplot():
         elif key == 'delta_rho':
             data = self.f.w[self.f.w_['h']] - self.f.w[self.f.w_['rhob']]
         elif key == 'va':
-            data = self.f.get_va()
+            data = self.f.get_va()/1e3
             data = np.abs(data)
         elif key == 'cs':
             data = self.f.get_cs()
@@ -340,10 +342,12 @@ class SACplot():
         subplot.artists.append(im)
         
         if type(subplot.fieldlines) is np.ndarray:
-            for line in subplot.fieldlines:
+            if not isinstance(self.line_colour,list):
+                 self.line_colour = [self.line_colour]*len(self.fieldseeds)
+            for i,line in enumerate(subplot.fieldlines):
                 line[0] = (line[0]/(len(subplot.xc)-2) * (subplot.xc.max() - subplot.xc.min()))
                 line[1] = (line[1]/(len(subplot.yc)-2) * (subplot.yc.max() ))
-                subplot.artists.append(subplot.axes.plot(line[0],line[1],color=self.line_colour,linewidth=1)[0])
+                subplot.artists.append(subplot.axes.plot(line[0],line[1],color=self.line_colour[i],linewidth=2)[0])
         
 
     def seed_generator(self,ax,density,dS):
