@@ -255,7 +255,7 @@ class VAChdf5():
         self.time_group = self.sac_group['wseries']
         self.header.update(dict(self.time_group.attrs))
         self.header['varnames'] = self.header['varnames'][0].split()
-        self.readrecord(0)
+        self.read_timestep(0)
         self.t_start = self.header['t']
         self.t_end = self.time_group.items()[-1][1].attrs['t'][0]
         self.num_records = len(self.time_group.items())
