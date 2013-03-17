@@ -3,7 +3,7 @@
 import struct
 import h5py
 import numpy as np
-from os import stat
+import os
 
 #==============================================================================
 # File I/O Classes
@@ -112,7 +112,7 @@ class FortranFile(file):
              raise IOError('Error reading record from data file')
          return data_str
 
-class VACfile(FortranFile):
+class VACfile():
     def __init__(self,fname,mode='r',buf=0):
         """
         Base input class for VAC Unformatted binary files.        
@@ -142,31 +142,32 @@ class VACfile(FortranFile):
             file.x : x array from file which is [ndim,[nx]] in size
         """
         #Do FORTRAN read init, set Endian for VAC/SAC files
-        FortranFile.__init__(self,fname,mode,buf)
-        self.setEndian('<')
-        self.readstep()
-        self.recordsize = self.tell()
-        self.num_records = stat(fname).st_size / self.recordsize
+        self.file = FortranFile(fname,mode,buf)
+        self.file.setEndian('<')
+        self.process_step()
+        self.recordsize = self.file.tell()
+        self.num_records = os.stat(fname).st_size / self.recordsize
         
         #Find out first and last time values        
         self.t_start = self.header['params'][1]
-        self.readrecord(self.num_records)
+        self.read_timestep(self.num_records)
         self.t_end = self.header['params'][1]
-        self.readrecord(1)
+        self.read_timestep(1)
         
         print "File is %i Records Long"%self.num_records
             
     def read_timestep(self,i):
-        self.seek(int(i-1) * self.recordsize)
-        self.readstep(i)
+        self.file.seek(int(i-1) * self.recordsize)
+        self.process_step(i)
     
     def readParams(self,prec='d'):
         """Reads the Params line which is a mix of Ints and Reals"""
         #Check that prec is spec'd proper        
-        if prec not in ['d','f']: raise ValueError('Not an appropriate precision')
+        if prec not in ['d','f']:
+            raise ValueError('Not an appropriate precision')
         #read in line
-        data_str = self.readRecord()
-        pars = struct.unpack(self.ENDIAN+'idiii',data_str)
+        data_str = self.file.readRecord()
+        pars = struct.unpack(self.file.ENDIAN+'idiii', data_str)
         return list(pars)
     
     def process_step(self):
@@ -176,7 +177,7 @@ class VACfile(FortranFile):
         Sets up the header and reads and reshapes the arrays
         """
         self.header = {}
-        self.header['filehead'] = self.readRecord()
+        self.header['filehead'] = self.file.readRecord()
         self.header['params'] = self.readParams()
         #params is: it, t, ndim, neqpar, nw
         self.header['it'] = self.header['params'][0]
@@ -184,27 +185,28 @@ class VACfile(FortranFile):
         self.header['ndim'] = self.header['params'][2]
         self.header['neqpar'] = self.header['params'][3]
         self.header['nw'] = self.header['params'][4]
-        self.header['nx'] = self.readInts()
-        self.header['eqpar'] = self.readReals()
-        self.header['varnames'] = self.readRecord().split()
+        self.header['nx'] = self.file.readInts()
+        self.header['eqpar'] = self.file.readReals()
+        self.header['varnames'] = self.file.readRecord().split()
 
-        self.x = self.readReals()
+        self.x = self.file.readReals()
         #s = self.header['nx'] + [self.header['ndim']]
         s = [self.header['params'][2]] + self.header['nx']
         #s = [self.header['params'][2]] + self.header['nx']
-        self.x = reshape(self.x,s,order='C') ## - Don't know! Array was wrong 
+        self.x = np.reshape(self.x,s,order='C') ## - Don't know! Array was wrong 
         #self.E = self.readReals()
         #self.E = reshape(self.E,s)
         #shape when using F order, makes me wonder!
         
-        self.w = zeros([self.header['params'][-1]]+self.header['nx'],order='C')
+        self.w = np.zeros([self.header['params'][-1]]+self.header['nx'],order='C')
         for i in xrange(0,self.header['params'][-1]):
-            self.w[i] = reshape(self.readReals(), self.header['nx'], order='C')
+            self.w[i] = np.reshape(self.file.readReals(), self.header['nx'], order='C')
         self.w_ = {}
         ndim = self.header['params'][2]
         nw = self.header['params'][-1]
         #find h in varnames (to prevent x y h bug in 3D file)
-        index = next((i for i in xrange(len(self.header['varnames'])) if not(self.header['varnames'][i] in ["x","y","z"])),ndim)
+        index = next((i for i in xrange(len(self.header['varnames']))
+                    if not(self.header['varnames'][i] in ["x","y","z"])),ndim)
         for i,name in enumerate(self.header['varnames'][index:nw+index]):
             self.w_.update({name:i})
 
@@ -253,7 +255,7 @@ class VAChdf5():
         self.time_group = self.sac_group['wseries']
         self.header.update(dict(self.time_group.attrs))
         self.header['varnames'] = self.header['varnames'][0].split()
-        self.readrecord(0)
+        self.read_timestep(0)
         self.t_start = self.header['t']
         self.t_end = self.time_group.items()[-1][1].attrs['t'][0]
         self.num_records = len(self.time_group.items())
@@ -282,21 +284,45 @@ class VACdata():
     """ This is a file type independant class that should expose a VACfile or
     VACHDF5 file so it is transparent to the end user. """
     
-    def __init__():
+    def __init__(self, filename, filetype='auto', mode='r'):
         """
         Create a VACdata class. This can be a read or a create to write 
         operation
         
         Parameters
         ----------
+        filename: str
         
         mode: {'r', 'w'}
             If read, pass onto open() and read a file
             If 'w' setup a class then save a time step.
         """
-        pass
+        
+        #Detect filetype and open file for reading.
+        if mode == 'r':
+            filePrefix, fileExt = os.path.splitext(filename)
+            if fileExt == 'h5':
+                self.filetype = 'hdf5'
+            elif fileExt in ['ini', 'out']:
+                self.filetype ='fort'
+            else:
+                if filetype == 'auto':
+                    raise TypeError("File type can not be automatically determined")
+                else:
+                    if filetype in ['hdf5', 'fort']:
+                        self.filetype = filetype
+                    else:
+                        raise ValueError("Specified filetype is not valid. Filetype should be one of { 'hdf5' | 'fort}")
+            
+            self.open(filename, self.filetype)
+            
+        elif mode == 'w':
+            raise NotImplementedError("Not supported yet")
+        else:
+            raise ValueError("mode should be one of { 'r' | 'w'}")
+        
     
-    def open():
+    def open(self, filename, filetype):
         """
         Opens a file dependant upon the extention or a manual flag
         
@@ -305,6 +331,54 @@ class VACdata():
         filename: str
         
         filetype: { fortran binary | hdf5 }
+        """
+        if filetype == 'hdf5':
+            self.file = VAChdf5(filename)
+        
+        elif filetype == 'fort':
+            self.file = VACfile(filename, mode='r')
+        
+        #Expose the interesting data
+        self.x = self.file.x
+        self.w = self.file.w
+        self.w_ = self.file.w_
+        self.header = self.file.header
+        self.t_start = self.file.t_start
+        self.t_end = self.file.t_end
+        self.num_records = self.file.num_records
+    
+    def read_timestep(self, i):
+        """
+        Read in the specified time step
+        
+        Parameters
+        ----------        
+        i: int
+            Time Step number
+        """
+        self.file.read_timestep(i)
+        
+    def init_file():
+        """
+        Sets up a file for writing, in the case of HDF5 writes file level 
+        header.
+        
+        Parameters
+        ----------
+        
+        filename
+        
+        filetype {fortran | pyhdf}
+        """
+        pass
+    
+    def write_step():
+        """
+        Writes current class state as time step
+        
+        Parameters
+        ----------
+        iternation number???
         """
         pass
 
