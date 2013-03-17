@@ -2,7 +2,12 @@
 
 import struct
 import h5py
-from numpy import reshape, zeros
+import numpy as np
+import os
+
+#==============================================================================
+# File I/O Classes
+#==============================================================================
 
 class FortranFile(file):
     """
@@ -107,7 +112,7 @@ class FortranFile(file):
              raise IOError('Error reading record from data file')
          return data_str
 
-class VACfile(FortranFile): #TODO: Make this not a subclass of FortranFile
+class VACfile():
     def __init__(self,fname,mode='r',buf=0):
         """
         Base input class for VAC Unformatted binary files.        
@@ -137,39 +142,42 @@ class VACfile(FortranFile): #TODO: Make this not a subclass of FortranFile
             file.x : x array from file which is [ndim,[nx]] in size
         """
         #Do FORTRAN read init, set Endian for VAC/SAC files
-        FortranFile.__init__(self,fname,mode,buf)
-        self.setEndian('<')
-        self.readstep()
-        self.recordsize = self.tell()
-        from os import stat
-        self.num_records = stat(fname).st_size / self.recordsize
+        self.file = FortranFile(fname,mode,buf)
+        self.file.setEndian('<')
+        self.process_step()
+        self.recordsize = self.file.tell()
+        self.num_records = os.stat(fname).st_size / self.recordsize
         
         #Find out first and last time values        
         self.t_start = self.header['params'][1]
-        self.readrecord(self.num_records)
+        self.read_timestep(self.num_records)
         self.t_end = self.header['params'][1]
-        self.readrecord(1)
+        self.read_timestep(1)
         
         print "File is %i Records Long"%self.num_records
             
-    def readrecord(self,i):
-        self.seek(int(i-1) * self.recordsize)
-        self.readstep(i)
+    def read_timestep(self,i):
+        self.file.seek(int(i-1) * self.recordsize)
+        self.process_step()
     
     def readParams(self,prec='d'):
         """Reads the Params line which is a mix of Ints and Reals"""
         #Check that prec is spec'd proper        
-        if prec not in ['d','f']: raise ValueError('Not an appropriate precision')
+        if prec not in ['d','f']:
+            raise ValueError('Not an appropriate precision')
         #read in line
-        data_str = self.readRecord()
-        pars = struct.unpack(self.ENDIAN+'idiii',data_str)
+        data_str = self.file.readRecord()
+        pars = struct.unpack(self.file.ENDIAN+'idiii', data_str)
         return list(pars)
     
-    def readstep(self,i=0):
-        """reads one time step of data"""
+    def process_step(self):
+        """
+        Does the raw file processing for each timestep
         
+        Sets up the header and reads and reshapes the arrays
+        """
         self.header = {}
-        self.header['filehead'] = self.readRecord()
+        self.header['filehead'] = self.file.readRecord()
         self.header['params'] = self.readParams()
         #params is: it, t, ndim, neqpar, nw
         self.header['it'] = self.header['params'][0]
@@ -177,49 +185,229 @@ class VACfile(FortranFile): #TODO: Make this not a subclass of FortranFile
         self.header['ndim'] = self.header['params'][2]
         self.header['neqpar'] = self.header['params'][3]
         self.header['nw'] = self.header['params'][4]
-        self.header['nx'] = self.readInts()
-        self.header['eqpar'] = self.readReals()
-        self.header['varnames'] = self.readRecord().split()
+        self.header['nx'] = self.file.readInts()
+        self.header['eqpar'] = self.file.readReals()
+        self.header['varnames'] = self.file.readRecord().split()
 
-        self.x = self.readReals()
-#        s = self.header['nx'] + [self.header['ndim']]
+        self.x = self.file.readReals()
+        #s = self.header['nx'] + [self.header['ndim']]
         s = [self.header['params'][2]] + self.header['nx']
         #s = [self.header['params'][2]] + self.header['nx']
-        self.x = reshape(self.x,s,order='C') ## - Don't know! Array was wrong 
+        self.x = np.reshape(self.x,s,order='C') ## - Don't know! Array was wrong 
         #self.E = self.readReals()
         #self.E = reshape(self.E,s)
         #shape when using F order, makes me wonder!
         
-        self.w = zeros([self.header['params'][-1]]+self.header['nx'],order='C')
+        self.w = np.zeros([self.header['params'][-1]]+self.header['nx'],order='C')
         for i in xrange(0,self.header['params'][-1]):
-            self.w[i] = reshape(self.readReals(), self.header['nx'], order='C')
+            self.w[i] = np.reshape(self.file.readReals(), self.header['nx'], order='C')
         self.w_ = {}
         ndim = self.header['params'][2]
         nw = self.header['params'][-1]
         #find h in varnames (to prevent x y h bug in 3D file)
-        index = next((i for i in xrange(len(self.header['varnames'])) if not(self.header['varnames'][i] in ["x","y","z"])),ndim)
+        index = next((i for i in xrange(len(self.header['varnames']))
+                    if not(self.header['varnames'][i] in ["x","y","z"])),ndim)
         for i,name in enumerate(self.header['varnames'][index:nw+index]):
             self.w_.update({name:i})
 
+class VAChdf5():
+    def __init__(self,filename):
+        """
+        Based on FortranFile has been modified to read VAC / SAC HDF5 files.
+       
+        Reads a iteration into the following structure:
+           file.header: -Dictionary containging
+                        -filehead: string at begging of file
+                        -params: Iteration Parameters, it, t, ndim, neqpar, nw
+                        -nx: Size of cordinate array [list]
+                        -eqpar: eqpar_ parameters [list]
+                        -varnames: list containg varible names for dimensions, nw and eqpar?
+            file.w : w array from file which is [params,[nx]] in size
+            file.w_: dict containing the {varname:index} pairs for the w array
+            file.x : x array from file which is [ndim,[nx]] in size
+        
+        Also creates HDF5 specific attributes:
+            file.sac_group - Holds the x and time_group attributes.
+            file.time_group - Holds the series of w arrays.
+        
+        Largely the HDF5 file is designed so the functionality mimics the VAC
+        binary file, i.e. all the vars are still in the W array etc.
+        """
+        self.h5file = h5py.File(filename,'r')
+        #Open top level group
+        if not("SACdata" in self.h5file.keys()):
+            print """Are you sure this is a proper SAC HDF5 file?
+                Opening first group."""
+            self.sac_group = self.h5file[self.h5file.keys()[0]]
+        else:
+            self.sac_group = self.h5file["SACdata"]
+            
+        self.x = self.sac_group['x']
+        
+        self.header = dict(self.sac_group.attrs)
+        self.header['neqpar'] = int(self.header['neqpar'])
+        self.header['ndim'] = int(self.header['ndim'])
+        try:
+            self.header['filehead'] = self.h5file.attrs['filehead'][0]
+        except:
+            pass
+        
+        self.time_group = self.sac_group['wseries']
+        self.header.update(dict(self.time_group.attrs))
+        self.header['varnames'] = self.header['varnames'][0].split()
+        self.read_timestep(0)
+        self.t_start = self.header['t']
+        self.t_end = self.time_group.items()[-1][1].attrs['t'][0]
+        self.num_records = len(self.time_group.items())
+    
+    def read_timestep(self,i):
+        wstepname = self.time_group.keys()[i]
+        self.header['it'] = int(self.time_group[wstepname].attrs['it'])
+        self.header['t'] = float(self.time_group[wstepname].attrs['t'])
+        #to maintain backwards compatibility with VACfile
+        self.header['params'] = [self.header['it'], self.header['t'], 
+                                self.header['ndim'], self.header['neqpar'], 
+                                self.header['nw']]
+        
+        self.w = self.time_group[wstepname]
+        self.w_ = {}
+        index = next((i for i in xrange(len(self.header['varnames'])) if not(self.header['varnames'][i] in ["x","y","z"])),self.header['ndim'])
+        for i,name in enumerate(self.header['varnames'][index:self.header['nw']+index]):
+            self.w_.update({name:i})
+
+
 #==============================================================================
-#         SAC calculated varible methods
+# VAC / SAC data classes for UI and Output (hopefully)
 #==============================================================================
 
-class SACdata():
-    """ A class containing conservative varible definitions and sac only data 
-    update methods. Designed to be subclassed, so SACfile and SAChdf5 can share
-    common methods without horrible file inheratance """
+class VACdata():
+    """ This is a file type independant class that should expose a VACfile or
+    VACHDF5 file so it is transparent to the end user. """
+    
+    def __init__(self, filename, filetype='auto', mode='r'):
+        """
+        Create a VACdata class. This can be a read or a create to write 
+        operation
+        
+        Parameters
+        ----------
+        filename: str
+        
+        mode: {'r', 'w'}
+            If read, pass onto open() and read a file
+            If 'w' setup a class then save a time step.
+        """
+        
+        #Detect filetype and open file for reading.
+        if mode == 'r':
+            filePrefix, fileExt = os.path.splitext(filename)
+            if fileExt == '.h5':
+                self.filetype = 'hdf5'
+            elif fileExt in ['.ini', '.out']:
+                self.filetype ='fort'
+            else:
+                if filetype == 'auto':
+                    raise TypeError("File type can not be automatically determined")
+                else:
+                    if filetype in ['hdf5', 'fort']:
+                        self.filetype = filetype
+                    else:
+                        raise ValueError("Specified filetype is not valid. Filetype should be one of { 'hdf5' | 'fort}")
+            
+            self.open(filename, self.filetype)
+            
+        elif mode == 'w':
+            raise NotImplementedError("Not supported yet")
+        else:
+            raise ValueError("mode should be one of { 'r' | 'w'}")
+        
+    
+    def open(self, filename, filetype):
+        """
+        Opens a file dependant upon the extention or a manual flag
+        
+        Parameters
+        ----------
+        filename: str
+        
+        filetype: { fortran binary | hdf5 }
+        """
+        if filetype == 'hdf5':
+            self.file = VAChdf5(filename)
+        
+        elif filetype == 'fort':
+            self.file = VACfile(filename, mode='r')
+        
+        #Expose the interesting data
+        self.x = self.file.x
+        self.w = self.file.w
+        self.w_ = self.file.w_
+        self.header = self.file.header
+        self.t_start = self.file.t_start
+        self.t_end = self.file.t_end
+        self.num_records = self.file.num_records
+    
+    def read_timestep(self, i):
+        """
+        Read in the specified time step
+        
+        Parameters
+        ----------        
+        i: int
+            Time Step number
+        """
+        self.file.read_timestep(i)
+        
+    def init_file():
+        """
+        Sets up a file for writing, in the case of HDF5 writes file level 
+        header.
+        
+        Parameters
+        ----------
+        
+        filename
+        
+        filetype {fortran | pyhdf}
+        """
+        pass
+    
+    def write_step():
+        """
+        Writes current class state as time step
+        
+        Parameters
+        ----------
+        iternation number???
+        """
+        pass
+
+class SACdata(VACdata):
+    """
+    This adds specifications to VACdata designed for SAC simulations in 2D or
+    3D with magentic field.
+
+    This adds the background and pertubation varibles into a new w_sac dict.
+    """
+    
+    def __init__(self, filename, filetype='auto', mode='r'):        
+        VACdata.__init__(self, filename, filetype=filetype, mode=mode)
+        self.update_w_sac()
+    
     def update_w_sac(self):
-        self.ndim = self.header['ndim']
+        """
+        This method creates the w_sac dictionary for the current timestep.
+        """
+        ndim = self.header['ndim']
         self.w_sac = {}
-        if self.ndim == 2:
+        if ndim == 2:
             self.w_sac.update({'rho':self.w[self.w_["h" ]] + self.w[self.w_["rhob"]]})
             self.w_sac.update({'v1':self.w[self.w_["m1"]] / self.w_sac['rho']})
             self.w_sac.update({'v2':self.w[self.w_["m2"]] / self.w_sac['rho']})
-            self.w_sac.update({'e':self.w[self.w_["e"]]+self.w[self.w_["eb"]]})
+            self.w_sac.update({'e':self.w[self.w_["e"]] + self.w[self.w_["eb"]]})
             self.w_sac.update({'b1':self.w[self.w_["b1"]] + self.w[self.w_["bg1"]]})
             self.w_sac.update({'b2':self.w[self.w_["b2"]] + self.w[self.w_["bg2"]]})
-        if self.ndim == 3:
+        if ndim == 3:
             self.w_sac.update({'rho':self.w[self.w_["h" ]] + self.w[self.w_["rhob"]]})
             self.w_sac.update({'v1':self.w[self.w_["m1"]] / self.w_sac['rho']})
             self.w_sac.update({'v2':self.w[self.w_["m2"]] / self.w_sac['rho']})
@@ -230,15 +418,24 @@ class SACdata():
             self.w_sac.update({'b3':self.w[self.w_["b2"]] + self.w[self.w_["bg3"]]})
     
     def convert_B(self):
-        from numpy import sqrt
+        """
+        This function corrects for the scaling of the magentic field units.
+
+        It will convert the magnetic field into Tesla for the current time
+        step.
+
+        WARNING: The conservative variable calculations are in SAC scaled
+        magnetic field units, this conversion should be run after accessing any
+        calculatuions involving the magnetic field
+        """
         mu = 1.25663706e-6
         if self.ndim == 2:
-            self.w_sac['b1'] *= sqrt(mu)
-            self.w_sac['b2'] *= sqrt(mu)
+            self.w_sac['b1'] *= np.sqrt(mu)
+            self.w_sac['b2'] *= np.sqrt(mu)
         if self.ndim == 3:
-            self.w_sac['b1'] *= sqrt(mu)
-            self.w_sac['b2'] *= sqrt(mu)
-            self.w_sac['b3'] *= sqrt(mu)
+            self.w_sac['b1'] *= np.sqrt(mu)
+            self.w_sac['b2'] *= np.sqrt(mu)
+            self.w_sac['b3'] *= np.sqrt(mu)
     
     def get_thermalp(self,beta=False):
         """Calculate Thermal pressure from varibles """
@@ -321,121 +518,3 @@ class SACdata():
             p = self.get_thermalp()
         g1 = self.header['eqpar'][0]
         return sqrt((g1 * p) / self.w_sac['rho'])
-
-#==============================================================================
-#       END SAC calculated varible methods
-#==============================================================================
-
-
-class SACfile(VACfile,SACdata):
-    """
-    Specification of VACFile for the reading of SAC files, to calculate the
-    total from the background and pertuabation parts.
-    Also defines:
-       w_sac: Dict, containing conservative varibles as sum of
-       background and pertubation parts.
-       """
-    def __init__(self,fname,mode='r',buf=0):
-        VACfile.__init__(self,fname,mode,buf)
-    
-    def readstep(self,i=0):
-        VACfile.readstep(self,i)
-        """Need a good way of determining the number of varibles that are 
-        background or pertuabation"""
-        
-        #split up into background / pertubation varibles
-        self.update_w_sac()
-
-
-#==============================================================================
-# HDF5 File classes
-#==============================================================================
-
-class VAChdf5():
-    def __init__(self,filename):
-        """
-        Based on FortranFile has been modified to read VAC / SAC HDF5 files.
-       
-        Reads a iteration into the following structure:
-           file.header: -Dictionary containging
-                        -filehead: string at begging of file
-                        -params: Iteration Parameters, it, t, ndim, neqpar, nw
-                        -nx: Size of cordinate array [list]
-                        -eqpar: eqpar_ parameters [list]
-                        -varnames: list containg varible names for dimensions, nw and eqpar?
-            file.w : w array from file which is [params,[nx]] in size
-            file.w_: dict containing the {varname:index} pairs for the w array
-            file.x : x array from file which is [ndim,[nx]] in size
-        
-        Also creates HDF5 specific attributes:
-            file.sac_group - Holds the x and time_group attributes.
-            file.time_group - Holds the series of w arrays.
-        
-        Largely the HDF5 file is designed so the functionality mimics the VAC
-        binary file, i.e. all the vars are still in the W array etc.
-        """
-        self.h5file = h5py.File(filename,'r')
-        #Open top level group
-        if not("SACdata" in self.h5file.keys()):
-            print """Are you sure this is a proper SAC HDF5 file?
-                Opening first group."""
-            self.sac_group = self.h5file[self.h5file.keys()[0]]
-        else:
-            self.sac_group = self.h5file["SACdata"]
-            
-        self.x = self.sac_group['x']
-        
-        self.header = dict(self.sac_group.attrs)
-        self.header['neqpar'] = int(self.header['neqpar'])
-        self.header['ndim'] = int(self.header['ndim'])
-        try:
-            self.header['filehead'] = self.h5file.attrs['filehead'][0]
-        except:
-            pass
-        
-        self.time_group = self.sac_group['wseries']
-        self.header.update(dict(self.time_group.attrs))
-        self.header['varnames'] = self.header['varnames'][0].split()
-        self.readrecord(0)
-        self.t_start = self.header['t']
-        self.t_end = self.time_group.items()[-1][1].attrs['t'][0]
-        self.num_records = len(self.time_group.items())
-    
-    def readrecord(self,i):
-        wstepname = self.time_group.keys()[i]
-        self.header['it'] = int(self.time_group[wstepname].attrs['it'])
-        self.header['t'] = float(self.time_group[wstepname].attrs['t'])
-        #to maintain backwards compatibility with VACfile
-        self.header['params'] = [self.header['it'], self.header['t'], 
-                                self.header['ndim'], self.header['neqpar'], 
-                                self.header['nw']]
-        
-        self.w = self.time_group[wstepname]
-        self.w_ = {}
-        index = next((i for i in xrange(len(self.header['varnames'])) if not(self.header['varnames'][i] in ["x","y","z"])),self.header['ndim'])
-        for i,name in enumerate(self.header['varnames'][index:self.header['nw']+index]):
-            self.w_.update({name:i})
-
-    def readstep(self,i=0):
-        raise Warning("""readstep() isn't implemented for the HDF5
-        file, it will read first record unless i is specified""")
-        self.readrecord(i)
-
-class SAChdf5(VAChdf5,SACdata):
-    """
-    Specification of VAChdf5 for the reading of SACHDF5 files, to calculate the
-       total from the background and pertuabation parts.
-       Also defines:
-           w_sac: Dict, containing conservative varibles as sum of
-                   background and pertubation parts.
-       """
-    def __init__(self,fname,mode='r',buf=0):
-        VAChdf5.__init__(self,fname)
-    
-    def readrecord(self,i=0):
-        VAChdf5.readrecord(self,i)
-        """Need a good way of determining the number of varibles that are 
-        background or pertuabation"""
-
-        self.update_w_sac()
-        
