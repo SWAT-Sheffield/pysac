@@ -398,17 +398,16 @@ class SACdata(VACdata):
         """
         This method creates the w_sac dictionary for the current timestep.
         """
-        print "boo"
-        self.ndim = self.header['ndim']
+        ndim = self.header['ndim']
         self.w_sac = {}
-        if self.ndim == 2:
+        if ndim == 2:
             self.w_sac.update({'rho':self.w[self.w_["h" ]] + self.w[self.w_["rhob"]]})
             self.w_sac.update({'v1':self.w[self.w_["m1"]] / self.w_sac['rho']})
             self.w_sac.update({'v2':self.w[self.w_["m2"]] / self.w_sac['rho']})
             self.w_sac.update({'e':self.w[self.w_["e"]] + self.w[self.w_["eb"]]})
             self.w_sac.update({'b1':self.w[self.w_["b1"]] + self.w[self.w_["bg1"]]})
             self.w_sac.update({'b2':self.w[self.w_["b2"]] + self.w[self.w_["bg2"]]})
-        if self.ndim == 3:
+        if ndim == 3:
             self.w_sac.update({'rho':self.w[self.w_["h" ]] + self.w[self.w_["rhob"]]})
             self.w_sac.update({'v1':self.w[self.w_["m1"]] / self.w_sac['rho']})
             self.w_sac.update({'v2':self.w[self.w_["m2"]] / self.w_sac['rho']})
