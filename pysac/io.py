@@ -398,6 +398,7 @@ class SACdata(VACdata):
         """
         This method creates the w_sac dictionary for the current timestep.
         """
+        print "boo"
         self.ndim = self.header['ndim']
         self.w_sac = {}
         if self.ndim == 2:
