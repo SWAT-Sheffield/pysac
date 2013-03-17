@@ -158,7 +158,7 @@ class VACfile():
             
     def read_timestep(self,i):
         self.file.seek(int(i-1) * self.recordsize)
-        self.process_step(i)
+        self.process_step()
     
     def readParams(self,prec='d'):
         """Reads the Params line which is a mix of Ints and Reals"""
