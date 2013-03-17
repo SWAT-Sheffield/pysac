@@ -383,17 +383,28 @@ class VACdata():
         pass
 
 class SACdata(VACdata):
-    """ A class containing conservative varible definitions and sac only data 
-    update methods. Designed to be subclassed, so SACfile and SAChdf5 can share
-    common methods without horrible file inheratance """
+    """
+    This adds specifications to VACdata designed for SAC simulations in 2D or
+    3D with magentic field.
+
+    This adds the background and pertubation varibles into a new w_sac dict.
+    """
+    
+    def __init__(self, filename, filetype='auto', mode='r'):        
+        VACdata.__init__(self, filename, filetype=filetype, mode=mode)
+        self.update_w_sac()
+    
     def update_w_sac(self):
+        """
+        This method creates the w_sac dictionary for the current timestep.
+        """
         self.ndim = self.header['ndim']
         self.w_sac = {}
         if self.ndim == 2:
             self.w_sac.update({'rho':self.w[self.w_["h" ]] + self.w[self.w_["rhob"]]})
             self.w_sac.update({'v1':self.w[self.w_["m1"]] / self.w_sac['rho']})
             self.w_sac.update({'v2':self.w[self.w_["m2"]] / self.w_sac['rho']})
-            self.w_sac.update({'e':self.w[self.w_["e"]]+self.w[self.w_["eb"]]})
+            self.w_sac.update({'e':self.w[self.w_["e"]] + self.w[self.w_["eb"]]})
             self.w_sac.update({'b1':self.w[self.w_["b1"]] + self.w[self.w_["bg1"]]})
             self.w_sac.update({'b2':self.w[self.w_["b2"]] + self.w[self.w_["bg2"]]})
         if self.ndim == 3:
@@ -407,15 +418,24 @@ class SACdata(VACdata):
             self.w_sac.update({'b3':self.w[self.w_["b2"]] + self.w[self.w_["bg3"]]})
     
     def convert_B(self):
-        from numpy import sqrt
+        """
+        This function corrects for the scaling of the magentic field units.
+
+        It will convert the magnetic field into Tesla for the current time
+        step.
+
+        WARNING: The conservative variable calculations are in SAC scaled
+        magnetic field units, this conversion should be run after accessing any
+        calculatuions involving the magnetic field
+        """
         mu = 1.25663706e-6
         if self.ndim == 2:
-            self.w_sac['b1'] *= sqrt(mu)
-            self.w_sac['b2'] *= sqrt(mu)
+            self.w_sac['b1'] *= np.sqrt(mu)
+            self.w_sac['b2'] *= np.sqrt(mu)
         if self.ndim == 3:
-            self.w_sac['b1'] *= sqrt(mu)
-            self.w_sac['b2'] *= sqrt(mu)
-            self.w_sac['b3'] *= sqrt(mu)
+            self.w_sac['b1'] *= np.sqrt(mu)
+            self.w_sac['b2'] *= np.sqrt(mu)
+            self.w_sac['b3'] *= np.sqrt(mu)
     
     def get_thermalp(self,beta=False):
         """Calculate Thermal pressure from varibles """
