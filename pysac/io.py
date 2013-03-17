@@ -301,9 +301,9 @@ class VACdata():
         #Detect filetype and open file for reading.
         if mode == 'r':
             filePrefix, fileExt = os.path.splitext(filename)
-            if fileExt == 'h5':
+            if fileExt == '.h5':
                 self.filetype = 'hdf5'
-            elif fileExt in ['ini', 'out']:
+            elif fileExt in ['.ini', '.out']:
                 self.filetype ='fort'
             else:
                 if filetype == 'auto':
