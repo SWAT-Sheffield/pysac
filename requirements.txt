@@ -1,5 +1,4 @@
 distribute==0.6.24
-numpydoc
 numpy
 scipy
 matplotlib>=1.2
