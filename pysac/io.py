@@ -117,6 +117,16 @@ class FortranFile(file):
              raise IOError('Error reading record from data file')
          return data_str
 
+    def readParams(self,prec='d'):
+        """Reads the Params line which is a mix of Ints and Reals"""
+        #Check that prec is spec'd proper        
+        if prec not in ['d','f']:
+            raise ValueError('Not an appropriate precision')
+        #read in line
+        data_str = self.file.readRecord()
+        pars = struct.unpack(self.file.ENDIAN+'idiii', data_str)
+        return list(pars)
+
 class VACfile():
     def __init__(self,fname,mode='r',buf=0):
         """
@@ -165,16 +175,6 @@ class VACfile():
         self.file.seek(int(i-1) * self.recordsize)
         self.process_step()
     
-    def readParams(self,prec='d'):
-        """Reads the Params line which is a mix of Ints and Reals"""
-        #Check that prec is spec'd proper        
-        if prec not in ['d','f']:
-            raise ValueError('Not an appropriate precision')
-        #read in line
-        data_str = self.file.readRecord()
-        pars = struct.unpack(self.file.ENDIAN+'idiii', data_str)
-        return list(pars)
-    
     def process_step(self):
         """
         Does the raw file processing for each timestep
@@ -183,7 +183,7 @@ class VACfile():
         """
         self.header = {}
         self.header['filehead'] = self.file.readRecord()
-        self.header['params'] = self.readParams()
+        self.header['params'] = self.file.readParams()
         #params is: it, t, ndim, neqpar, nw
         self.header['it'] = self.header['params'][0]
         self.header['t'] = self.header['params'][1]
@@ -326,7 +326,7 @@ class VACdata():
         elif mode == 'w':
             raise NotImplementedError("Not supported yet")
         else:
-            raise ValueError("mode should be one of { 'r' | 'w'}")
+            raise ValueError("mode should be one of { 'r' | 'w' }")
         
     
     def open(self, filename, filetype):
@@ -387,6 +387,22 @@ class VACdata():
         ----------
         iternation number???
         """
+        pass
+    
+    def _init_fortran(self):
+        """ Set up fortran file for writing """
+        pass
+    
+    def _init_hdf5(self):
+        """ Open and write file level header """
+        pass
+    
+    def _write_step_fortran(self):
+        """ Save step header and arrays into unformatted fortran file """
+        pass
+    
+    def _write_step_hdf5(self):
+        """ Save step data into hdf5 file """
         pass
 
 class SACdata(VACdata):
@@ -524,13 +540,12 @@ class SACdata(VACdata):
         return T
     
     def get_va(self):
-        from numpy import sqrt#, abs
-        return (sqrt(self.w_sac['b1']**2 + self.w_sac['b2']**2 + self.w_sac['b3']**2)/sqrt(self.w_sac['rho']))
+        return (np.sqrt(self.w_sac['b1']**2 + self.w_sac['b2']**2
+                        + self.w_sac['b3']**2) / np.sqrt(self.w_sac['rho']))
         #return (abs(self.w_sac['b1']) + abs(self.w_sac['b2']) + abs(self.w_sac['b3'])) / sqrt(self.w_sac['rho'])
     
     def get_cs(self,p=None):
-        from numpy import sqrt
         if not p:
             p = self.get_thermalp()
         g1 = self.header['eqpar'][0]
-        return sqrt((g1 * p) / self.w_sac['rho'])
+        return np.sqrt((g1 * p) / self.w_sac['rho'])
