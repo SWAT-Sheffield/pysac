@@ -1,8 +1,9 @@
-===========
-pySAC Guide
-===========
+====================
+pySAC Code Reference
+====================
 
-Welcome to the guide.
+This contains a very draft API reference for all the pySAC functions and 
+classes.
 
 Contents
 ^^^^^^^^

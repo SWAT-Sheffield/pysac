@@ -6,12 +6,18 @@
 Welcome to pySAC's documentation!
 =================================
 
+PySAC is a python packaged designed to make it easier to analyse and plot 
+output from VAC and SAC in python.
+
+pySAC currently supports routines for VAC and SAC Input / Output as well as 2D
+plotting.
+
 Contents:
 
 .. toctree::
    :maxdepth: 2
 
-   intro
+   guide
    reference/index
 
 Indices and tables
