@@ -1,5 +1,0 @@
-=====
-pySAC
-=====
-
-This is pySAC!

@@ -12,19 +12,15 @@
 # serve to show the default.
 
 import sys, os, math
-
 class Mock(object):
     __all__ = []
     def __init__(self, *args, **kwargs):
         for key, value in kwargs.iteritems():
             setattr(self, key, value)
-	
+
     def __call__(self, *args, **kwargs):
         return Mock()
-    
-    def __new__(*args,**kwargs):
-        pass
-    
+
     __add__  = __mul__  = __getitem__ = __setitem__ = \
 __delitem__ = __sub__ =  __floordiv__ = __mod__ = __divmod__ = \
 __pow__ = __lshift__ = __rshift__ = __and__ = __xor__ = __or__ = \
@@ -75,27 +71,24 @@ __lt__
 
 
 MOCK_MODULES = [
-    'scipy', 'matplotlib', 'matplotlib.pyplot', 'pyfits',
+    'scipy', 'matplotlib', 'matplotlib.pyplot',
     'scipy.constants.constants', 'matplotlib.cm',
-    'matplotlib.image', 'matplotlib.colors', 'sunpy.cm',
-    'pandas', 'pandas.io', 'pandas.io.parsers',
-    'suds', 'matplotlib.ticker', 'matplotlib.colorbar',
-    'matplotlib.dates', 'scipy.optimize', 'scipy.ndimage',
-    'matplotlib.figure', 'scipy.ndimage.interpolation', 'bs4',
-    'matplotlib.animation','mpl_toolkits','mpl_toolkits.axes_grid1',
-    'h5py','numpy.ma','matplotlib.cbook','matplotlib.axes',
-    'matplotlib.transforms', 'matplotlib.gridspec', 
-    'matplotlib.artist', 'matplotlib.axis','matplotlib.collections',
-    'matplotlib.contour','matplotlib.path','matplotlib.patches', 
-    'colormath','colormath.color_objects']
+    'matplotlib.image', 'matplotlib.colors','matplotlib.ticker',
+    'matplotlib.colorbar', 'matplotlib.dates', 'scipy.optimize',
+    'scipy.ndimage', 'matplotlib.figure', 'scipy.ndimage.interpolation',
+    'h5py','numpy.ma', 'matplotlib.animation', 'matplotlib.cbook',
+    'matplotlib.axes','mpl_toolkits.axes_grid1','colormath','colormath.color_objects',
+    'pysac.plot.CustomColourmaps']
 
-#for mod_name in MOCK_MODULES:
-#    sys.modules[mod_name] = Mock(pi=math.pi, G=6.67364e-11)
+for mod_name in MOCK_MODULES:
+    sys.modules[mod_name] = Mock(pi=math.pi, G=6.67364e-11)
 
-#sys.modules['numpy'] = Mock(pi=math.pi, G=6.67364e-11,
-#                            ndarray=type('ndarray', (), {}),
-#                            dtype=lambda _: Mock(_mock_repr='np.dtype(\'float32\')'))
-#sys.modules['scipy.constants'] = Mock(pi=math.pi, G=6.67364e-11)
+sys.modules['numpy'] = Mock(pi=math.pi, G=6.67364e-11,
+                            ndarray=type('ndarray', (), {}),
+                            dtype=lambda _: Mock(_mock_repr='np.dtype(\'float32\')'))
+sys.modules['scipy.constants'] = Mock(pi=math.pi, G=6.67364e-11)
+
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -108,7 +101,10 @@ print sys.path
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.coverage', 'sphinx.ext.pngmath', 'sphinx.ext.mathjax', 'sphinx.ext.ifconfig', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest',
+'sphinx.ext.intersphinx', 'sphinx.ext.todo', 'sphinx.ext.coverage',
+'sphinx.ext.pngmath', 'sphinx.ext.mathjax', 'sphinx.ext.ifconfig',
+'sphinx.ext.viewcode','numpydoc','sphinx.ext.autosummary']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

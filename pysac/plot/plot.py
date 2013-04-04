@@ -204,7 +204,7 @@ class SACplot():
         """Read and process a step of data."""
         if self.currentrecord != i:
             #Read in requested step
-            self.f.readrecord(i)
+            self.f.read_timestep(i)
         self.currentrecord =  i
         if type(keys) is list:
             all_data = []
@@ -261,7 +261,7 @@ class SACplot():
             if self.fieldseeds and subplot.fieldlines:
                 #Make and store fieldlines for this datapoint
                 ##This almost certainly could be done better::
-                if self.f.ndim == 2:
+                if self.f.header['ndim'] == 2:
                     B2 = self._read_data('b1',i)
                     B1 = self._read_data('b2',i)
                 else:

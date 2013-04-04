@@ -13,9 +13,7 @@ class FortranFile(file):
     """
     File with methods for dealing with fortran unformatted data files
     
-    Credit
-    ------
-    Neil Martinsen-Burrell [via Enthought Mailing list]
+    Credit: Neil Martinsen-Burrell [via Enthought Mailing list]
     """
 
     def __init__(self,fname, mode='r', buf=0):
@@ -24,11 +22,13 @@ class FortranFile(file):
          self.setEndian('>')
 
     def setEndian(self,c):
-        """Set endian to big (c='>') or little (c='<') or native (c='@')
+        """
+        Set endian to big (c='>') or little (c='<') or native (c='@')
         
-        :Parameters:
-          `c` : string
-        The endian-ness to use when reading from this file.
+        Parameters
+        ----------
+        `c` : string
+            The endian-ness to use when reading from this file.
         """
         if c == '<' or c == '>' or c =='@' or c == '=':
             self.ENDIAN = c
@@ -44,10 +44,13 @@ class FortranFile(file):
         return str
 
     def writeString(self,s):  
-        """Write a string
+        """
+        Write a string
          
-        :Parameters:
-          - `s`: the string to write
+        Parameters
+        ----------
+        `s`: str
+            The string to write
         """
         self.write(struct.pack(self.ENDIAN+'i',len(s)))
         self.write(s)
@@ -71,14 +74,16 @@ class FortranFile(file):
         return list(reals)
 
     def writeReals(self, reals, prec='d'):
-        """Write an array of floats in given precision
+        """
+        Write an array of floats in given precision
 
-         :Parameters:
-           `reals` : array
-             Data to write
-           `prec` : string
-             Character code for the precision to use in writing
-         """
+        Parameters
+        ----------
+        reals: array
+            Data to write
+        prec: str
+            Character code for the precision to use in writing
+        """
         if prec not in ['d','f']: raise ValueError('Not an appropriate precision')
         self.write(struct.pack(self.ENDIAN+'i',len(reals)))
         for r in reals:
@@ -307,12 +312,14 @@ class VACdata():
                 self.filetype ='fort'
             else:
                 if filetype == 'auto':
-                    raise TypeError("File type can not be automatically determined")
+                    raise TypeError(
+                            "File type can not be automatically determined")
                 else:
                     if filetype in ['hdf5', 'fort']:
                         self.filetype = filetype
                     else:
-                        raise ValueError("Specified filetype is not valid. Filetype should be one of { 'hdf5' | 'fort}")
+                        raise ValueError(
+"Specified filetype is not valid. Filetype should be one of { 'hdf5' | 'fort}")
             
             self.open(filename, self.filetype)
             
@@ -398,24 +405,33 @@ class SACdata(VACdata):
         """
         This method creates the w_sac dictionary for the current timestep.
         """
-        ndim = self.header['ndim']
         self.w_sac = {}
-        if ndim == 2:
-            self.w_sac.update({'rho':self.w[self.w_["h" ]] + self.w[self.w_["rhob"]]})
+        if self.header['ndim']:
+            self.w_sac.update({'rho':self.w[self.w_["h" ]] +
+                                                    self.w[self.w_["rhob"]]})
             self.w_sac.update({'v1':self.w[self.w_["m1"]] / self.w_sac['rho']})
             self.w_sac.update({'v2':self.w[self.w_["m2"]] / self.w_sac['rho']})
-            self.w_sac.update({'e':self.w[self.w_["e"]] + self.w[self.w_["eb"]]})
-            self.w_sac.update({'b1':self.w[self.w_["b1"]] + self.w[self.w_["bg1"]]})
-            self.w_sac.update({'b2':self.w[self.w_["b2"]] + self.w[self.w_["bg2"]]})
-        if ndim == 3:
-            self.w_sac.update({'rho':self.w[self.w_["h" ]] + self.w[self.w_["rhob"]]})
+            self.w_sac.update({'e':self.w[self.w_["e"]] +
+                                                        self.w[self.w_["eb"]]})
+            self.w_sac.update({'b1':self.w[self.w_["b1"]] +
+                                                    self.w[self.w_["bg1"]]})
+            self.w_sac.update({'b2':self.w[self.w_["b2"]] +
+                                                    self.w[self.w_["bg2"]]})
+        
+        if self.header['ndim']:
+            self.w_sac.update({'rho':self.w[self.w_["h" ]] +
+                                                    self.w[self.w_["rhob"]]})
             self.w_sac.update({'v1':self.w[self.w_["m1"]] / self.w_sac['rho']})
             self.w_sac.update({'v2':self.w[self.w_["m2"]] / self.w_sac['rho']})
             self.w_sac.update({'v3':self.w[self.w_["m3"]] / self.w_sac['rho']})
-            self.w_sac.update({'e':self.w[self.w_["e"]] + self.w[self.w_["eb"]]})
-            self.w_sac.update({'b1':self.w[self.w_["b1"]] + self.w[self.w_["bg1"]]})
-            self.w_sac.update({'b2':self.w[self.w_["b2"]] + self.w[self.w_["bg2"]]})
-            self.w_sac.update({'b3':self.w[self.w_["b2"]] + self.w[self.w_["bg3"]]})
+            self.w_sac.update({'e':self.w[self.w_["e"]] +
+                                                        self.w[self.w_["eb"]]})
+            self.w_sac.update({'b1':self.w[self.w_["b1"]] +
+                                                    self.w[self.w_["bg1"]]})
+            self.w_sac.update({'b2':self.w[self.w_["b2"]] +
+                                                    self.w[self.w_["bg2"]]})
+            self.w_sac.update({'b3':self.w[self.w_["b2"]] +
+                                                    self.w[self.w_["bg3"]]})
     
     def convert_B(self):
         """
@@ -429,17 +445,17 @@ class SACdata(VACdata):
         calculatuions involving the magnetic field
         """
         mu = 1.25663706e-6
-        if self.ndim == 2:
+        if self.header['ndim'] == 2:
             self.w_sac['b1'] *= np.sqrt(mu)
             self.w_sac['b2'] *= np.sqrt(mu)
-        if self.ndim == 3:
+        if self.header['ndim'] == 3:
             self.w_sac['b1'] *= np.sqrt(mu)
             self.w_sac['b2'] *= np.sqrt(mu)
             self.w_sac['b3'] *= np.sqrt(mu)
     
     def get_thermalp(self,beta=False):
         """Calculate Thermal pressure from varibles """
-        if self.ndim == 3:
+        if self.header['ndim'] == 3:
             #raise NotImplementedError("This Dosen't work for 3D yet, go fix")
             g1 = (self.header['eqpar'][0]-1)
             kp = (self.w_sac['rho'] * (self.w_sac['v1']**2 + self.w_sac['v2']**2 + self.w_sac['v3']**2))/2.
@@ -459,7 +475,7 @@ class SACdata(VACdata):
     
     def get_bgp(self):
         print "WARNING: Background Pressure will not work if inital conditions are not V=0"
-        if self.ndim == 3:
+        if self.header['ndim'] == 3:
             #raise NotImplementedError("This Dosen't work for 3D yet, go fix")
             g1 = (self.header['eqpar'][0]-1)
             kp = 0.0#(self.w[self.w_["rhob"]] * (self.w_sac['v1']**2 + self.w_sac['v2']**2 + self.w_sac['v3']**2))/2.
@@ -474,7 +490,7 @@ class SACdata(VACdata):
         return p
     
     def get_total_p(self):
-        if self.ndim == 3:
+        if self.header['ndim'] == 3:
            gamma = self.header['eqpar'][0]
            
            vtot2 = (self.w_sac['v1']**2 + self.w_sac['v2']**2 + self.w_sac['v3']**2)
@@ -497,7 +513,7 @@ class SACdata(VACdata):
     
     def get_bgtemp(self):
         print "WARNING: Background Temprature will not work if inital conditions are not V=0"
-        if self.ndim == 3:
+        if self.header['ndim'] == 3:
             kp = 0.0#(self.w[self.w_["rhob"]] * (self.w_sac['v1']**2 + self.w_sac['v2']**2 + self.w_sac['v3']**2))/2.
             mp = (self.w[self.w_["bg1"]]**2 + self.w[self.w_["bg2"]]**2 + self.w[self.w_["bg3"]]**2) / 2.
             T = self.w[self.w_["eb"]] - kp - mp
