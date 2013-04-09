@@ -51,7 +51,7 @@ myfile now contains various routines to read the data in the file, as we shall
 see in more detail later.
 
 Input/Output
-------------
+^^^^^^^^^^^^
 
 The first role of pySAC is to enable the reading and writing of SAC or VAC 
 files in either the VAC style fortran unformatted binary file type or the 
@@ -79,5 +79,10 @@ background varibles in the w array.
 SACdata implemetes methods to extract primative variables such as temperature 
 and pressure.
 
+
+VACdata Input
+-------------
+
+In this section we shall look at 
 
 
