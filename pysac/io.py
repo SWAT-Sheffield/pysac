@@ -123,7 +123,7 @@ class FortranFile(file):
         if prec not in ['d','f']:
             raise ValueError('Not an appropriate precision')
         #read in line
-        data_str = self.file.readRecord()
+        data_str = self.readRecord()
         pars = struct.unpack(self.file.ENDIAN+'idiii', data_str)
         return list(pars)
 
