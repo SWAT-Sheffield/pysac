@@ -124,7 +124,7 @@ class FortranFile(file):
             raise ValueError('Not an appropriate precision')
         #read in line
         data_str = self.readRecord()
-        pars = struct.unpack(self.file.ENDIAN+'idiii', data_str)
+        pars = struct.unpack(self.ENDIAN+'idiii', data_str)
         return list(pars)
 
 class VACfile():
