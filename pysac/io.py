@@ -188,6 +188,7 @@ class VACfile():
         self.t_start = self.header['params'][1]
         self.read_timestep(self.num_records)
         self.t_end = self.header['params'][1]
+        self.header['final t'] = self.t_end
         self.read_timestep(1)
         
         print "File is %i Records Long"%self.num_records
@@ -283,7 +284,8 @@ class VAChdf5():
         self.header['varnames'] = self.header['varnames'][0].split()
         self.read_timestep(0)
         self.t_start = self.header['t']
-        self.t_end = self.time_group.items()[-1][1].attrs['t'][0]
+        self.t_end = self.time_group.items()[-1][1].attrs['t']#[0] ##don't know
+        self.header['final t'] = self.sac_group.attrs['final t']
         self.num_records = len(self.time_group.items())
     
     def read_timestep(self,i):
@@ -411,7 +413,8 @@ class VACdata():
         self.outfiletype = self._get_file_type(filename, filetype)
         
         if self.outfiletype == 'hdf5':
-            self._init_hdf5(filename)
+            self.outfile = h5py.File(filename, 'w')
+            self.h5init = False
         
         elif self.outfiletype == 'fort':
             self.outfile = FortranFile(filename, mode='w')
@@ -460,22 +463,67 @@ class VACdata():
         for w in self.w:
             self.outfile.writeReals(w, prec='d')
         
-    def _init_hdf5(self, filename):
+    def _init_hdf5(self):
         """ Open and write file level header """
-        raise NotImplementedError("This is not finished yet!")
+        
+        #Write file level attributes
+        self.outfile.attrs.create('filehead', self.header['filehead'])
+        if 'filedesc' in self.header:
+            desc = self.header['filedesc']
+        else:
+            desc = 'This is a SAC HDF5 file written by pySAC'
+        self.outfile.attrs.create('filedesc', desc)
+        
+        #Create sacdata group
+        sacgrp = self.outfile.create_group("sacdata")
+        sacgrp.attrs.create('eqpar', self.header['eqpar'])
+        sacgrp.attrs.create('ndim', self.header['ndim'])
+        sacgrp.attrs.create('neqpar', self.header['neqpar'])
+        sacgrp.attrs.create('nx', self.header['nx'])
+        
+        #create wseries group
+        wgroup = sacgrp.create_group("wseries")
+        wgroup.attrs.create('nw', self.header['nw'])
+        wgroup.attrs.create('varnames', " ".join(self.header['varnames']))
+        
+        #write x array
+        sacgrp.create_dataset('x', data=self.x)
+        
+        
         
     def _write_step_hdf5(self):
         """ Save step data into hdf5 file """
-        raise NotImplementedError("This is not finished yet!")
+        if hasattr(self, 'h5init'):
+            if not self.h5init:
+                self._init_hdf5()
+                self.h5init = True
+            
+            wgroup = self.outfile['/sacdata/wseries']
+            wgroup.create_dataset('w%05i'%self.header['it'], data=self.w)
+            
+            dset = wgroup['w%05i'%self.header['it']]
+            dset.attrs.create('it', self.header['it'])
+            dset.attrs.create('t', self.header['t'])
+ 
+        else:
+            raise TypeError(
+            """Trouble identifying state of HDF5 file,
+            are you sure you are writing a hdf5 file?""")
     
     def close(self):
         if self.outfiletype == 'fort':
             self.outfile.close()
+        
+        if self.outfiletype == 'hdf5':
+            #Write out final info to sacgroup
+            sacgrp = self.outfile['/sacdata']
+            sacgrp.attrs.create('final t', self.header['t'])
+            sacgrp.attrs.create('nt', self.header['it'])
 
 class SACdata(VACdata):
     """
     This adds specifications to VACdata designed for SAC simulations in 2D or
-    3D with magentic field.
+    3D with magnetic field.
 
     This adds the background and pertubation varibles into a new w_sac dict.
     """

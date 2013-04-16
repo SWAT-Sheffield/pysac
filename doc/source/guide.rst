@@ -89,7 +89,7 @@ for each time step stored a header of the following form preceeds the data:
 - 'params' a list containing:
     iteration number, physical time, ndim, number of equation params, number of vars in w array
     i.e. [10, 11.2541, 2, 7, 9], [int, float, int, int, int]
-- nx number of dimensions (int)
+- nx coord dimensions e.g. [128,128,128]
 - 'eqpar' - equation parameters, neqpars floats.
 - varnames a list of strings nw long. Holds the names for all the w vars.
 - x array
@@ -130,9 +130,12 @@ Each time step can then be written by a call to write_step:
     
     myfile.write_step()
 
-remember to close the file when you are done with:
+remember to close the file when you are done:
     
     myfile.close()
+
+for hdf5 files, close writes extra met information to the file, so it is 
+very important that it is called.
 
 The output routines will automatically determine the file type.
 
