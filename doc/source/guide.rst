@@ -117,4 +117,35 @@ also to enable parallel I/O.
 Output
 ======
 
+Output in pySAC.io is done by writing out the current state of the VACdata 
+object. To create a new file with data from elsewhere you would create a VACdata
+object with mode='w' and then assign data and the header:
+    
+    myfile = sacio.VACdata("myoutfile.h5")
+    myfile.header = header
+    myfile.w = w_arr
+    myfile.x = x_arr
+
+Each time step can then be written by a call to write_step:
+    
+    myfile.write_step()
+
+remember to close the file when you are done with:
+    
+    myfile.close()
+
+The output routines will automatically determine the file type.
+
+It is also possible to save out to a different file, or file_type by first 
+reading in a file:
+    
+    myfile = sacio.VACdata("myinfile.h5")
+
+then calling init_file() and write_step() for each iteration in the file:
+    
+    myfile.init_file("myoutfile.out")
+    for i in range(num_records):
+        myfile.read_timestep(i)
+        myfile.write_step()
+    myfile.close()
 
