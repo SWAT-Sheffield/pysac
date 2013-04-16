@@ -17,9 +17,9 @@ class FortranFile(file):
     """
 
     def __init__(self,fname, mode='r', buf=0):
-         """Open the file for writing, defaults to big endian."""
+         """Open the file for writing, defaults to little endian."""
          file.__init__(self, fname, mode, buf)
-         self.setEndian('>')
+         self.setEndian('<')
 
     def setEndian(self,c):
         """
@@ -52,9 +52,9 @@ class FortranFile(file):
         `s`: str
             The string to write
         """
-        self.write(struct.pack(self.ENDIAN+'i',len(s)))
+        self.write(struct.pack(self.ENDIAN + 'i', len(s)))
         self.write(s)
-        self.write(struct.pack(self.ENDIAN+'i',len(s)))
+        self.write(struct.pack(self.ENDIAN + 'i', len(s)))
 
     def readReals(self, prec='d'):
         """Read in an array of reals (given precision) with error checking"""
@@ -84,11 +84,14 @@ class FortranFile(file):
         prec: str
             Character code for the precision to use in writing
         """
-        if prec not in ['d','f']: raise ValueError('Not an appropriate precision')
-        self.write(struct.pack(self.ENDIAN+'i',len(reals)))
-        for r in reals:
-            self.write(struct.pack(self.ENDIAN+prec,r))
-        self.write(struct.pack(self.ENDIAN+'i',len(reals)))
+        reals = np.asarray(reals)
+        if prec not in ['d','f']:
+            raise ValueError('Not an appropriate precision')
+            
+        self.write(struct.pack(self.ENDIAN + 'i', reals.nbytes))
+        self.write(struct.pack(self.ENDIAN + prec * reals.size,
+                               *reals.flatten(order='F')))
+        self.write(struct.pack(self.ENDIAN + 'i', reals.nbytes))
 
     def readInts(self):
         """Read in an array of integers with error checking"""
@@ -102,6 +105,19 @@ class FortranFile(file):
         if struct.unpack(self.ENDIAN+'i',self.read(4))[0] != l:
             raise IOError('Error reading array of integers from data file')
         return list(ints)
+
+    def writeInts(self, ints):
+        """
+        Write an array of integers in given precision
+
+        Parameters
+        ----------
+        ints: array
+            Data to write
+        """
+        self.write(struct.pack(self.ENDIAN + 'i', struct.calcsize('i') * len(ints)))
+        self.write(struct.pack(self.ENDIAN + 'i' * len(ints), *ints))
+        self.write(struct.pack(self.ENDIAN + 'i', struct.calcsize('i') * len(ints)))
 
     def readRecord(self):
          """Read a single fortran record"""
@@ -126,9 +142,14 @@ class FortranFile(file):
         data_str = self.readRecord()
         pars = struct.unpack(self.ENDIAN+'idiii', data_str)
         return list(pars)
+        
+    def writeParams(self, params):
+        self.write(struct.pack(self.ENDIAN + 'i', 24))
+        self.write(struct.pack(self.ENDIAN + 'idiii', *params))
+        self.write(struct.pack(self.ENDIAN + 'i', 24))
 
 class VACfile():
-    def __init__(self,fname,mode='r',buf=0):
+    def __init__(self, fname, mode='r', buf=0):
         """
         Base input class for VAC Unformatted binary files.        
         Based on FortranFile has been modified to read VAC / SAC output files.
@@ -182,7 +203,7 @@ class VACfile():
         Sets up the header and reads and reshapes the arrays
         """
         self.header = {}
-        self.header['filehead'] = self.file.readRecord()
+        self.header['filehead'] = self.file.readString()
         self.header['params'] = self.file.readParams()
         #params is: it, t, ndim, neqpar, nw
         self.header['it'] = self.header['params'][0]
@@ -289,6 +310,27 @@ class VACdata():
     """ This is a file type independant class that should expose a VACfile or
     VACHDF5 file so it is transparent to the end user. """
     
+    def _get_file_type(self, filename, filetype='auto'):
+        """ This method determines the filetype based on user input or the 
+        file extension"""
+        
+        filePrefix, fileExt = os.path.splitext(filename)
+        if fileExt == '.h5':
+            ofiletype = 'hdf5'
+        elif fileExt in ['.ini', '.out']:
+            ofiletype ='fort'
+        else:
+            if filetype == 'auto':
+                raise TypeError(
+                        "File type can not be automatically determined")
+            else:
+                if filetype in ['hdf5', 'fort']:
+                    ofiletype = filetype
+                else:
+                    raise ValueError(
+"Specified filetype is not valid. Filetype should be one of { 'hdf5' | 'fort}")
+        return ofiletype
+    
     def __init__(self, filename, filetype='auto', mode='r'):
         """
         Create a VACdata class. This can be a read or a create to write 
@@ -305,26 +347,13 @@ class VACdata():
         
         #Detect filetype and open file for reading.
         if mode == 'r':
-            filePrefix, fileExt = os.path.splitext(filename)
-            if fileExt == '.h5':
-                self.filetype = 'hdf5'
-            elif fileExt in ['.ini', '.out']:
-                self.filetype ='fort'
-            else:
-                if filetype == 'auto':
-                    raise TypeError(
-                            "File type can not be automatically determined")
-                else:
-                    if filetype in ['hdf5', 'fort']:
-                        self.filetype = filetype
-                    else:
-                        raise ValueError(
-"Specified filetype is not valid. Filetype should be one of { 'hdf5' | 'fort}")
+            filetype = self._get_file_type(filename, filetype)
             
-            self.open(filename, self.filetype)
+            self.open(filename, filetype)
             
         elif mode == 'w':
-            raise NotImplementedError("Not supported yet")
+            self.init_file(filename, filetype)            
+            
         else:
             raise ValueError("mode should be one of { 'r' | 'w' }")
         
@@ -365,7 +394,7 @@ class VACdata():
         """
         self.file.read_timestep(i)
         
-    def init_file():
+    def init_file(self, filename, filetype='auto'):
         """
         Sets up a file for writing, in the case of HDF5 writes file level 
         header.
@@ -375,35 +404,73 @@ class VACdata():
         
         filename
         
-        filetype {fortran | pyhdf}
+        filetype {auto | fort | hdf5}
         """
-        pass
+        
+        #Determine filetype
+        self.outfiletype = self._get_file_type(filename, filetype)
+        
+        if self.outfiletype == 'hdf5':
+            self._init_hdf5(filename)
+        
+        elif self.outfiletype == 'fort':
+            self.outfile = FortranFile(filename, mode='w')
+        
+        else:
+            raise ValueError("Invalid filetype, how did you get here?!")
     
-    def write_step():
+    def write_step(self):
         """
         Writes current class state as time step
         
-        Parameters
-        ----------
-        iternation number???
+        Requires the attributes of the class be populated for writing,
+        i.e. header, x, w need to be defined.
+
         """
-        pass
+        if self.outfiletype == 'hdf5':
+            self._write_step_hdf5()
+            
+        elif self.outfiletype == 'fort':
+            self._write_step_fortran()
+        
+        else:
+            raise ValueError("Invalid filetype in write_step")
     
-    def _init_fortran(self):
+    def _write_header_fortran(self):
         """ Set up fortran file for writing """
-        pass
-    
-    def _init_hdf5(self):
-        """ Open and write file level header """
-        pass
+
+        self.outfile.writeString(self.header['filehead'])
+        
+        if 'params' in self.header:
+            params = self.header['params']
+            
+        else:
+            params = [self.header['it'], self.header['t'], self.header['ndim'],
+                      self.header['neqpar'], self.header['nw']]
+        
+        self.outfile.writeParams(params)
+        self.outfile.writeInts(self.header['nx'])
+        self.outfile.writeReals(self.header['eqpar'])
+        self.outfile.writeString(" ".join(self.header['varnames']))
     
     def _write_step_fortran(self):
         """ Save step header and arrays into unformatted fortran file """
-        pass
-    
+        self._write_header_fortran()
+        self.outfile.writeReals(self.x, prec='d')
+        for w in self.w:
+            self.outfile.writeReals(w, prec='d')
+        
+    def _init_hdf5(self, filename):
+        """ Open and write file level header """
+        raise NotImplementedError("This is not finished yet!")
+        
     def _write_step_hdf5(self):
         """ Save step data into hdf5 file """
-        pass
+        raise NotImplementedError("This is not finished yet!")
+    
+    def close(self):
+        if self.outfiletype == 'fort':
+            self.outfile.close()
 
 class SACdata(VACdata):
     """
@@ -422,7 +489,7 @@ class SACdata(VACdata):
         This method creates the w_sac dictionary for the current timestep.
         """
         self.w_sac = {}
-        if self.header['ndim']:
+        if self.header['ndim'] == 2:
             self.w_sac.update({'rho':self.w[self.w_["h" ]] +
                                                     self.w[self.w_["rhob"]]})
             self.w_sac.update({'v1':self.w[self.w_["m1"]] / self.w_sac['rho']})
@@ -434,7 +501,7 @@ class SACdata(VACdata):
             self.w_sac.update({'b2':self.w[self.w_["b2"]] +
                                                     self.w[self.w_["bg2"]]})
         
-        if self.header['ndim']:
+        if self.header['ndim'] == 3:
             self.w_sac.update({'rho':self.w[self.w_["h" ]] +
                                                     self.w[self.w_["rhob"]]})
             self.w_sac.update({'v1':self.w[self.w_["m1"]] / self.w_sac['rho']})

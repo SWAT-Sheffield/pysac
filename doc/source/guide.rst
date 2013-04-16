@@ -62,6 +62,7 @@ The basic components of any VAC/SAC filetype are:
 - x array: An array containing all coordinates at any point in the domain
 - y array: An array containing all the computed variables
 - header: A header, stored in some form consisting of at:
+    - filehead - A not so descriptive file string
     - iteration number
     - physical time
     - number of dimensions
@@ -79,10 +80,41 @@ background varibles in the w array.
 SACdata implemetes methods to extract primative variables such as temperature 
 and pressure.
 
+VAC File Description
+--------------------
+The unformatted FORTRAN binary files have the following format
+for each time step stored a header of the following form preceeds the data:
 
-VACdata Input
--------------
+- 'filehead' a string describing the file i.e. '2D_mhd22'
+- 'params' a list containing:
+    iteration number, physical time, ndim, number of equation params, number of vars in w array
+    i.e. [10, 11.2541, 2, 7, 9], [int, float, int, int, int]
+- nx number of dimensions (int)
+- 'eqpar' - equation parameters, neqpars floats.
+- varnames a list of strings nw long. Holds the names for all the w vars.
+- x array
+- w array
 
-In this section we shall look at 
+Input
+=====
+
+In this section we shall look at reading files using pySAC
+
+VAC FORTRAN Files
+-----------------
+
+These are the defualt binary file type that VAC/SAC uses.
+
+WARNING: These files are compiler and machine dependant, they are not portable
+and should not be used over the far superior HDF5 files.
+
+SAC HDF5 Files
+--------------
+
+This file type has been added to SAC to make the output standard and portable,
+also to enable parallel I/O.
+
+Output
+======
 
 
