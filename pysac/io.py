@@ -284,8 +284,13 @@ class VAChdf5():
         self.header['varnames'] = self.header['varnames'][0].split()
         self.read_timestep(0)
         self.t_start = self.header['t']
-        self.t_end = self.time_group.items()[-1][1].attrs['t']#[0] ##don't know
-        self.header['final t'] = self.sac_group.attrs['final t']
+        if 'final t' in self.sac_group.attrs:
+            self.header['final t'] = self.sac_group.attrs['final t']
+            self.t_end = self.sac_group.attrs['final t']
+        else:
+            self.t_end = self.time_group.items()[-1][1].attrs['t']#[0] ##don't know
+            self.header['final t'] = self.t_end
+        
         self.num_records = len(self.time_group.items())
     
     def read_timestep(self,i):
@@ -475,7 +480,7 @@ class VACdata():
         self.outfile.attrs.create('filedesc', desc)
         
         #Create sacdata group
-        sacgrp = self.outfile.create_group("sacdata")
+        sacgrp = self.outfile.create_group("SACdata")
         sacgrp.attrs.create('eqpar', self.header['eqpar'])
         sacgrp.attrs.create('ndim', self.header['ndim'])
         sacgrp.attrs.create('neqpar', self.header['neqpar'])
@@ -498,7 +503,7 @@ class VACdata():
                 self._init_hdf5()
                 self.h5init = True
             
-            wgroup = self.outfile['/sacdata/wseries']
+            wgroup = self.outfile['/SACdata/wseries']
             wgroup.create_dataset('w%05i'%self.header['it'], data=self.w)
             
             dset = wgroup['w%05i'%self.header['it']]
@@ -516,7 +521,7 @@ class VACdata():
         
         if self.outfiletype == 'hdf5':
             #Write out final info to sacgroup
-            sacgrp = self.outfile['/sacdata']
+            sacgrp = self.outfile['/SACdata']
             sacgrp.attrs.create('final t', self.header['t'])
             sacgrp.attrs.create('nt', self.header['it'])
 
