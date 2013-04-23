@@ -304,8 +304,11 @@ class VAChdf5():
         
         self.w = self.time_group[wstepname]
         self.w_ = {}
-        index = next((i for i in xrange(len(self.header['varnames'])) if not(self.header['varnames'][i] in ["x","y","z"])),self.header['ndim'])
-        for i,name in enumerate(self.header['varnames'][index:self.header['nw']+index]):
+        index = next((i for i in xrange(len(self.header['varnames'])) if not(
+            self.header['varnames'][i] in ["x","y","z"])),self.header['ndim'])
+            
+        for i,name in enumerate(
+                    self.header['varnames'][index:self.header['nw'] + index]):
             self.w_.update({name:i})
 
 
@@ -335,7 +338,7 @@ class VACdata():
                     ofiletype = filetype
                 else:
                     raise ValueError(
-"Specified filetype is not valid. Filetype should be one of { 'hdf5' | 'fort}")
+"Specified filetype is not valid. Filetype should be one of { 'hdf5' | 'fort' }")
         return ofiletype
     
     def __init__(self, filename, filetype='auto', mode='r'):
@@ -373,7 +376,7 @@ class VACdata():
         ----------
         filename: str
         
-        filetype: { fortran binary | hdf5 }
+        filetype: { fort | hdf5 }
         """
         if filetype == 'hdf5':
             self.file = VAChdf5(filename)
