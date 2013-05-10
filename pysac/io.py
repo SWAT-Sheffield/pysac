@@ -281,7 +281,7 @@ class VAChdf5():
         
         self.time_group = self.sac_group['wseries']
         self.header.update(dict(self.time_group.attrs))
-        self.header['varnames'] = self.header['varnames'][0].split()
+        self.header['varnames'] = self.header['varnames'].split()
         self.read_timestep(0)
         self.t_start = self.header['t']
         if 'final t' in self.sac_group.attrs:
@@ -492,6 +492,7 @@ class VACdata():
         #create wseries group
         wgroup = sacgrp.create_group("wseries")
         wgroup.attrs.create('nw', self.header['nw'])
+        print " ".join(self.header['varnames'])
         wgroup.attrs.create('varnames', " ".join(self.header['varnames']))
         
         #write x array
@@ -547,7 +548,7 @@ class SACdata(VACdata):
         """
         self.w_sac = {}
         if self.header['ndim'] == 2:
-            self.w_sac.update({'rho':self.w[self.w_["h" ]] +
+            self.w_sac.update({'rho':self.w[self.w_["h"]] +
                                                     self.w[self.w_["rhob"]]})
             self.w_sac.update({'v1':self.w[self.w_["m1"]] / self.w_sac['rho']})
             self.w_sac.update({'v2':self.w[self.w_["m2"]] / self.w_sac['rho']})
@@ -559,7 +560,7 @@ class SACdata(VACdata):
                                                     self.w[self.w_["bg2"]]})
         
         if self.header['ndim'] == 3:
-            self.w_sac.update({'rho':self.w[self.w_["h" ]] +
+            self.w_sac.update({'rho':self.w[self.w_["h"]] +
                                                     self.w[self.w_["rhob"]]})
             self.w_sac.update({'v1':self.w[self.w_["m1"]] / self.w_sac['rho']})
             self.w_sac.update({'v2':self.w[self.w_["m2"]] / self.w_sac['rho']})
