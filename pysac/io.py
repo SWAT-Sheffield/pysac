@@ -527,6 +527,7 @@ class VACdata():
             sacgrp = self.outfile['/SACdata']
             sacgrp.attrs.create('final t', self.header['t'])
             sacgrp.attrs.create('nt', self.header['it'])
+            self.outfile.close()
 
 class SACdata(VACdata):
     """
