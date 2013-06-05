@@ -17,7 +17,7 @@ code you can clone the git repository thus::
 
 which you can then install using the included python setup script. There are
 two options at this point, you can install the code permantly or you can 
-install it in `develop' mode which enable you to edit the code in the directory
+install it in 'develop' mode which enable you to edit the code in the directory
 in which you have just cloned it.
 To install in devlop mode do the following::
     
@@ -72,7 +72,7 @@ The basic components of any VAC/SAC filetype are:
     - the equation parameters
     - names for the varibles in the w array
 
-pySAC implements a `VACdata' class that will read either the VAC fortran type
+pySAC implements a 'VACdata' class that will read either the VAC fortran type
 files or HDF5 files containing VAC/SAC data. There is a specification of 
 VACdata to SACdata for SAC files with magnetic field and pertubation and 
 background varibles in the w array.
@@ -87,7 +87,7 @@ Header Contents
 ===============
 
 The header of VAC / SAC files contains the same information irrespective of the
- file type. When saving a file using pySAC the routines will automatically 
+file type. When saving a file using pySAC the routines will automatically 
 reformat the header to fit the file. The keys in the header and examples are 
 listed below::
 

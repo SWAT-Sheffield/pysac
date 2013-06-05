@@ -281,7 +281,7 @@ class VAChdf5():
         
         self.time_group = self.sac_group['wseries']
         self.header.update(dict(self.time_group.attrs))
-        self.header['varnames'] = self.header['varnames'].split()
+        self.header['varnames'] = self.header['varnames'][0].split()
         self.read_timestep(0)
         self.t_start = self.header['t']
         if 'final t' in self.sac_group.attrs:
@@ -492,13 +492,11 @@ class VACdata():
         #create wseries group
         wgroup = sacgrp.create_group("wseries")
         wgroup.attrs.create('nw', self.header['nw'])
-        print " ".join(self.header['varnames'])
-        wgroup.attrs.create('varnames', " ".join(self.header['varnames']))
+        #This is saved in a list to match FORTRAN behavior
+        wgroup.attrs.create('varnames', [" ".join(self.header['varnames'])])
         
         #write x array
         sacgrp.create_dataset('x', data=self.x)
-        
-        
         
     def _write_step_hdf5(self):
         """ Save step data into hdf5 file """
