@@ -569,7 +569,7 @@ class SACdata(VACdata):
                                                     self.w[self.w_["bg1"]]})
             self.w_sac.update({'b2':self.w[self.w_["b2"]] +
                                                     self.w[self.w_["bg2"]]})
-            self.w_sac.update({'b3':self.w[self.w_["b2"]] +
+            self.w_sac.update({'b3':self.w[self.w_["b3"]] +
                                                     self.w[self.w_["bg3"]]})
     
     def convert_B(self):
