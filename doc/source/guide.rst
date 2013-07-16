@@ -130,6 +130,45 @@ for each time step stored a header of the following form preceeds the data:
 - x array
 - w array
 
+SAC HDF5 File Specification
+===========================
+A new file format to replace the unformatted FORTRAN binary files has been developed.
+The advantages of HDF5 are that it is a modern portable binary data format, that is well specified and has bany bindings for many different languages.
+The structure of a HDF5 file is very similar to a UNIX file system, where you have constructs like directories, each can contain sub-directories and also have metadata associated with them.
+
+Below is the file structure for a SAC HDF5 file, attributes (metadata) are indicated with a - and data arrays are indicated with a +.
+
+.. code-block:: none
+
+    /
+        -filehead
+	-filedesc
+    
+    /SACdata
+        -eqpar
+	-final t
+	-ndim
+	-neqpar
+	-nt
+	-nx
+    
+	+x
+    
+	    /SACdata/wseries
+		-nw
+		-varnames
+    
+		+w00001
+		-it
+		-t
+		...
+		+w0000n
+		-it
+		-t
+		...
+
+It should be noted that any code written for this file structure should not use the names of the w arrays for any reason, they should be read with the sequential operators of the HDF5 library because there is no specification reason why they have to be numbered, and could definatley exceed 99999.
+
 Input
 -----
 
@@ -169,7 +208,7 @@ remember to close the file when you are done::
     
     myfile.close()
 
-for hdf5 files, close writes extra met information to the file, so it is 
+for hdf5 files, close writes extra meta information to the file, so it is 
 very important that it is called.
 
 The output routines will automatically determine the file type.
