@@ -383,7 +383,10 @@ class VACdata():
         
         elif filetype == 'fort':
             self.file = VACfile(filename, mode='r')
-        
+
+        self._pull_from_file()
+
+    def _pull_from_file(self):
         #Expose the interesting data
         self.x = self.file.x
         self.w = self.file.w
@@ -392,7 +395,31 @@ class VACdata():
         self.t_start = self.file.t_start
         self.t_end = self.file.t_end
         self.num_records = self.file.num_records
-    
+
+#    @property
+#    def w(self):
+#        return self.file.w
+#    
+#    @property
+#    def w_(self):
+#        return self.file.w_
+#
+#    @property
+#    def header(self):
+#        return self.file.header
+#
+#    @property
+#    def t_start(self):
+#        return self.file.t_start
+#
+#    @property
+#    def t_end(self):
+#        return self.file.t_end
+#
+#    @property
+#    def num_records(self):
+#       return self.file.num_records
+
     def read_timestep(self, i):
         """
         Read in the specified time step
@@ -403,7 +430,8 @@ class VACdata():
             Time Step number
         """
         self.file.read_timestep(i)
-        
+        self._pull_from_file()
+
     def init_file(self, filename, filetype='auto'):
         """
         Sets up a file for writing, in the case of HDF5 writes file level 
