@@ -316,7 +316,7 @@ class VAChdf5():
 # VAC / SAC data classes for UI and Output (hopefully)
 #==============================================================================
 
-class VACdata():
+class VACdata(object):
     """ This is a file type independant class that should expose a VACfile or
     VACHDF5 file so it is transparent to the end user. """
     
@@ -384,41 +384,51 @@ class VACdata():
         elif filetype == 'fort':
             self.file = VACfile(filename, mode='r')
 
-        self._pull_from_file()
+    def save_self(self):
+        """ Copy File attrs to this object for output"""
+        self.x_internal = self.x
+        self.w_internal = self.w
+        self.header_internal = self.header
+        
+    @property
+    def w(self):
+        return self.file.w
+    
+    @w.setter
+    def w(self, value):
+        self.w_internal = value
+    
+    @property
+    def x(self):
+        return self.file.x
+    
+    @x.setter
+    def x(self, value):
+        self.x_internal = value
+    
+    @property
+    def w_(self):
+        return self.file.w_
 
-    def _pull_from_file(self):
-        #Expose the interesting data
-        self.x = self.file.x
-        self.w = self.file.w
-        self.w_ = self.file.w_
-        self.header = self.file.header
-        self.t_start = self.file.t_start
-        self.t_end = self.file.t_end
-        self.num_records = self.file.num_records
+    @property
+    def header(self):
+        return self.file.header
+    
+    @header.setter
+    def header(self, value):
+        self.header_internal = value
 
-#    @property
-#    def w(self):
-#        return self.file.w
-#    
-#    @property
-#    def w_(self):
-#        return self.file.w_
-#
-#    @property
-#    def header(self):
-#        return self.file.header
-#
-#    @property
-#    def t_start(self):
-#        return self.file.t_start
-#
-#    @property
-#    def t_end(self):
-#        return self.file.t_end
-#
-#    @property
-#    def num_records(self):
-#       return self.file.num_records
+    @property
+    def t_start(self):
+        return self.file.t_start
+
+    @property
+    def t_end(self):
+        return self.file.t_end
+
+    @property
+    def num_records(self):
+       return self.file.num_records
 
     def read_timestep(self, i):
         """
@@ -430,7 +440,6 @@ class VACdata():
             Time Step number
         """
         self.file.read_timestep(i)
-        self._pull_from_file()
 
     def init_file(self, filename, filetype='auto'):
         """
@@ -478,53 +487,53 @@ class VACdata():
     def _write_header_fortran(self):
         """ Set up fortran file for writing """
 
-        self.outfile.writeString(self.header['filehead'])
+        self.outfile.writeString(self.header_internal['filehead'])
         
-        if 'params' in self.header:
-            params = self.header['params']
+        if 'params' in self.header_internal:
+            params = self.header_internal['params']
             
         else:
-            params = [self.header['it'], self.header['t'], self.header['ndim'],
-                      self.header['neqpar'], self.header['nw']]
+            params = [self.header_internal['it'], self.header_internal['t'], self.header_internal['ndim'],
+                      self.header_internal['neqpar'], self.header_internal['nw']]
         
         self.outfile.writeParams(params)
-        self.outfile.writeInts(self.header['nx'])
-        self.outfile.writeReals(self.header['eqpar'])
-        self.outfile.writeString(" ".join(self.header['varnames']))
+        self.outfile.writeInts(self.header_internal['nx'])
+        self.outfile.writeReals(self.header_internal['eqpar'])
+        self.outfile.writeString(" ".join(self.header_internal['varnames']))
     
     def _write_step_fortran(self):
         """ Save step header and arrays into unformatted fortran file """
         self._write_header_fortran()
-        self.outfile.writeReals(self.x, prec='d')
-        for w in self.w:
+        self.outfile.writeReals(self.x_internal, prec='d')
+        for w in self.w_internal:
             self.outfile.writeReals(w, prec='d')
         
     def _init_hdf5(self):
         """ Open and write file level header """
         
         #Write file level attributes
-        self.outfile.attrs.create('filehead', self.header['filehead'])
-        if 'filedesc' in self.header:
-            desc = self.header['filedesc']
+        self.outfile.attrs.create('filehead', self.header_internal['filehead'])
+        if 'filedesc' in self.header_internal:
+            desc = self.header_internal['filedesc']
         else:
             desc = 'This is a SAC HDF5 file written by pySAC'
         self.outfile.attrs.create('filedesc', desc)
         
         #Create sacdata group
         sacgrp = self.outfile.create_group("SACdata")
-        sacgrp.attrs.create('eqpar', self.header['eqpar'])
-        sacgrp.attrs.create('ndim', self.header['ndim'])
-        sacgrp.attrs.create('neqpar', self.header['neqpar'])
-        sacgrp.attrs.create('nx', self.header['nx'])
+        sacgrp.attrs.create('eqpar', self.header_internal['eqpar'])
+        sacgrp.attrs.create('ndim', self.header_internal['ndim'])
+        sacgrp.attrs.create('neqpar', self.header_internal['neqpar'])
+        sacgrp.attrs.create('nx', self.header_internal['nx'])
         
         #create wseries group
         wgroup = sacgrp.create_group("wseries")
-        wgroup.attrs.create('nw', self.header['nw'])
+        wgroup.attrs.create('nw', self.header_internal['nw'])
         #This is saved in a list to match FORTRAN behavior
-        wgroup.attrs.create('varnames', [" ".join(self.header['varnames'])])
+        wgroup.attrs.create('varnames', [" ".join(self.header_internal['varnames'])])
         
         #write x array
-        sacgrp.create_dataset('x', data=self.x)
+        sacgrp.create_dataset('x', data=self.x_internal)
         
     def _write_step_hdf5(self):
         """ Save step data into hdf5 file """
@@ -534,11 +543,11 @@ class VACdata():
                 self.h5init = True
             
             wgroup = self.outfile['/SACdata/wseries']
-            wgroup.create_dataset('w%05i'%self.header['it'], data=self.w)
+            wgroup.create_dataset('w%05i'%self.header_internal['it'], data=self.w_internal)
             
-            dset = wgroup['w%05i'%self.header['it']]
-            dset.attrs.create('it', self.header['it'])
-            dset.attrs.create('t', self.header['t'])
+            dset = wgroup['w%05i'%self.header_internal['it']]
+            dset.attrs.create('it', self.header_internal['it'])
+            dset.attrs.create('t', self.header_internal['t'])
  
         else:
             raise TypeError(
@@ -552,8 +561,8 @@ class VACdata():
         if self.outfiletype == 'hdf5':
             #Write out final info to sacgroup
             sacgrp = self.outfile['/SACdata']
-            sacgrp.attrs.create('final t', self.header['t'])
-            sacgrp.attrs.create('nt', self.header['it'])
+            sacgrp.attrs.create('final t', self.header_internal['t'])
+            sacgrp.attrs.create('nt', self.header_internal['it'])
             self.outfile.close()
 
 class SACdata(VACdata):
