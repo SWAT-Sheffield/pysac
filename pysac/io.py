@@ -609,6 +609,10 @@ class SACdata(VACdata):
             self.w_sac.update({'b3':self.w[self.w_["b3"]] +
                                                     self.w[self.w_["bg3"]]})
     
+    def read_timestep(self,i):
+        VACdata.read_timestep(self,i)
+        self.update_w_sac()
+        
     def convert_B(self):
         """
         This function corrects for the scaling of the magentic field units.
