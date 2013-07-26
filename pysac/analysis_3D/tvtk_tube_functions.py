@@ -11,6 +11,9 @@ from tvtk.api import tvtk
 def move_seeds(seeds,vfield,dt):
     """ Move a list of seeds based on a velocity field
     
+    TODO:
+    WARNING: THIS IS HARD CODED FOR GRID SIZE!
+    
     Parameters
     ----------
     seeds: tvtk.PolyData
@@ -199,13 +202,16 @@ def get_the_line(bfield,surf_seeds,n):
                                  source=tvtk.PolyData(
                                  points=np.array(
                                  [surf_seeds.get_point(n),[0,0,0]])))
-
+    tvtk.PolyData(
+                                 points=np.array(
+                                 [surf_seeds.get_point(n),[0,0,0]]))
     the_line.integrator = tvtk.RungeKutta4()
     the_line.maximum_propagation = 1000
     the_line.integration_direction = 'backward'
     the_line.update()
     
     return the_line
+    
 def update_the_line(the_line, surf_seeds, seed, length):
     """ Updates the TD line at each time step, while making sure the length is fixed"""
     the_line.source.points = [surf_seeds[seed], [0.0, 0.0, 0.0]]
