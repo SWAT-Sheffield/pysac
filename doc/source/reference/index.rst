@@ -13,4 +13,4 @@ Contents
 
     io   
     plotting
-
+    analysis
