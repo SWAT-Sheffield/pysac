@@ -222,7 +222,6 @@ def process_next_step_tvtk(f, cube_slice, bfield, vfield, density, valf, cs, bet
 
 def process_next_step_mlab(f, cube_slice, bfield, vfield, density, valf, cs, beta):
     """ Update all vtk arrays from current file state including flux"""
-    from mayavi import mlab
     #Do this before convert_B
     va_f = f.get_va()
     cs_f = f.get_cs()
