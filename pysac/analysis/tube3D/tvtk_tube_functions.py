@@ -9,7 +9,7 @@ import numpy as np
 from tvtk.api import tvtk
 import vtk_read_functions as vrf
 
-def vector_field(u, v, w, transpose=True, copy_data=False):
+def vector_field(u, v, w, transpose=True, copy_data=True, field_name=None):
     """
     Take 3 numpy arrays and return a tvtk ImageData object
     
@@ -33,17 +33,29 @@ def vector_field(u, v, w, transpose=True, copy_data=False):
     -------
     vfield: tvtk.ImageData
     """
-    if transpose:
-        u = u.T
-        v = v.T
-        w = w.T
     vector_data = np.c_[u.ravel(), w.ravel(),  v.ravel()].ravel()
-    vector_data = vector_data.reshape([u.shape[0] , w.shape[1], v.shape[2], 3])
-    vfield = vrf.array_to_vtk_image(vector_data, copy_data, data_type='vector')
+    data = vector_data.reshape([u.shape[0] , w.shape[1], v.shape[2], 3])
     
-    return tvtk.to_tvtk(vfield)
+    imd = tvtk.ImageData()
+    dims = list(data.shape)
+    if len(dims) == 3:
+        dims.insert(2, 1)
+        data = np.reshape(data, dims)
+    imd.dimensions = tuple(dims[:-1])
+    imd.extent = 0, dims[0]-1, 0, dims[1]-1, 0, dims[2]-1
+    imd.update_extent = 0, dims[0]-1, 0, dims[1]-1, 0, dims[2]-1
+    sz = np.size(data)
+    if transpose:
+        data_t = np.transpose(data, (2, 1, 0, 3))
+    else:
+        data_t = data
+    imd.point_data.vectors = np.reshape(data_t, (sz/3, 3))
+    imd.point_data.vectors.name = field_name
+    imd.update()
+    
+    return imd
 
-def scalar_field(u, ravel=True, copy_data=False):
+def scalar_field(u, ravel=True, copy_data=True):
     """
     Take a numpy array and return a tvtk ImageData object
     
@@ -97,7 +109,7 @@ def move_seeds(seeds,vfield,dt):
     seeds_arr: ndarray
         New Seed points    
     """
-    v_seed = tvtk.ProbeFilter(source=vfield.outputs[0],input=seeds)
+    v_seed = tvtk.ProbeFilter(source=vfield,input=seeds)
     v_seed.update()
     int_vels = np.array(v_seed.output.point_data.vectors)[:,:2]/15.625
     seed_arr = np.array(seeds.points)
@@ -142,14 +154,15 @@ def make_circle_seeds(n,r,**domain):
 
 def create_flux_surface(bfield,surf_seeds):
     #Make a streamline instance with the bfield
-    surf_field_lines = tvtk.StreamTracer(input = bfield.outputs[0])
-    #Convert seeds to polydata
-    
+    surf_field_lines = tvtk.StreamTracer()
+    surf_field_lines.input = bfield
+
     surf_field_lines.source = surf_seeds
     surf_field_lines.integrator = tvtk.RungeKutta4()
     surf_field_lines.maximum_propagation = 1000
     surf_field_lines.integration_direction = 'backward'
     surf_field_lines.update()
+
     #Create surface from 'parallel' lines
     surface = tvtk.RuledSurfaceFilter()
     surface.input = surf_field_lines.output
@@ -262,15 +275,13 @@ def get_surface_velocity_comp(surface_velocities, normals, torsionals, parallels
     
     return vperp, vpar, vphi
 
-def get_the_line(bfield,surf_seeds,n):
+def get_the_line(bfield, surf_seeds, n):
     """Generate the vertical line on the surface"""
-    the_line = tvtk.StreamTracer(input=bfield.outputs[0],
+    the_line = tvtk.StreamTracer(input=bfield,
                                  source=tvtk.PolyData(
                                  points=np.array(
                                  [surf_seeds.get_point(n),[0,0,0]])))
-    tvtk.PolyData(
-                                 points=np.array(
-                                 [surf_seeds.get_point(n),[0,0,0]]))
+
     the_line.integrator = tvtk.RungeKutta4()
     the_line.maximum_propagation = 1000
     the_line.integration_direction = 'backward'
