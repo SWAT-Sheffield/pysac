@@ -213,7 +213,7 @@ def get_surface_vectors(poly_norms, surf_bfield):
     poly_norms.update()
 
     passfail, poly_norms = norms_sanity_check(poly_norms)
-    print "pass norm check?", passfail
+#    print "pass norm check?", passfail
     
     normals = np.array(poly_norms.output.point_data.normals)
     
