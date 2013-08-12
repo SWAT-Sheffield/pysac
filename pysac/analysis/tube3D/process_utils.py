@@ -159,10 +159,12 @@ def get_hdf5_mlab(f, cube_slice, flux=True):
         cs = scalar_field(cs_f, name="Sound Speed", figure=None)
         beta = scalar_field(beta_f, name="Beta", figure=None)
         
-        return bfield.outputs[0], vfield.outputs[0], density.outputs[0], valf.outputs[0], cs.outputs[0], beta.outputs[0]
+        return map(copy.deepcopy, [bfield.outputs[0], vfield.outputs[0],
+                   density.outputs[0], valf.outputs[0], cs.outputs[0],
+                   beta.outputs[0]])
     
     else:
-        return bfield.outputs[0], vfield.outputs[0]
+        return map(copy.deepcopy, [bfield.outputs[0], vfield.outputs[0]])
 
 def get_hdf5(f, cube_slice, flux=True, method='mlab'):
     """
