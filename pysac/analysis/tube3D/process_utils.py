@@ -223,7 +223,7 @@ def process_next_step_tvtk(f, cube_slice, bfield, vfield, density, valf, cs, bet
     
     return bfield, vfield, density, valf, cs, beta
 
-def process_next_step_mlab(f, cube_slice, bfield, vfield, density, valf, cs, beta):
+def process_next_step_mlab(f, cube_slice):
     """ Update all vtk arrays from current file state including flux"""
     #Do this before convert_B
     va_f = f.get_va()
@@ -236,25 +236,27 @@ def process_next_step_mlab(f, cube_slice, bfield, vfield, density, valf, cs, bet
     
     # Create TVTK datasets
     bfield = vector_field(f.w_sac['b3'][cube_slice] * 1e3,
-                                        name="Magnetic Field",figure=None)
+                          name="Magnetic Field",figure=None)
     
     vfield = vector_field(f.w_sac['v3'][cube_slice] / 1e3,
-                                        f.w_sac['v2'][cube_slice] / 1e3,
-                                        f.w_sac['v1'][cube_slice] / 1e3,
-                                        name="Velocity Field",figure=None)
+                          f.w_sac['v2'][cube_slice] / 1e3,
+                          f.w_sac['v1'][cube_slice] / 1e3,
+                          name="Velocity Field",figure=None)
     
     density = scalar_field(f.w_sac['rho'][cube_slice],
-                                         name="Density", figure=None)
+                           name="Density", figure=None)
                                          
     valf = scalar_field(va_f, name="Alven Speed", figure=None)
     cs = scalar_field(cs_f, name="Sound Speed", figure=None)
     beta = scalar_field(beta_f, name="Beta", figure=None)
     
-    return bfield.outputs[0], vfield.outputs[0], density.outputs[0], valf.outputs[0], cs.outputs[0], beta.outputs[0]
+    return map(copy.deepcopy, [bfield.outputs[0], vfield.outputs[0],
+                               density.outputs[0], valf.outputs[0],
+                               cs.outputs[0], beta.outputs[0]])
 
 def process_next_step(f, cube_slice, bfield, vfield, density, valf, cs, beta, method='mlab'):
     if method == 'mlab':
-        return process_next_step_mlab(f, cube_slice, bfield, vfield, density, valf, cs, beta)
+        return process_next_step_mlab(f, cube_slice)
     
     if method == 'tvtk':
         return process_next_step_tvtk(f, cube_slice, bfield, vfield, density, valf, cs, beta)
