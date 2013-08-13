@@ -160,44 +160,68 @@ def get_hdf5_mlab(f, cube_slice, flux=True):
         cs = scalar_field(cs_f, name="Sound Speed", figure=None)
         beta = scalar_field(beta_f, name="Beta", figure=None)
         
-        return map(copy.deepcopy, [bfield.outputs[0], vfield.outputs[0],
-                   density.outputs[0], valf.outputs[0], cs.outputs[0],
-                   beta.outputs[0]])
+        return bfield, vfield, density, valf, cs, beta
     
     else:
-        return map(copy.deepcopy, [bfield.outputs[0], vfield.outputs[0]])
+        return bfield, vfield
 
-def get_hdf5(f, cube_slice, flux=True, method='mlab'):
-    """
-    Reads in useful variables from a hdf5 file to tvtk data structures
-    
-    Arguments
-    ---------
-    f   hdf5 file handle:
-        SAC HDF5 file
-    flux    boolean:
-        Read variables for fluc calculation?
-    cube_slice  np.slice:
-        Slice to apply to the arrays
-    method: 'mlab', 'tvtk'
-        method to use to read data
-    
-    Returns
-    -------
-    if flux:
-        bfield, vfield, density, valf, cs, beta
-    else:
-        bfield, vfield        
-    """
-    if method == 'mlab':
-        return get_hdf5_mlab(f, cube_slice, flux=flux)
-    
-    if method == 'tvtk':
-        return get_hdf5_tvtk(f, cube_slice, flux=flux)
-    
-    raise ValueError("Invalid Method")
-    
-def process_next_step_tvtk(f, cube_slice, bfield, vfield, density, valf, cs, beta):
+#def get_hdf5(f, cube_slice, flux=True, method='mlab'):
+#    """
+#    Reads in useful variables from a hdf5 file to tvtk data structures
+#    
+#    Arguments
+#    ---------
+#    f   hdf5 file handle:
+#        SAC HDF5 file
+#    flux    boolean:
+#        Read variables for fluc calculation?
+#    cube_slice  np.slice:
+#        Slice to apply to the arrays
+#    method: 'mlab', 'tvtk'
+#        method to use to read data
+#    
+#    Returns
+#    -------
+#    if flux:
+#        bfield, vfield, density, valf, cs, beta
+#    else:
+#        bfield, vfield        
+#    """
+#    if method == 'mlab':
+#        return get_hdf5_mlab(f, cube_slice, flux=flux)
+#    
+#    if method == 'tvtk':
+#        return get_hdf5_tvtk(f, cube_slice, flux=flux)
+#    
+#    raise ValueError("Invalid Method")
+#    
+#def process_next_step_tvtk(f, cube_slice, bfield, vfield, density, valf, cs, beta):
+#    """ Update all vtk arrays from current file state including flux"""
+#    va_f = f.get_va()
+#    cs_f = f.get_cs()
+#    thermal_p,mag_p = f.get_thermalp(beta=True)
+#    beta_f = mag_p / thermal_p
+#    density_f = f.w_sac['rho']
+#    f.convert_B()
+#    
+#    # Update Datasets
+#    bfield = ttf.vector_field(f.w_sac['b3'][cube_slice] * 1e3,
+#                              f.w_sac['b2'][cube_slice] * 1e3,
+#                              f.w_sac['b1'][cube_slice] * 1e3)
+#                              
+#    bfield = ttf.vector_field(f.w_sac['v3'][cube_slice] * 1e3,
+#                              f.w_sac['v2'][cube_slice] * 1e3,
+#                              f.w_sac['v1'][cube_slice] * 1e3)
+#      
+#                        
+#    density = ttf.scalar_field(density_f)                                   
+#    valf = ttf.scalar_field(va_f)
+#    cs = ttf.scalar_field(cs_f)
+#    beta = ttf.scalar_field(beta_f)
+#    
+#    return bfield, vfield, density, valf, cs, beta
+
+def process_next_step(f, cube_slice, bfield, vfield, density, valf, cs, beta):
     """ Update all vtk arrays from current file state including flux"""
     va_f = f.get_va()
     cs_f = f.get_cs()
@@ -207,22 +231,21 @@ def process_next_step_tvtk(f, cube_slice, bfield, vfield, density, valf, cs, bet
     f.convert_B()
     
     # Update Datasets
-    bfield = ttf.vector_field(f.w_sac['b3'][cube_slice] * 1e3,
-                              f.w_sac['b2'][cube_slice] * 1e3,
-                              f.w_sac['b1'][cube_slice] * 1e3)
-                              
-    bfield = ttf.vector_field(f.w_sac['v3'][cube_slice] * 1e3,
-                              f.w_sac['v2'][cube_slice] * 1e3,
-                              f.w_sac['v1'][cube_slice] * 1e3)
-      
-                        
-    density = ttf.scalar_field(density_f)                                   
-    valf = ttf.scalar_field(va_f)
-    cs = ttf.scalar_field(cs_f)
-    beta = ttf.scalar_field(beta_f)
+    bfield.set(vector_data = np.rollaxis(np.array([f.w_sac['b3'][cube_slice] * 1e3,
+                                                   f.w_sac['b2'][cube_slice] * 1e3,
+                                                   f.w_sac['b1'][cube_slice] * 1e3]),
+                                                   0, 4))
+    vfield.set(vector_data = np.rollaxis(np.array([f.w_sac['v3'][cube_slice] / 1e3,
+                                                   f.w_sac['v2'][cube_slice] / 1e3,
+                                                   f.w_sac['v1'][cube_slice] / 1e3]),
+                                                   0, 4))
+    valf.set(scalar_data = va_f)
+    cs.set(scalar_data = cs_f)
+    beta.set(scalar_data = beta_f)
+    density.set(scalar_data = density_f)
     
     return bfield, vfield, density, valf, cs, beta
-
+    
 def process_next_step_mlab(f, cube_slice):
     """ Update all vtk arrays from current file state including flux"""
     #Do this before convert_B
@@ -250,15 +273,13 @@ def process_next_step_mlab(f, cube_slice):
     cs = scalar_field(cs_f, name="Sound Speed", figure=None)
     beta = scalar_field(beta_f, name="Beta", figure=None)
     
-    return map(copy.deepcopy, [bfield.outputs[0], vfield.outputs[0],
-                               density.outputs[0], valf.outputs[0],
-                               cs.outputs[0], beta.outputs[0]])
-
-def process_next_step(f, cube_slice, bfield, vfield, density, valf, cs, beta, method='mlab'):
-    if method == 'mlab':
-        return process_next_step_mlab(f, cube_slice)
-    
-    if method == 'tvtk':
-        return process_next_step_tvtk(f, cube_slice, bfield, vfield, density, valf, cs, beta)
-    
-    raise ValueError("Invalid Method")
+    return bfield, vfield, density, valf, cs, beta
+#
+#def process_next_step(f, cube_slice, bfield, vfield, density, valf, cs, beta, method='mlab'):
+#    if method == 'mlab':
+#        return process_next_step_mlab(f, cube_slice)
+#    
+#    if method == 'tvtk':
+#        return process_next_step_tvtk(f, cube_slice, bfield, vfield, density, valf, cs, beta)
+#    
+#    raise ValueError("Invalid Method")
