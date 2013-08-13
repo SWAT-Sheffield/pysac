@@ -7,6 +7,7 @@ Created on Wed Dec 12 10:55:54 2012
 3D Visualisation and Analysis Utils
 """
 import os
+import copy
 import numpy as np
 
 import tvtk_tube_functions as ttf
@@ -235,8 +236,6 @@ def process_next_step_mlab(f, cube_slice, bfield, vfield, density, valf, cs, bet
     
     # Create TVTK datasets
     bfield = vector_field(f.w_sac['b3'][cube_slice] * 1e3,
-                                        f.w_sac['b2'][cube_slice] * 1e3, 
-                                        f.w_sac['b1'][cube_slice] * 1e3,
                                         name="Magnetic Field",figure=None)
     
     vfield = vector_field(f.w_sac['v3'][cube_slice] / 1e3,
