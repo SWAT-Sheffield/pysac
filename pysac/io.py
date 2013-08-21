@@ -304,12 +304,14 @@ class VAChdf5():
         
         self.w = self.time_group[wstepname]
         self.w_ = {}
+        self.w_dict = {}
         index = next((i for i in xrange(len(self.header['varnames'])) if not(
             self.header['varnames'][i] in ["x","y","z"])),self.header['ndim'])
             
         for i,name in enumerate(
                     self.header['varnames'][index:self.header['nw'] + index]):
             self.w_.update({name:i})
+            self.w_dict.update({name:self.w[i]})
 
 
 #==============================================================================
