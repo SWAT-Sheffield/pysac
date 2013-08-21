@@ -411,6 +411,10 @@ class VACdata(object):
     @property
     def w_(self):
         return self.file.w_
+    
+    @property
+    def w_dict(self):
+        return self.file.w_dict
 
     @property
     def header(self):
