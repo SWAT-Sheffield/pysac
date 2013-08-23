@@ -183,9 +183,9 @@ def update_flux_surface(surf_seeds, surf_field_lines, surface):
     surface.update()   
 
 
-def make_poly_norms(surface):
+def make_poly_norms(poly_data):
     poly_norms = tvtk.PolyDataNormals()
-    poly_norms.input = surface.output
+    poly_norms.input = poly_data
     poly_norms.compute_point_normals = True
     poly_norms.flip_normals = False
     poly_norms.update()
@@ -376,6 +376,29 @@ def write_flux(file_name, surface, surface_density, surface_va, surface_beta,
     w = tvtk.XMLPolyDataWriter(input=poly_out,file_name=file_name)
     w.write()
     
+def write_wave_flux(file_name, surface_poly, parallels, normals, torsionals,
+                    Fwpar, Fwperp, Fwphi):
+
+    pd_Fwpar = tvtk.PointData(scalars=Fwpar, vectors=parallels)
+    pd_Fwpar.scalars.name = "Fwpar"
+    pd_Fwpar.vectors.name = "par"
+    
+    pd_Fwperp = tvtk.PointData(scalars=Fwperp, vectors=normals)
+    pd_Fwperp.scalars.name = "Fwperp"
+    pd_Fwperp.vectors.name = "perp"
+    
+    pd_Fwphi = tvtk.PointData(scalars=Fwphi, vectors=torsionals)
+    pd_Fwphi.scalars.name = "Fwphi"
+    pd_Fwphi.vectors.name = "phi"
+    
+    poly_out = surface_poly
+    poly_out.point_data.add_array(pd_Fwpar.scalars)
+    poly_out.point_data.add_array(pd_Fwperp.scalars)
+    poly_out.point_data.add_array(pd_Fwphi.scalars)
+    
+    w = tvtk.XMLPolyDataWriter(input=poly_out,file_name=file_name)
+    w.write()
+
 def read_step(filename):
     """ Read back in a saved surface file"""
     r = tvtk.XMLPolyDataReader(file_name=filename)

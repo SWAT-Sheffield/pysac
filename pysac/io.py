@@ -615,6 +615,22 @@ class SACdata(VACdata):
             self.w_sac.update({'b3':self.w[self.w_["b3"]] +
                                                     self.w[self.w_["bg3"]]})
     
+    def get_w_yt(self):
+        self.w_yt = {}
+        if self.header['ndim'] == 3:
+            self.w_yt.update({'Bx':self.w_sac['b2'],
+                              'By':self.w_sac['b3'],
+                              'Bz':self.w_sac['b1']})
+            
+            self.w_yt.update({'x-velocity':self.w_sac['v2'],
+                              'y-velocity':self.w_sac['v3'],
+                              'z-velocity':self.w_sac['v1']})
+            
+            self.w_yt.update({'Denisty':self.w_sac['rho'],
+                              'e':self.w_sac['e']})
+            
+        return self.w_yt
+    
     def read_timestep(self,i):
         VACdata.read_timestep(self,i)
         self.update_w_sac()
