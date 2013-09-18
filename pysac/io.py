@@ -626,8 +626,11 @@ class SACdata(VACdata):
                               'y-velocity':self.w_sac['v3'],
                               'z-velocity':self.w_sac['v1']})
             
-            self.w_yt.update({'Denisty':self.w_sac['rho'],
+            self.w_yt.update({'Density':self.w_sac['rho'],
                               'e':self.w_sac['e']})
+                              
+        if self.header['ndim'] == 2:
+            raise ValueError("Doesn't support 2D")
             
         return self.w_yt
     
