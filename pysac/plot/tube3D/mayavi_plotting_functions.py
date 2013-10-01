@@ -122,4 +122,6 @@ def change_surface_scalars(new_tube,surf_bar_label,scalar_name,sym_lim=True,log1
         new_tube.module_manager.scalar_lut_manager.data_range = np.array(lims)
     if log10:
         new_tube.module_manager.scalar_lut_manager.lut.scale = 'log10'
+    if not log10:
+        new_tube.module_manager.scalar_lut_manager.lut.scale = 'linear'
     
