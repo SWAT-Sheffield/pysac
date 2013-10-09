@@ -90,7 +90,7 @@ class FortranFile(file):
             
         self.write(struct.pack(self.ENDIAN + 'i', reals.nbytes))
         self.write(struct.pack(self.ENDIAN + prec * reals.size,
-                               *reals.flatten(order='F')))
+                               *reals.flatten()))
         self.write(struct.pack(self.ENDIAN + 'i', reals.nbytes))
 
     def readInts(self):
@@ -180,18 +180,26 @@ class VACfile():
         #Do FORTRAN read init, set Endian for VAC/SAC files
         self.file = FortranFile(fname,mode,buf)
         self.file.setEndian('<')
-        self.process_step()
-        self.recordsize = self.file.tell()
-        self.num_records = os.stat(fname).st_size / self.recordsize
         
-        #Find out first and last time values        
-        self.t_start = self.header['params'][1]
-        self.read_timestep(self.num_records)
-        self.t_end = self.header['params'][1]
-        self.header['final t'] = self.t_end
-        self.read_timestep(1)
+        if mode == 'r':
+            self.process_step()
+            self.recordsize = self.file.tell()
+            self.num_records = os.stat(fname).st_size / self.recordsize
+            
+            #Find out first and last time values        
+            self.t_start = self.header['params'][1]
+            self.read_timestep(self.num_records)
+            self.t_end = self.header['params'][1]
+            self.header['final t'] = self.t_end
+            self.read_timestep(1)
         
-        print "File is %i Records Long"%self.num_records
+            print "File is %i Records Long"%self.num_records
+        
+        elif mode == 'w':
+            #Set up varibles to be filled and then written
+            self.header = []
+        else:
+            raise ValueError("mode must be 'r' or 'w'")
             
     def read_timestep(self,i):
         self.file.seek(int(i-1) * self.recordsize)
@@ -217,9 +225,8 @@ class VACfile():
         self.header['varnames'] = self.file.readRecord().split()
 
         self.x = self.file.readReals()
-        #s = self.header['nx'] + [self.header['ndim']]
+#        s = self.header['nx'] + [self.header['ndim']]
         s = [self.header['params'][2]] + self.header['nx']
-        #s = [self.header['params'][2]] + self.header['nx']
         self.x = np.reshape(self.x,s,order='C') ## - Don't know! Array was wrong 
         #self.E = self.readReals()
         #self.E = reshape(self.E,s)
@@ -236,9 +243,50 @@ class VACfile():
                     if not(self.header['varnames'][i] in ["x","y","z"])),ndim)
         for i,name in enumerate(self.header['varnames'][index:nw+index]):
             self.w_.update({name:i})
+    
+    def _write_header(self):
+        """ Write header information """
+        
+        #Validate Header
+        if not all([t in self.header for t in ['filehead', 'nx', 'eqpar']]):
+            raise ValueError('Invalid header for writing')
+            
+        if not ('params' in self.header or 
+                all([t in self.header for t in 
+                                        ['it', 't', 'ndim', 'neqpar', 'nw']])):
+            raise ValueError('Invalid header for writing')
+        
+        #pad the header to 79 characters as the distribute script needs it like
+        #that even though SAC dosen't
+        self.file.writeString(self.header['filehead'])#.ljust(79))
+
+        if 'params' in self.header:
+            params = self.header['params']
+
+        else:
+            params = [self.header['it'], self.header['t'], self.header['ndim'],
+                      self.header['neqpar'], self.header['nw']]
+
+        self.file.writeParams(params)
+        self.file.writeInts(self.header['nx'])
+        self.file.writeReals(self.header['eqpar'])
+        self.file.writeString(" ".join(self.header['varnames']))
+    
+    def _write_data(self):
+        """ Save arrays into unformatted fortran file """
+        self.file.writeReals(self.x, prec='d')
+        for w in self.w:
+            self.file.writeReals(w, prec='d')
+    
+    def write_step(self):
+        self._write_header()
+        self._write_data()
+    
+    def close(self):
+        self.file.close()
 
 class VAChdf5():
-    def __init__(self,filename):
+    def __init__(self, filename, mode='r'):
         """
         Based on FortranFile has been modified to read VAC / SAC HDF5 files.
        
@@ -260,38 +308,50 @@ class VAChdf5():
         Largely the HDF5 file is designed so the functionality mimics the VAC
         binary file, i.e. all the vars are still in the W array etc.
         """
-        self.h5file = h5py.File(filename,'r')
-        #Open top level group
-        if not("SACdata" in self.h5file.keys()):
-            print """Are you sure this is a proper SAC HDF5 file?
-                Opening first group."""
-            self.sac_group = self.h5file[self.h5file.keys()[0]]
-        else:
-            self.sac_group = self.h5file["SACdata"]
+        self.mode = mode
+        self.h5file = h5py.File(filename,mode)
+        
+        if mode == 'r':
+            #Open top level group
+            if not("SACdata" in self.h5file.keys()):
+                print """Are you sure this is a proper SAC HDF5 file?
+                    Opening first group."""
+                self.sac_group = self.h5file[self.h5file.keys()[0]]
+            else:
+                self.sac_group = self.h5file["SACdata"]
+                
+            self.x = self.sac_group['x']
             
-        self.x = self.sac_group['x']
-        
-        self.header = dict(self.sac_group.attrs)
-        self.header['neqpar'] = int(self.header['neqpar'])
-        self.header['ndim'] = int(self.header['ndim'])
-        try:
-            self.header['filehead'] = self.h5file.attrs['filehead'][0]
-        except:
-            pass
-        
-        self.time_group = self.sac_group['wseries']
-        self.header.update(dict(self.time_group.attrs))
-        self.header['varnames'] = self.header['varnames'][0].split()
-        self.read_timestep(0)
-        self.t_start = self.header['t']
-        if 'final t' in self.sac_group.attrs:
-            self.header['final t'] = self.sac_group.attrs['final t']
-            self.t_end = self.sac_group.attrs['final t']
+            self.header = dict(self.sac_group.attrs)
+            self.header['neqpar'] = int(self.header['neqpar'])
+            self.header['ndim'] = int(self.header['ndim'])
+            try:
+                self.header['filehead'] = self.h5file.attrs['filehead'][0]
+            except:
+                pass
+            
+            self.time_group = self.sac_group['wseries']
+            self.header.update(dict(self.time_group.attrs))
+            self.header['varnames'] = self.header['varnames'][0].split()
+            self.read_timestep(0)
+            self.t_start = self.header['t']
+            if 'final t' in self.sac_group.attrs:
+                self.header['final t'] = self.sac_group.attrs['final t']
+                self.t_end = self.sac_group.attrs['final t']
+            else:
+                self.t_end = self.time_group.items()[-1][1].attrs['t']#[0] ##don't know
+                self.header['final t'] = self.t_end
+            
+            self.num_records = len(self.time_group.items())
+            
+        elif mode =='w':
+            self._has_header = False
+            #Create sacdata group
+            self.sac_group = self.h5file.create_group("SACdata")
+            #create wseries group
+            self.time_group = self.sac_group.create_group("wseries")
         else:
-            self.t_end = self.time_group.items()[-1][1].attrs['t']#[0] ##don't know
-            self.header['final t'] = self.t_end
-        
-        self.num_records = len(self.time_group.items())
+            raise ValueError("mode must be 'r' or 'w'")
     
     def read_timestep(self,i):
         wstepname = self.time_group.keys()[i]
@@ -312,6 +372,55 @@ class VAChdf5():
                     self.header['varnames'][index:self.header['nw'] + index]):
             self.w_.update({name:i})
             self.w_dict.update({name:self.w[i]})
+    
+    def _write_header(self):
+        """ Populate top level attributes with the file meta data """
+        if self.mode == 'r':
+            raise Exception("This is only vaild if mode = 'r'")
+            
+        #Write file level attributes
+        self.h5file.attrs.create('filehead', self.header['filehead'])
+        if 'filedesc' in self.header:
+            desc = self.header['filedesc']
+        else:
+            desc = 'This is a SAC HDF5 file written by pySAC'
+        self.h5file.attrs.create('filedesc', desc)
+        
+        #populate the SAC group
+        self.sac_group.attrs.create('eqpar', self.header['eqpar'])
+        self.sac_group.attrs.create('ndim', self.header['ndim'])
+        self.sac_group.attrs.create('neqpar', self.header['neqpar'])
+        self.sac_group.attrs.create('nx', self.header['nx'])
+        
+        #Populate the wseries group
+        self.time_group.attrs.create('nw', self.header['nw'])
+        #This is saved in a list to match FORTRAN behavior
+        self.time_group.attrs.create('varnames', [" ".join(self.header['varnames'])])
+        
+        #write x array
+        self.sac_group.create_dataset('x', data=self.x)
+        
+        self._has_header = True
+        
+    def write_step(self):
+        """ Save step data into hdf5 file """
+        if self.mode == 'r':
+            raise Exception("This is only vaild if mode = 'r'")
+        
+        if not self._has_header:
+            self._write_header()
+        
+        dset = self.time_group.create_dataset('w%05i'%self.header['it'], data=self.w)
+        
+        dset.attrs.create('it', self.header['it'])
+        dset.attrs.create('t', self.header['t'])
+    
+    def close(self):
+        if self.mode == 'w':
+            #Write out final info to sacgroup
+            self.sac_group.attrs.create('final t', self.header['t'])
+            self.sac_group.attrs.create('nt', self.header['it'])
+        self.h5file.close()
 
 
 #==============================================================================
@@ -342,71 +451,34 @@ class VACdata(object):
                     raise ValueError(
 "Specified filetype is not valid. Filetype should be one of { 'hdf5' | 'fort' }")
         return ofiletype
-    
-    def __init__(self, filename, filetype='auto', mode='r'):
+
+    def __init__(self, filename, filetype='auto'):
         """
-        Create a VACdata class. This can be a read or a create to write 
-        operation
+        Create a VACdata class.
         
         Parameters
         ----------
         filename: str
         
-        mode: {'r', 'w'}
-            If read, pass onto open() and read a file
-            If 'w' setup a class then save a time step.
+        filetype: str {'auto' | 'fort' | 'hdf5' }
         """
         
         #Detect filetype and open file for reading.
-        if mode == 'r':
-            filetype = self._get_file_type(filename, filetype)
-            
-            self.open(filename, filetype)
-            
-        elif mode == 'w':
-            self.init_file(filename, filetype)            
-            
-        else:
-            raise ValueError("mode should be one of { 'r' | 'w' }")
+        filetype = self._get_file_type(filename, filetype)
         
-    
-    def open(self, filename, filetype):
-        """
-        Opens a file dependant upon the extention or a manual flag
-        
-        Parameters
-        ----------
-        filename: str
-        
-        filetype: { fort | hdf5 }
-        """
         if filetype == 'hdf5':
             self.file = VAChdf5(filename)
         
         elif filetype == 'fort':
             self.file = VACfile(filename, mode='r')
-
-    def save_self(self):
-        """ Copy File attrs to this object for output"""
-        self.x_internal = self.x
-        self.w_internal = self.w
-        self.header_internal = self.header
-        
+            
     @property
     def w(self):
         return self.file.w
     
-    @w.setter
-    def w(self, value):
-        self.w_internal = value
-    
     @property
     def x(self):
         return self.file.x
-    
-    @x.setter
-    def x(self, value):
-        self.x_internal = value
     
     @property
     def w_(self):
@@ -419,10 +491,6 @@ class VACdata(object):
     @property
     def header(self):
         return self.file.header
-    
-    @header.setter
-    def header(self, value):
-        self.header_internal = value
 
     @property
     def t_start(self):
@@ -446,130 +514,6 @@ class VACdata(object):
             Time Step number
         """
         self.file.read_timestep(i)
-
-    def init_file(self, filename, filetype='auto'):
-        """
-        Sets up a file for writing, in the case of HDF5 writes file level 
-        header.
-        
-        Parameters
-        ----------
-        
-        filename
-        
-        filetype {auto | fort | hdf5}
-        """
-        
-        #Determine filetype
-        self.outfiletype = self._get_file_type(filename, filetype)
-        
-        if self.outfiletype == 'hdf5':
-            self.outfile = h5py.File(filename, 'w')
-            self.h5init = False
-        
-        elif self.outfiletype == 'fort':
-            self.outfile = FortranFile(filename, mode='w')
-        
-        else:
-            raise ValueError("Invalid filetype, how did you get here?!")
-    
-    def write_step(self):
-        """
-        Writes current class state as time step
-        
-        Requires the attributes of the class be populated for writing,
-        i.e. header, x, w need to be defined.
-
-        """
-        if self.outfiletype == 'hdf5':
-            self._write_step_hdf5()
-            
-        elif self.outfiletype == 'fort':
-            self._write_step_fortran()
-        
-        else:
-            raise ValueError("Invalid filetype in write_step")
-    
-    def _write_header_fortran(self):
-        """ Set up fortran file for writing """
-
-        self.outfile.writeString(self.header_internal['filehead'])
-        
-        if 'params' in self.header_internal:
-            params = self.header_internal['params']
-            
-        else:
-            params = [self.header_internal['it'], self.header_internal['t'], self.header_internal['ndim'],
-                      self.header_internal['neqpar'], self.header_internal['nw']]
-        
-        self.outfile.writeParams(params)
-        self.outfile.writeInts(self.header_internal['nx'])
-        self.outfile.writeReals(self.header_internal['eqpar'])
-        self.outfile.writeString(" ".join(self.header_internal['varnames']))
-    
-    def _write_step_fortran(self):
-        """ Save step header and arrays into unformatted fortran file """
-        self._write_header_fortran()
-        self.outfile.writeReals(self.x_internal, prec='d')
-        for w in self.w_internal:
-            self.outfile.writeReals(w, prec='d')
-        
-    def _init_hdf5(self):
-        """ Open and write file level header """
-        
-        #Write file level attributes
-        self.outfile.attrs.create('filehead', self.header_internal['filehead'])
-        if 'filedesc' in self.header_internal:
-            desc = self.header_internal['filedesc']
-        else:
-            desc = 'This is a SAC HDF5 file written by pySAC'
-        self.outfile.attrs.create('filedesc', desc)
-        
-        #Create sacdata group
-        sacgrp = self.outfile.create_group("SACdata")
-        sacgrp.attrs.create('eqpar', self.header_internal['eqpar'])
-        sacgrp.attrs.create('ndim', self.header_internal['ndim'])
-        sacgrp.attrs.create('neqpar', self.header_internal['neqpar'])
-        sacgrp.attrs.create('nx', self.header_internal['nx'])
-        
-        #create wseries group
-        wgroup = sacgrp.create_group("wseries")
-        wgroup.attrs.create('nw', self.header_internal['nw'])
-        #This is saved in a list to match FORTRAN behavior
-        wgroup.attrs.create('varnames', [" ".join(self.header_internal['varnames'])])
-        
-        #write x array
-        sacgrp.create_dataset('x', data=self.x_internal)
-        
-    def _write_step_hdf5(self):
-        """ Save step data into hdf5 file """
-        if hasattr(self, 'h5init'):
-            if not self.h5init:
-                self._init_hdf5()
-                self.h5init = True
-            
-            wgroup = self.outfile['/SACdata/wseries']
-            wgroup.create_dataset('w%05i'%self.header_internal['it'], data=self.w_internal)
-            
-            dset = wgroup['w%05i'%self.header_internal['it']]
-            dset.attrs.create('it', self.header_internal['it'])
-            dset.attrs.create('t', self.header_internal['t'])
- 
-        else:
-            raise TypeError(
-            """Trouble identifying state of HDF5 file,
-            are you sure you are writing a hdf5 file?""")
-    
-    def close(self):
-        if self.outfiletype == 'fort':
-            self.outfile.close()
-        
-        if self.outfiletype == 'hdf5':
-            #Write out final info to sacgroup
-            sacgrp = self.outfile['/SACdata']
-            sacgrp.attrs.create('final t', self.header_internal['t'])
-            sacgrp.attrs.create('nt', self.header_internal['it'])
-            self.outfile.close()
 
 class SACdata(VACdata):
     """
