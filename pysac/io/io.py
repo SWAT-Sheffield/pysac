@@ -53,7 +53,7 @@ class FortranFile(file):
             The string to write
         """
         self.write(struct.pack(self.ENDIAN + 'i', len(s)))
-        self.write(s)
+        self.write(s.encode("latin-1"))
         self.write(struct.pack(self.ENDIAN + 'i', len(s)))
 
     def readReals(self, prec='d'):
@@ -279,6 +279,10 @@ class VACfile():
             self.file.writeReals(w, prec='d')
     
     def write_step(self):
+        #Make sure you are saving the correct size data
+#        assert tuple(self.header['nx']) == self.w[0].shape
+#        assert tuple(self.header['nx']) == self.x[0].shape
+
         self._write_header()
         self._write_data()
     
@@ -523,8 +527,8 @@ class SACdata(VACdata):
     This adds the background and pertubation varibles into a new w_sac dict.
     """
     
-    def __init__(self, filename, filetype='auto', mode='r'):        
-        VACdata.__init__(self, filename, filetype=filetype, mode=mode)
+    def __init__(self, filename, filetype='auto'):        
+        VACdata.__init__(self, filename, filetype=filetype)
         self.update_w_sac()
     
     def update_w_sac(self):
