@@ -4,7 +4,7 @@ Write a GDF file in serial
 """
 
 sac_gdf_output = {
-      'denisty_pert':{
+      'density_pert':{
                       'field_name': 'pertubation density',
                       'field_units': '$kg m^{-3}$',
                       'field_to_cgs': 1e-3,
@@ -30,8 +30,8 @@ sac_gdf_output = {
                       },
       'internal_energy_pert':{
                        'field_name': 'pertubation internal energy',
-                      'field_units': '$ms^{-1}$',
-                      'field_to_cgs': 0,
+                      'field_units': '$Pa$',
+                      'field_to_cgs': 0.1,
                       'staggering': 0
                       },
       'mag_field_x_pert':{
@@ -46,13 +46,19 @@ sac_gdf_output = {
                       'field_to_cgs': 1e-4,
                       'staggering': 0
                       },
-      'internal_energy_bg':{
-                      'field_name': 'background internal energy',
-                      'field_units': '$ms^{-1}$',
+      'mag_field_z_pert':{
+                      'field_name': 'pertubation magnetic field z component',
+                      'field_units': '$T$}',
                       'field_to_cgs': 1e-4,
                       'staggering': 0
+                      },
+      'internal_energy_bg':{
+                      'field_name': 'background internal energy',
+                      'field_units': '$pa$',
+                      'field_to_cgs': 0.1,
+                      'staggering': 0
                       },  
-      'denisty_bg':{
+      'density_bg':{
                       'field_name': 'background density',
                       'field_units': '$kg m^{-3}$',
                       'field_to_cgs': 1e-3,

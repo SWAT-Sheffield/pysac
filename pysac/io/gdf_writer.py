@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import astropy.units as u
 import numpy as np
 import h5py
 
@@ -24,16 +25,10 @@ def write_gdf(gdf_path, header, x, fields, data_author=None, data_comment=None):
     fields: dict
         A dictionary with a key for each varname in header, and a value containing
         a dictionary with each of 
-        {field: np.ndarray,
+        {field: astropy.units.Quantity,
              The array for this field, in x,y,z (should be in SI not code units)
-        field_value: string
-             The save name for the field in yt nomencleture i.e. denisty_pert
         field_name: string,
              A descriptive name for the field, spaces allowed
-        field_to_cgs: float,
-             The conversion factor to cgs units
-        field_units: string,
-             A unit string
         staggering: integer
              0: cell-centred, 1: face-centred, 2: vertex-centred}
     
@@ -65,8 +60,12 @@ def write_gdf(gdf_path, header, x, fields, data_author=None, data_comment=None):
     g.attrs["dimensionality"] = header['ndim']
     g.attrs["domain_dimensions"] = header['nx']
     g.attrs["current_time"] = header['t']
-    g.attrs["domain_left_edge"] = [x[0][0,0,0], x[1][0,0,0], x[2][0,0,0]]
-    g.attrs["domain_right_edge"] = [x[0][-1,-1,-1], x[1][-1,-1,-1], x[2][-1,-1,-1]]
+    g.attrs["domain_left_edge"] = [x[0][0,0,0].to(u.cm).value,
+                                   x[1][0,0,0].to(u.cm).value, 
+                                   x[2][0,0,0].to(u.cm).value]
+    g.attrs["domain_right_edge"] = [x[0][-1,-1,-1].to(u.cm).value,
+                                    x[1][-1,-1,-1].to(u.cm).value,
+                                    x[2][-1,-1,-1].to(u.cm).value]
     g.attrs["unique_identifier"] = np.random.randint(1e15)
     g.attrs["cosmological_simulation"] = 0
     #TODO: hmmmm
@@ -74,7 +73,17 @@ def write_gdf(gdf_path, header, x, fields, data_author=None, data_comment=None):
     g.attrs["field_ordering"] = 0
     # @todo: not yet supported by yt.
     g.attrs["boundary_conditions"] = np.array([0, 0, 0, 0, 0, 0], 'int32')
-
+    
+    #Write some VAC info just in case
+    if 'final t' in header.keys():
+        g.attrs['simulation_run_time'] = header['final t']
+    g.attrs["eqpar"] = header['eqpar']
+    index = next((i for i in xrange(len(header['varnames']))
+                    if not(header['varnames'][i] in ["x","y","z"])),header['ndim'])
+    g.attrs["eqpar_names"] = header['varnames'][index+header['nw']-1:]
+    #Write the x array
+    f['x'] = x
+    
     # "field_types" group
     g = f.create_group("field_types")
 
@@ -83,7 +92,7 @@ def write_gdf(gdf_path, header, x, fields, data_author=None, data_comment=None):
 
     # root datasets -- info about the grids
     f["grid_dimensions"] = header['nx']
-    f["grid_left_index"] = [0]*header['nx']
+    f["grid_left_index"] = [0]*header['ndim']
     f["grid_level"] = 0
     # @todo: Fill with proper values
     f["grid_parent_id"] = 0
@@ -92,14 +101,16 @@ def write_gdf(gdf_path, header, x, fields, data_author=None, data_comment=None):
     # "data" group -- where we should spend the most time
     d = f.create_group("data")
     
-    gr = f.create_group("grid_%10i"%0)
-    for afield in fields:
-        gr[afield['field_value']] = afield['field']
+    gr = d.create_group("grid_%010i"%0)
+    for field_title,afield in fields.items():
+        field = afield['field'].si
+        gr[field_title] = field
         
-        fv = f['field_types'].create_group(afield['field_value'])
+        fv = f['field_types'].create_group(field_title)
         fv.attrs['field_name'] = afield['field_name']
-        fv.attrs['field_to_cgs'] = afield['field_to_cgs']
-        fv.arrts['field_units'] = afield['field_units']
+        print np.array(field.unit.to_system(u.cgs)[0])
+        fv.attrs['field_to_cgs'] = field.unit.to_system(u.cgs)[0].value
+        fv.attrs['field_units'] = field.unit.to_string("latex")
         fv.attrs['staggering'] = afield['staggering']
     
     f.close()
