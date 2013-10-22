@@ -4,7 +4,175 @@ import astropy.units as u
 import numpy as np
 import h5py
 
-def write_gdf(gdf_path, header, x, fields, data_author=None, data_comment=None):
+def convert_w_3D(w, w_):
+    """
+    This function converts a 4D w array to a field dictionary.
+    
+    It is hardcoded to expect the following varibles:
+    
+    varnames: ['h', 'm1', 'm2', 'm3', 'e', 'b1', 'b2', 'b3', 'eb', 'rhob', 'bg1', 'bg2', 'bg3']
+    where magnticfield is in NON-scaled units of B i.e. Tesla
+    and everything else is also in base SI, m, Pa, kg /m^3 etc.
+    
+    Paramters
+    ---------
+    w: np.ndarray
+        The w array in Si units
+    
+    w_: dict
+        A conversion between varnames and w indices
+    """
+    
+    rhot = w[w_['h']] + w[w_['rhob']]
+    
+    sac_gdf_output = {}
+    
+    sac_gdf_output['density_pert'] = {
+                    'field': w[w_['h']] * u.Unit('kg/m^3'),
+                    'field_name': 'pertubation density',       
+                    'staggering': 0
+                    }
+    sac_gdf_output['density_bg'] = {
+                    'field': w[w_['rhob']] * u.Unit('kg/m^3'),
+                    'field_name':'background density',       
+                    'staggering':0
+                    }
+    sac_gdf_output['velocity_x'] = {
+                    'field': w[w_['m2']]/rhot * u.Unit('m/s'),
+                    'field_name': 'velocity x component',       
+                    'staggering': 0
+                    }
+    sac_gdf_output['velocity_y'] = {
+                    'field': w[w_['m3']]/rhot * u.Unit('m/s'),
+                    'field_name': 'velocity y component',     
+                    'staggering': 0
+                    }
+    sac_gdf_output['velocity_z'] = {
+                    'field': w[w_['m1']]/rhot * u.Unit('m/s'),
+                    'field_name':'velocity z component',        
+                    'staggering':0
+                    }
+    sac_gdf_output['mag_field_x_pert'] = {
+                    'field':u.Quantity(w[w_['b2']], unit=u.T),
+                    'field_name':'pertubation magnetic field x component',        
+                    'staggering':0
+                    }
+    sac_gdf_output['mag_field_y_pert'] = {
+                    'field': w[w_['b3']] * u.T,
+                    'field_name':'pertubation magnetic field y component',        
+                    'staggering':0
+                    }
+    sac_gdf_output['mag_field_z_pert'] = {
+                    'field': w[w_['b1']] * u.T,
+                    'field_name': 'pertubation magnetic field z component',        
+                    'staggering': 0
+                    }
+    sac_gdf_output['mag_field_x_bg'] = {
+                    'field': w[w_['bg2']] * u.T,
+                    'field_name':'background magnetic field x component',        
+                    'staggering':0
+                    }
+    sac_gdf_output['mag_field_y_bg'] = {
+                    'field': w[w_['bg3']] * u.T,
+                    'field_name': 'background magnetic field y component',        
+                    'staggering': 0
+                    }
+    sac_gdf_output['mag_field_z_bg'] = {
+                    'field': w[w_['bg1']] * u.T,
+                    'field_name': 'background magnetic field z component',        
+                    'staggering': 0
+                    }
+    sac_gdf_output['internal_energy_pert'] = {
+                    'field': w[w_['e']] * u.Pa,
+                    'field_name':'pertubation internal energy',        
+                    'staggering':0
+                    }
+    sac_gdf_output['internal_energy_bg'] = {
+                    'field': w[w_['eb']] * u.Pa,
+                    'field_name':'background internal energy',        
+                    'staggering':0
+                    }
+
+    return sac_gdf_output
+
+def convert_w_2D(w, w_):
+    """
+    This function converts a 3D w array to a field dictionary.
+    
+    It is hardcoded to expect the following varibles:
+    
+    varnames: ['h', 'm1', 'm2', 'e', 'b1', 'b2', 'eb', 'rhob', 'bg1', 'bg2']
+    where magnticfield is in NON-scaled units of B i.e. Tesla
+    and everything else is also in base SI, m, Pa, kg /m^3 etc.
+    
+    Paramters
+    ---------
+    w: np.ndarray
+        The w array in Si units
+    
+    w_: dict
+        A conversion between varnames and w indices
+    """
+    
+    rhot = w[w_['h']] + w[w_['rhob']]
+    
+    sac_gdf_output = {}
+    
+    sac_gdf_output['density_pert'] = {
+                    'field': w[w_['h']] * u.Unit('kg/m^3'),
+                    'field_name': 'pertubation density',       
+                    'staggering': 0
+                    }
+    sac_gdf_output['density_bg'] = {
+                    'field': w[w_['rhob']] * u.Unit('kg/m^3'),
+                    'field_name':'background density',       
+                    'staggering':0
+                    }
+    sac_gdf_output['velocity_x'] = {
+                    'field': w[w_['m2']]/rhot * u.Unit('m/s'),
+                    'field_name': 'velocity x component',       
+                    'staggering': 0
+                    }
+    sac_gdf_output['velocity_z'] = {
+                    'field': w[w_['m1']]/rhot * u.Unit('m/s'),
+                    'field_name':'velocity z component',        
+                    'staggering':0
+                    }
+    sac_gdf_output['mag_field_x_pert'] = {
+                    'field':u.Quantity(w[w_['b2']], unit=u.T),
+                    'field_name':'pertubation magnetic field x component',        
+                    'staggering':0
+                    }
+    sac_gdf_output['mag_field_z_pert'] = {
+                    'field': w[w_['b1']] * u.T,
+                    'field_name': 'pertubation magnetic field z component',        
+                    'staggering': 0
+                    }
+    sac_gdf_output['mag_field_x_bg'] = {
+                    'field': w[w_['bg2']] * u.T,
+                    'field_name':'background magnetic field x component',        
+                    'staggering':0
+                    }
+    sac_gdf_output['mag_field_z_bg'] = {
+                    'field': w[w_['bg1']] * u.T,
+                    'field_name': 'background magnetic field z component',        
+                    'staggering': 0
+                    }
+    sac_gdf_output['internal_energy_pert'] = {
+                    'field': w[w_['e']] * u.Pa,
+                    'field_name':'pertubation internal energy',        
+                    'staggering':0
+                    }
+    sac_gdf_output['internal_energy_bg'] = {
+                    'field': w[w_['eb']] * u.Pa,
+                    'field_name':'background internal energy',        
+                    'staggering':0
+                    }
+
+    return sac_gdf_output
+
+def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
+              data_author=None, data_comment=None):
     """
     Write a gdf file from a vac-data header a w array and an x array
     
@@ -13,13 +181,13 @@ def write_gdf(gdf_path, header, x, fields, data_author=None, data_comment=None):
     
     Parameters
     ----------
-    gdf_path: string
+    gdf_path: string or h5py instance
         Filename to save out
     
     header: dict
         A 'VACdata' like header
     
-    x: np.ndarray
+    x: astropy.units.Quantity
         The x array described in header, in x,y,z order
     
     fields: dict
@@ -44,7 +212,10 @@ def write_gdf(gdf_path, header, x, fields, data_author=None, data_comment=None):
     """
     
     # Create and open the file with h5py
-    f = h5py.File(gdf_path, "w")
+    if isinstance(gdf_path, h5py.File):
+        f = gdf_path
+    else:
+        f = h5py.File(gdf_path, "w")
 
     # "gridded_data_format" group
     g = f.create_group("gridded_data_format")
@@ -91,12 +262,12 @@ def write_gdf(gdf_path, header, x, fields, data_author=None, data_comment=None):
     g = f.create_group("particle_types")
 
     # root datasets -- info about the grids
-    f["grid_dimensions"] = header['nx']
-    f["grid_left_index"] = [0]*header['ndim']
-    f["grid_level"] = 0
+    f["grid_dimensions"] = np.array([header['nx']]) #needs to be 1XN
+    f["grid_left_index"] = np.array([[0]*header['ndim']]) #needs to be 1XN
+    f["grid_level"] = np.zeros(1)
     # @todo: Fill with proper values
-    f["grid_parent_id"] = 0
-    f["grid_particle_count"] = 0
+    f["grid_parent_id"] = np.zeros(1)
+    f["grid_particle_count"] = np.zeros((1,1))
     
     # "data" group -- where we should spend the most time
     d = f.create_group("data")
@@ -104,13 +275,13 @@ def write_gdf(gdf_path, header, x, fields, data_author=None, data_comment=None):
     gr = d.create_group("grid_%010i"%0)
     for field_title,afield in fields.items():
         field = afield['field'].si
-        gr[field_title] = field
+        gr.create_dataset(field_title, header['nx'], dtype='d')
+        gr[field_title][arr_slice] = field
         
         fv = f['field_types'].create_group(field_title)
         fv.attrs['field_name'] = afield['field_name']
-        print np.array(field.unit.to_system(u.cgs)[0])
-        fv.attrs['field_to_cgs'] = field.unit.to_system(u.cgs)[0].value
-        fv.attrs['field_units'] = field.unit.to_string("latex")
+        fv.attrs['field_to_cgs'] = field.unit.to_system(u.cgs)[0].scale
+        fv.attrs['field_units'] = field.unit.to_string("latex").strip('$')
         fv.attrs['staggering'] = afield['staggering']
     
     f.close()

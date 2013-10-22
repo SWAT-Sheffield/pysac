@@ -2,6 +2,17 @@ import os
 import numpy as np
 from pysac.io import VACfile
 
+def mag_convert(w,w_):
+    """
+    Convert magnetic field from scaled to SI
+    """
+    mu = 1.25663706e-6
+    keys = ['b1','b2','b3','bg1','bg2','bg3']
+    for k in keys:
+        w[w_[k]] = w[w_[k]] * np.sqrt(mu)
+    
+    return w
+
 def SAC_split_array(array,n0,n1,n2,axis_skip=0):
     """
     Split an array into the same order peices as SAC distribution.
