@@ -274,14 +274,18 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     
     gr = d.create_group("grid_%010i"%0)
     for field_title,afield in fields.items():
+        print field_title
         field = afield['field'].si
         gr.create_dataset(field_title, header['nx'], dtype='d')
-        gr[field_title][arr_slice] = field
         
         fv = f['field_types'].create_group(field_title)
         fv.attrs['field_name'] = afield['field_name']
         fv.attrs['field_to_cgs'] = field.unit.to_system(u.cgs)[0].scale
-        fv.attrs['field_units'] = field.unit.to_string("latex").strip('$')
+        fv.attrs['field_units'] = np.string_(field.unit.to_string("latex").strip('$'))
         fv.attrs['staggering'] = afield['staggering']
+   
+    for field_title, afield in fields.items():
+       print "writing %s"%field_title 
+       gr[field_title][arr_slice] = np.array(field)
     
     f.close()
