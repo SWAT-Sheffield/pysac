@@ -212,9 +212,9 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     """
     # Create and open the file with h5py
     if isinstance(gdf_path, h5py.File):
-        f = gdf_file
+        f = gdf_path
     else:
-        f = h5py.File(gdf_file, "w")
+        f = h5py.File(gdf_path, "w")
         
     domain_left_edge = [x[0][0,0,0].to(u.cm).value,
                         x[1][0,0,0].to(u.cm).value, 
@@ -223,7 +223,7 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
                          x[1][-1,-1,-1].to(u.cm).value,
                          x[2][-1,-1,-1].to(u.cm).value]
 
-    create_file(gdf_file, header, domain_left_edge=domain_left_edge,
+    create_file(f, header, domain_left_edge=domain_left_edge,
                 domain_right_edge=domain_right_edge, data_author=data_author, 
                 data_comment=data_comment)
     
@@ -232,7 +232,8 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
 
     for field_title,afield in fields.items():
        write_field(f, afield['field'], field_title, afield['field_name'],
-                   arr_slice=arr_slice, afield['staggering'])
+                   field_shape=header['nx'], arr_slice=arr_slice, 
+                   staggering=afield['staggering'])
     
     f.close()
 
@@ -322,10 +323,14 @@ def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
     
     return f
 
-def write_field(gdf_file, data, field_title, field_name, arr_slice=np.s_[:], staggering=0):
-    gr = gdf_file["grid_%010i"%0]
+def write_field(gdf_file, data, field_title, field_name, field_shape=None, arr_slice=np.s_[:], staggering=0):
+    gr = gdf_file["/data/grid_%010i"%0]
     field = data.si
-    gr.create_dataset(field_title, field.shape, dtype='d')
+    
+    if not field_shape:
+        field_shape = field.shape
+        
+    gr.create_dataset(field_title, field_shape, dtype='d')
     
     fv = gdf_file['field_types'].create_group(field_title)
     fv.attrs['field_name'] = field_name
