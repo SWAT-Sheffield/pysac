@@ -210,13 +210,66 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     -----
     GDF is defined here: https://bitbucket.org/yt_analysis/grid_data_format/
     """
-    
     # Create and open the file with h5py
     if isinstance(gdf_path, h5py.File):
-        f = gdf_path
+        f = gdf_file
     else:
-        f = h5py.File(gdf_path, "w")
+        f = h5py.File(gdf_file, "w")
+        
+    domain_left_edge = [x[0][0,0,0].to(u.cm).value,
+                        x[1][0,0,0].to(u.cm).value, 
+                        x[2][0,0,0].to(u.cm).value]
+    domain_right_edge = [x[0][-1,-1,-1].to(u.cm).value,
+                         x[1][-1,-1,-1].to(u.cm).value,
+                         x[2][-1,-1,-1].to(u.cm).value]
 
+    create_file(gdf_file, header, domain_left_edge=domain_left_edge,
+                domain_right_edge=domain_right_edge, data_author=data_author, 
+                data_comment=data_comment)
+    
+    #Write the x array
+    f['x'] = x
+
+    for field_title,afield in fields.items():
+       write_field(f, afield['field'], field_title, afield['field_name'],
+                   arr_slice=arr_slice, afield['staggering'])
+    
+    f.close()
+
+def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
+                data_author="", data_comment=""):
+    """
+    Do all the structral creation of a gdf file
+    
+    gdf files should be written in a x,y,z order, please swap them before 
+    calling this function!!
+    
+    Parameters
+    ----------
+    gdf_path: string or h5py instance
+        Filename to save out
+    
+    header: dict
+        A 'VACdata' like header
+    
+    domain_left_edge
+    
+    domain_right_edge
+    
+    data_author: (optional) string
+        Author to write to file
+    
+    data_comment: (optional) string
+        A comment to write to file
+    
+    Returns
+    -------
+    h5py.File instance
+    
+    Notes
+    -----
+    GDF is defined here: https://bitbucket.org/yt_analysis/grid_data_format/
+    """
     # "gridded_data_format" group
     g = f.create_group("gridded_data_format")
     g.attrs["data_software"] = "SAC"
@@ -231,12 +284,8 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     g.attrs["dimensionality"] = header['ndim']
     g.attrs["domain_dimensions"] = header['nx']
     g.attrs["current_time"] = header['t']
-    g.attrs["domain_left_edge"] = [x[0][0,0,0].to(u.cm).value,
-                                   x[1][0,0,0].to(u.cm).value, 
-                                   x[2][0,0,0].to(u.cm).value]
-    g.attrs["domain_right_edge"] = [x[0][-1,-1,-1].to(u.cm).value,
-                                    x[1][-1,-1,-1].to(u.cm).value,
-                                    x[2][-1,-1,-1].to(u.cm).value]
+    g.attrs["domain_left_edge"] = domain_left_edge
+    g.attrs["domain_right_edge"] = domain_right_edge
     g.attrs["unique_identifier"] = np.random.randint(1e15)
     g.attrs["cosmological_simulation"] = 0
     #TODO: hmmmm
@@ -252,8 +301,6 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     index = next((i for i in xrange(len(header['varnames']))
                     if not(header['varnames'][i] in ["x","y","z"])),header['ndim'])
     g.attrs["eqpar_names"] = header['varnames'][index+header['nw']-1:]
-    #Write the x array
-    f['x'] = x
     
     # "field_types" group
     g = f.create_group("field_types")
@@ -268,24 +315,22 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     # @todo: Fill with proper values
     f["grid_parent_id"] = np.zeros(1)
     f["grid_particle_count"] = np.zeros((1,1))
-    
+
     # "data" group -- where we should spend the most time
     d = f.create_group("data")
-    
     gr = d.create_group("grid_%010i"%0)
-    for field_title,afield in fields.items():
-        print field_title
-        field = afield['field'].si
-        gr.create_dataset(field_title, header['nx'], dtype='d')
-        
-        fv = f['field_types'].create_group(field_title)
-        fv.attrs['field_name'] = afield['field_name']
-        fv.attrs['field_to_cgs'] = field.unit.to_system(u.cgs)[0].scale
-        fv.attrs['field_units'] = np.string_(field.unit.to_string("latex").strip('$'))
-        fv.attrs['staggering'] = afield['staggering']
-   
-    for field_title, afield in fields.items():
-       print "writing %s"%field_title 
-       gr[field_title][arr_slice] = np.array(field)
     
-    f.close()
+    return f
+
+def write_field(gdf_file, data, field_title, field_name, arr_slice=np.s_[:], staggering=0):
+    gr = gdf_file["grid_%010i"%0]
+    field = data.si
+    gr.create_dataset(field_title, field.shape, dtype='d')
+    
+    fv = gdf_file['field_types'].create_group(field_title)
+    fv.attrs['field_name'] = field_name
+    fv.attrs['field_to_cgs'] = field.unit.to_system(u.cgs)[0].scale
+    fv.attrs['field_units'] = np.string_(field.unit.to_string("latex").strip('$'))
+    fv.attrs['staggering'] = staggering
+   
+    gr[field_title][arr_slice] = np.array(field)
