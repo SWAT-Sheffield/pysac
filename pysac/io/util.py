@@ -6,6 +6,7 @@ def mag_convert(w,w_):
     """
     Convert magnetic field from scaled to SI
     """
+    w = np.array(w)
     mu = 1.25663706e-6
     keys = ['b1','b2','b3','bg1','bg2','bg3']
     for k in keys:

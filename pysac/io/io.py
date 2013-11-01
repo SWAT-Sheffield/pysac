@@ -227,14 +227,14 @@ class VACfile():
         self.x = self.file.readReals()
 #        s = self.header['nx'] + [self.header['ndim']]
         s = [self.header['params'][2]] + self.header['nx']
-        self.x = np.reshape(self.x,s,order='C') ## - Don't know! Array was wrong 
+        self.x = np.reshape(self.x,s,order='F') ## - Don't know! Array was wrong 
         #self.E = self.readReals()
         #self.E = reshape(self.E,s)
         #shape when using F order, makes me wonder!
         
-        self.w = np.zeros([self.header['params'][-1]]+self.header['nx'],order='C')
+        self.w = np.zeros([self.header['params'][-1]]+self.header['nx'],order='F')
         for i in xrange(0,self.header['params'][-1]):
-            self.w[i] = np.reshape(self.file.readReals(), self.header['nx'], order='C')
+            self.w[i] = np.reshape(self.file.readReals(), self.header['nx'], order='F')
         self.w_ = {}
         ndim = self.header['params'][2]
         nw = self.header['params'][-1]
