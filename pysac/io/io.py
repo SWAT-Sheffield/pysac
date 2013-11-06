@@ -90,7 +90,7 @@ class FortranFile(file):
             
         self.write(struct.pack(self.ENDIAN + 'i', reals.nbytes))
         self.write(struct.pack(self.ENDIAN + prec * reals.size,
-                               *reals.flatten()))
+                               *reals.flatten(order='F')))
         self.write(struct.pack(self.ENDIAN + 'i', reals.nbytes))
 
     def readInts(self):
@@ -225,8 +225,8 @@ class VACfile():
         self.header['varnames'] = self.file.readRecord().split()
 
         self.x = self.file.readReals()
-#        s = self.header['nx'] + [self.header['ndim']]
-        s = [self.header['params'][2]] + self.header['nx']
+        s = self.header['nx'] + [self.header['ndim']]
+#        s = [self.header['params'][2]] + self.header['nx']
         self.x = np.reshape(self.x,s,order='F') ## - Don't know! Array was wrong 
         #self.E = self.readReals()
         #self.E = reshape(self.E,s)
@@ -280,8 +280,8 @@ class VACfile():
     
     def write_step(self):
         #Make sure you are saving the correct size data
-#        assert tuple(self.header['nx']) == self.w[0].shape
-#        assert tuple(self.header['nx']) == self.x[0].shape
+        assert tuple(self.header['nx']) == self.w[0].shape
+        assert tuple(self.header['nx']) == self.x[...,0].shape
 
         self._write_header()
         self._write_data()

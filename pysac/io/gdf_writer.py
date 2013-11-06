@@ -323,7 +323,36 @@ def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
     
     return f
 
-def write_field(gdf_file, data, field_title, field_name, field_shape=None, arr_slice=np.s_[:], staggering=0):
+def write_field(gdf_file, data, field_title, field_name, field_shape=None,
+                arr_slice=np.s_[:], staggering=0):
+    """
+    Write a field to an existing gdf file
+    
+    Parameters
+    ----------
+    
+    gdf_file: h5py.File
+        Open, writeable gdf file
+    
+    data: astropy.units.Quantity
+        The data to be written
+    
+    field_tile: str
+        The name of the field dataset
+    
+    field_name: str
+        The long name for the field
+    
+    field_shape: (optional) tuple
+        The shape of the whole dataset, if not specified use data.shape.
+    
+    arr_slice: (optional) np.s_
+        The slice of the whole dataset to write
+    
+    staggering: (optional) int
+        The 'staggering' of the gdf field
+    
+    """
     gr = gdf_file["/data/grid_%010i"%0]
     field = data.si
     
