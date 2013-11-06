@@ -225,11 +225,9 @@ class VACfile():
         self.header['varnames'] = self.file.readRecord().split()
 
         self.x = self.file.readReals()
-        s = self.header['nx'] + [self.header['ndim']]
-#        s = [self.header['params'][2]] + self.header['nx']
+#        s = self.header['nx'] + [self.header['ndim']]
+        s = [self.header['params'][2]] + self.header['nx']
         self.x = np.reshape(self.x,s,order='F') ## - Don't know! Array was wrong 
-        #self.E = self.readReals()
-        #self.E = reshape(self.E,s)
         #shape when using F order, makes me wonder!
         
         self.w = np.zeros([self.header['params'][-1]]+self.header['nx'],order='F')
@@ -274,7 +272,8 @@ class VACfile():
     
     def _write_data(self):
         """ Save arrays into unformatted fortran file """
-        self.file.writeReals(self.x, prec='d')
+        for x in self.x:
+            self.file.writeReals(x, prec='d')
         for w in self.w:
             self.file.writeReals(w, prec='d')
     
