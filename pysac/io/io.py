@@ -224,6 +224,9 @@ class VACfile():
         self.header['eqpar'] = self.file.readReals()
         self.header['varnames'] = self.file.readRecord().split()
 
+#        self.x = np.zeros([self.header['ndim']] + self.header['nx'])
+#        for i in range(0,self.header['ndim']):
+#            self.x[i] = np.reshape(self.file.readReals(), self.header['nx'], order='F')
         self.x = self.file.readReals()
 #        s = self.header['nx'] + [self.header['ndim']]
         s = [self.header['ndim']] + self.header['nx']
@@ -272,8 +275,7 @@ class VACfile():
     
     def _write_data(self):
         """ Save arrays into unformatted fortran file """
-        for x in self.x:
-            self.file.writeReals(x, prec='d')
+        self.file.writeReals(self.x, prec='d')
         for w in self.w:
             self.file.writeReals(w, prec='d')
     
