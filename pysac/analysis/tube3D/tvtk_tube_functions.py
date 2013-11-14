@@ -280,7 +280,10 @@ def get_the_line(bfield, surf_seeds, n):
     the_line = tvtk.StreamTracer(input=bfield,
                                  source=tvtk.PolyData(
                                  points=np.array(
-                                 [surf_seeds.get_point(n),[0,0,0]])))
+                                    [surf_seeds.points.get_point(n),[0,0,0]]
+                                                )
+                                                     )
+                                 )
 
     the_line.integrator = tvtk.RungeKutta4()
     the_line.maximum_propagation = 1000
@@ -291,7 +294,7 @@ def get_the_line(bfield, surf_seeds, n):
     
 def update_the_line(the_line, surf_seeds, seed, length):
     """ Updates the TD line at each time step, while making sure the length is fixed"""
-    the_line.source.points = [surf_seeds[seed], [0.0, 0.0, 0.0]]
+    the_line.source.points = np.array([surf_seeds.get_point(seed), [0.0, 0.0, 0.0]])
     the_line.update()
     
     N = len(the_line.output.points)

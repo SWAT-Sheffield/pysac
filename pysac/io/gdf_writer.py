@@ -251,7 +251,9 @@ def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
         Filename to save out
     
     header: dict
-        A 'VACdata' like header
+        A 'VACdata' like header, containg:
+        ndim, nx, t
+        and optionally: eqpar, varnames, final t
     
     domain_left_edge
     
@@ -271,6 +273,8 @@ def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
     -----
     GDF is defined here: https://bitbucket.org/yt_analysis/grid_data_format/
     """
+    if isinstance(f, basestring):
+        f = h5py.File(f)
     # "gridded_data_format" group
     g = f.create_group("gridded_data_format")
     g.attrs["data_software"] = "SAC"
@@ -298,10 +302,12 @@ def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
     #Write some VAC info just in case
     if 'final t' in header.keys():
         g.attrs['simulation_run_time'] = header['final t']
-    g.attrs["eqpar"] = header['eqpar']
-    index = next((i for i in xrange(len(header['varnames']))
-                    if not(header['varnames'][i] in ["x","y","z"])),header['ndim'])
-    g.attrs["eqpar_names"] = header['varnames'][index+header['nw']-1:]
+    if 'eqpar' in header.keys():
+        g.attrs["eqpar"] = header['eqpar']
+    if 'varnames' in header.keys():
+        index = next((i for i in xrange(len(header['varnames']))
+                        if not(header['varnames'][i] in ["x","y","z"])),header['ndim'])
+        g.attrs["eqpar_names"] = header['varnames'][index+header['nw']-1:]
     
     # "field_types" group
     g = f.create_group("field_types")
