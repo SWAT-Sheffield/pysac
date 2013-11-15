@@ -411,7 +411,7 @@ def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:]):
     fv = gdf_file['field_types'].create_group(field['field_title'])
     fv.attrs['field_name'] = field['field_name']
     fv.attrs['field_to_cgs'] = field['field_to_cgs']
-    fv.attrs['field_units'] = np.string_(field.unit.to_string("latex").strip('$'))
+    fv.attrs['field_units'] = field['field_units'] 
     fv.attrs['staggering'] = field['staggering']
    
     gr[field['field_title']][arr_slice] = np.array(field['field'])
