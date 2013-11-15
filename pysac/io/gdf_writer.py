@@ -231,7 +231,7 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     f['x'] = x
 
     for field_title,afield in fields.items():
-       write_field(f, afield['field'], field_title, afield['field_name'],
+       write_field_u(f, afield['field'], field_title, afield['field_name'],
                    field_shape=header['nx'], arr_slice=arr_slice, 
                    staggering=afield['staggering'])
     
@@ -329,7 +329,7 @@ def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
     
     return f
 
-def write_field(gdf_file, data, field_title, field_name, field_shape=None,
+def write_field_u(gdf_file, data, field_title, field_name, field_shape=None,
                 arr_slice=np.s_[:], staggering=0):
     """
     Write a field to an existing gdf file
@@ -374,3 +374,44 @@ def write_field(gdf_file, data, field_title, field_name, field_shape=None,
     fv.attrs['staggering'] = staggering
    
     gr[field_title][arr_slice] = np.array(field)
+
+def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:]):
+    """
+    Write a field to an existing gdf file
+    
+    Parameters
+    ----------
+    
+    gdf_file: h5py.File
+        Open, writeable gdf file
+    
+    field: dict
+        A dict containing the following keys:
+            'field': ndarray
+            'field_title': string
+            'field_name': string
+            'field_units': string
+            'field_to_cgs': float
+            'staggering': 0 or 1
+    
+    arr_slice: (optional) np.s_
+        The slice of the whole dataset to write
+    
+    staggering: (optional) int
+        The 'staggering' of the gdf field
+    
+    """
+    gr = gdf_file["/data/grid_%010i"%0]
+    
+    if not field_shape:
+        field_shape = field['field'].shape
+        
+    gr.create_dataset(field['field_title'], field_shape, dtype='d')
+    
+    fv = gdf_file['field_types'].create_group(field['field_title'])
+    fv.attrs['field_name'] = field['field_name']
+    fv.attrs['field_to_cgs'] = field['field_to_cgs']
+    fv.attrs['field_units'] = np.string_(field.unit.to_string("latex").strip('$'))
+    fv.attrs['staggering'] = field['staggering']
+   
+    gr[field['field_title']][arr_slice] = np.array(field['field'])
