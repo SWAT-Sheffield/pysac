@@ -406,12 +406,25 @@ def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:]):
     if not field_shape:
         field_shape = field['field'].shape
         
-    gr.create_dataset(field['field_title'], field_shape, dtype='d')
+    dset = gr.create_dataset(field['field_title'], field_shape, dtype='d')
     
     fv = gdf_file['field_types'].create_group(field['field_title'])
     fv.attrs['field_name'] = field['field_name']
     fv.attrs['field_to_cgs'] = field['field_to_cgs']
     fv.attrs['field_units'] = field['field_units'] 
     fv.attrs['staggering'] = field['staggering']
-   
-    gr[field['field_title']][arr_slice] = np.array(field['field'])
+    
+    memory_space = h5s.create_simple(field['field'].shape)
+    file_space = dset.id.get_space()
+
+    s = [arr_slice[0].start,arr_slice[1].start,arr_slice[2].start]
+    e = [arr_slice[0].stop,arr_slice[1].stop,arr_slice[2].stop]
+
+    count = tuple(np.array(e) - np.array(s))
+
+    file_space.select_hyperslab(tuple(s), tuple(count))
+
+    dset.id.write(memory_space, file_space,
+            np.ascontiguousarray(field['field']))
+    #gr[field['field_title']][arr_slice] = np.array(field['field'])
+
