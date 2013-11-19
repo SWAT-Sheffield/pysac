@@ -3,6 +3,7 @@
 import astropy.units as u
 import numpy as np
 import h5py
+from h5py import h5s
 
 def convert_w_3D(w, w_):
     """
