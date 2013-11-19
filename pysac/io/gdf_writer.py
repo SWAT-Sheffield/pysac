@@ -275,6 +275,7 @@ def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
     """
     if isinstance(f, basestring):
         f = h5py.File(f)
+
     # "gridded_data_format" group
     g = f.create_group("gridded_data_format")
     g.attrs["data_software"] = "SAC"
