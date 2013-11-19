@@ -3,6 +3,7 @@
 import astropy.units as u
 import numpy as np
 import h5py
+from h5py import h5s
 
 def convert_w_3D(w, w_):
     """
@@ -376,7 +377,7 @@ def write_field_u(gdf_file, data, field_title, field_name, field_shape=None,
    
     gr[field_title][arr_slice] = np.array(field)
 
-def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:]):
+def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:], api='high'):
     """
     Write a field to an existing gdf file
     
@@ -401,6 +402,10 @@ def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:]):
     staggering: (optional) int
         The 'staggering' of the gdf field
     
+    api: str
+        'high' or 'low' signifiyng the h5py API to use for write. Used for 
+        benchmarking.
+    
     """
     gr = gdf_file["/data/grid_%010i"%0]
     
@@ -415,17 +420,27 @@ def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:]):
     fv.attrs['field_units'] = field['field_units'] 
     fv.attrs['staggering'] = field['staggering']
     
-    memory_space = h5s.create_simple(field['field'].shape)
+    if api == 'high':
+        _write_dset_high(dset, field['field'], arr_slice)
+    elif api == 'low':
+        _write_dset_low(dset, field['field'], arr_slice)
+    else:
+        raise ValueError("Please specifiy 'high' or 'low'")
+    
+
+def _write_dset_high(dset, data, arr_slice):
+    dset[arr_slice] = np.ascontiguousarray(data)
+    
+def _write_dset_low(dset, data, arr_slice):
+    memory_space = h5s.create_simple(data.shape)
     file_space = dset.id.get_space()
 
-    s = [arr_slice[0].start,arr_slice[1].start,arr_slice[2].start]
-    e = [arr_slice[0].stop,arr_slice[1].stop,arr_slice[2].stop]
+    s = (arr_slice[0].start,arr_slice[1].start,arr_slice[2].start)
+    e = (arr_slice[0].stop,arr_slice[1].stop,arr_slice[2].stop)
 
-    count = tuple(np.array(e) - np.array(s))
+    count = tuple([ee - ss for ss,ee in zip(s,e)])
 
-    file_space.select_hyperslab(tuple(s), tuple(count))
+    file_space.select_hyperslab(s, count)
 
     dset.id.write(memory_space, file_space,
-            np.ascontiguousarray(field['field']))
-    #gr[field['field_title']][arr_slice] = np.array(field['field'])
-
+            np.ascontiguousarray(data))
