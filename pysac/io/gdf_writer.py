@@ -3,7 +3,7 @@
 import astropy.units as u
 import numpy as np
 import h5py
-from h5py import h5s,h5p, h5fd
+from h5py import h5s, h5p, h5fd
 
 def convert_w_3D(w, w_):
     """
@@ -377,7 +377,8 @@ def write_field_u(gdf_file, data, field_title, field_name, field_shape=None,
    
     gr[field_title][arr_slice] = np.array(field)
 
-def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:], api='high'):
+def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:], 
+                collective=False, api='high'):
     """
     Write a field to an existing gdf file
     
@@ -402,6 +403,9 @@ def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:], api='high
     staggering: (optional) int
         The 'staggering' of the gdf field
     
+    collective: bool
+        Use MPI collective write
+
     api: str
         'high' or 'low' signifiyng the h5py API to use for write. Used for 
         benchmarking.
@@ -428,11 +432,14 @@ def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:], api='high
         raise ValueError("Please specifiy 'high' or 'low'")
     
 
-def _write_dset_high(dset, data, arr_slice):
-    with dset.collective:
+def _write_dset_high(dset, data, arr_slice,collective=False):
+    if collective:
+        with dset.collective:
+            dset[arr_slice] = np.ascontiguousarray(data)
+    else:
         dset[arr_slice] = np.ascontiguousarray(data)
     
-def _write_dset_low(dset, data, arr_slice):
+def _write_dset_low(dset, data, arr_slice, collective=False):
     memory_space = h5s.create_simple(data.shape)
     file_space = dset.id.get_space()
 
@@ -443,12 +450,11 @@ def _write_dset_low(dset, data, arr_slice):
 
     file_space.select_hyperslab(s, count)
 
-    dxpl = h5p.create(h5p.DATASET_XFER)
-    dxpl.set_dxpl_mpio(h5fd.MPIO_COLLECTIVE)
+    if collective:
+        dxpl = h5p.create(h5p.DATASET_XFER)
+        dxpl.set_dxpl_mpio(h5fd.MPIO_COLLECTIVE)
+    else:
+        dxpl = None
 
     dset.id.write(memory_space, file_space,
-<<<<<<< HEAD
             np.ascontiguousarray(data),dxpl=dxpl)
-=======
-            np.ascontiguousarray(data))
->>>>>>> 8937afad443d4c2fb1feace24c92502aded67ce2
