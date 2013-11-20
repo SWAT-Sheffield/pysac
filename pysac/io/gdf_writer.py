@@ -3,7 +3,7 @@
 import astropy.units as u
 import numpy as np
 import h5py
-from h5py import h5s
+from h5py import h5s,h5p, h5fd
 
 def convert_w_3D(w, w_):
     """
@@ -429,7 +429,8 @@ def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:], api='high
     
 
 def _write_dset_high(dset, data, arr_slice):
-    dset[arr_slice] = np.ascontiguousarray(data)
+    with dset.collective:
+        dset[arr_slice] = np.ascontiguousarray(data)
     
 def _write_dset_low(dset, data, arr_slice):
     memory_space = h5s.create_simple(data.shape)
@@ -442,5 +443,8 @@ def _write_dset_low(dset, data, arr_slice):
 
     file_space.select_hyperslab(s, count)
 
+    dxpl = h5p.create(h5p.DATASET_XFER)
+    dxpl.set_dxpl_mpio(h5fd.MPIO_COLLECTIVE)
+
     dset.id.write(memory_space, file_space,
-            np.ascontiguousarray(data))
+            np.ascontiguousarray(data),dxpl=dxpl)
