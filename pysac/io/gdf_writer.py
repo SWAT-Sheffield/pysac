@@ -447,8 +447,4 @@ def _write_dset_low(dset, data, arr_slice):
     dxpl.set_dxpl_mpio(h5fd.MPIO_COLLECTIVE)
 
     dset.id.write(memory_space, file_space,
-<<<<<<< HEAD
             np.ascontiguousarray(data),dxpl=dxpl)
-=======
-            np.ascontiguousarray(data))
->>>>>>> 8937afad443d4c2fb1feace24c92502aded67ce2
