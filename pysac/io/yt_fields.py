@@ -25,6 +25,11 @@ def mag_field_z(field, data):
 def mag_field_magnitude(field, data):
     return np.sqrt(data['mag_field_x']**2 + data['mag_field_y']**2 + data['mag_field_z']**2)
 
+@yt.derived_field(take_log=False, units=r'T')
+def mag_field_pert_magnitude(field, data):
+    return np.sqrt(data['mag_field_x_pert']**2 + data['mag_field_y_pert']**2 +
+                    data['mag_field_z_pert']**2)
+
 @yt.derived_field(take_log=False, units=r'Pa')
 def internal_energy(field, data):
     return data['internal_energy_pert'] + data['internal_energy_bg']
