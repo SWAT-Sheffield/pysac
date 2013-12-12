@@ -92,8 +92,11 @@ def draw_surface(surf_poly,cmap,lines=False,**colourbar_args):
     new_tube.module_manager.scalar_lut_manager.lut.table = cmap
     new_tube.parent.parent.point_scalars_name = 'vperp'
     
-    surf_bar = add_colourbar(new_tube, [0.84, 0.35], [0.11,0.31],
-                                  title='',**colourbar_args)
+    cbar_args = {'position':[0.84, 0.35],
+                 'position2':[0.11,0.31],
+                 'title':''}
+    cbar_args.update(colourbar_args)
+    surf_bar = add_colourbar(new_tube, **cbar_args)
     surf_bar_label = add_cbar_label(surf_bar,'Velocity Perpendicular\n    to Surface [km/s]')
     #finite = np.isfinite(surf_poly.point_data.scalars)
     lim = np.max([np.nanmax(surf_poly.point_data.scalars),
