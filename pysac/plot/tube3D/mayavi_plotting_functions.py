@@ -85,13 +85,15 @@ def add_colourbar(module, position ,position2, title,label_fstring='%#4.2f',
     bar.scalar_bar_actor.label_format = label_fstring
     return bar
 
-def draw_surface(surf_poly,cmap,lines=False,**colourbar_args):
+def draw_surface(surf_poly,cmap,lines=False,lim=None,**colourbar_args):
     if not lines:
         surf_poly.lines = None
     new_tube = mlab.pipeline.surface(surf_poly)
     new_tube.module_manager.scalar_lut_manager.lut.table = cmap
     new_tube.parent.parent.point_scalars_name = 'vperp'
     
+    colourbar_args.pop('lines', False)
+    colourbar_args.pop('lim', False)    
     cbar_args = {'position':[0.84, 0.35],
                  'position2':[0.11,0.31],
                  'title':''}
@@ -99,8 +101,9 @@ def draw_surface(surf_poly,cmap,lines=False,**colourbar_args):
     surf_bar = add_colourbar(new_tube, **cbar_args)
     surf_bar_label = add_cbar_label(surf_bar,'Velocity Perpendicular\n    to Surface [km/s]')
     #finite = np.isfinite(surf_poly.point_data.scalars)
-    lim = np.max([np.nanmax(surf_poly.point_data.scalars),
-                  np.abs(np.nanmin(surf_poly.point_data.scalars))])
+    if lim is None:
+        lim = np.max([np.nanmax(surf_poly.point_data.scalars),
+                      np.abs(np.nanmin(surf_poly.point_data.scalars))])
     new_tube.module_manager.scalar_lut_manager.data_range = np.array([-lim,lim])
     return new_tube, surf_bar, surf_bar_label
 
