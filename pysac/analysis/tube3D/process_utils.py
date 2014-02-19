@@ -165,6 +165,42 @@ def get_hdf5_mlab(f, cube_slice, flux=True):
     else:
         return bfield, vfield
 
+def get_mlab_field_yt(ds, *args, **kwargs):
+    """
+    Take a yt dataset and either one or three field names and return a scalar 
+    or vector field
+    
+    Parameters
+    ----------
+    ds: yt dataset
+        Any yt dataset from a uniform grid
+    
+    args: one or three  strings (x,y,z ordered)
+        For field keys
+    
+    cube_slice: numpy slice
+        A slice to slice the input array with
+    
+    Returns
+    -------
+    A mayavi field
+    """
+    cg = ds.h.grids[0]
+    cube_slice = kwargs.pop('cube_slice',None)
+    if cube_slice is None:
+        cube_slice = np.s_[...]
+    
+    if len(args) == 1:
+        return scalar_field(cg[args[0]][cube_slice], name=args[0], figure=None)
+    elif len(args) == 3:
+        return vector_field(cg[args[0]][cube_slice],
+                            cg[args[1]][cube_slice], 
+                            cg[args[2]][cube_slice],
+                            name=args[0],figure=None)
+    else:
+        raise ValueError("Please specify one or three keys")
+    
+
 def get_yt_mlab(ds, cube_slice, flux=True):
     """
     Reads in useful variables from yt to vtk data structures

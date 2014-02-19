@@ -61,7 +61,7 @@ def sound_speed(field, data):
 @yt.derived_field(take_log=False, units=r'')
 def plasma_beta(field, data):  
     return data['mag_pressure'] / data['thermal_pressure']
-    
+#    
 #@yt.derived_field(take_log=False, units=r'Pa')
 #def wave_flux_x(field, data):
 #    Bb = np.array([f.w_dict['bg3'], f.w_dict['bg2'], f.w_dict['bg1']])
