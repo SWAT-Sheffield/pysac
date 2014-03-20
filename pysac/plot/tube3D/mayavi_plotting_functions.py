@@ -30,8 +30,8 @@ def set_cbar_text(cbar,lut_manager='scalar'):
     set_text(manager.title_text_property)
     set_text(manager.label_text_property)
 
-def add_axes(ranges):
-    axes1 = mlab.axes()
+def add_axes(ranges, obj=None):
+    axes1 = mlab.axes(obj)
     axes1.axes.ranges = ranges
     axes1.axes.use_ranges = True
     set_text(axes1.axes.axis_label_text_property)
@@ -51,7 +51,7 @@ def add_cbar_label(cbar,title):
     position = cbar.scalar_bar_representation.position
     position2 = cbar.scalar_bar_representation.position2
     
-    x = position[0] + position2[0] + 0.004
+    x = position[0] + position2[0] #+ 0.002
     y = position[1]
     
     text = mlab.text(x,y,title)
