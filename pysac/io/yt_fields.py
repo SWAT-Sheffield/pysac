@@ -1,6 +1,17 @@
-# -*- coding: utf-8 -*-
+"""
+A set of dervied fields for yt 2.x which combine pertubation and background components
+and define magnitudes, as well as calculate things like charaistic speeds.
+
+Note: These use yt 3.x like field naming conventions
+"""
+
 import yt.mods as yt
 import numpy as np
+
+__all__ = ['density', 'velocity_magnitude', 'internal_energy',
+           'mag_pressure', 'thermal_pressure', 'alfven_speed', 'sound_speed',
+           'plasma_beta', 'mag_field_x', 'mag_field_y', 'mag_field_z',
+           'mag_field_magnitude', 'mag_field_pert_magnitude']
 
 mu0 = 1.25663706e-6
 gamma = 1.6666
@@ -61,60 +72,3 @@ def sound_speed(field, data):
 @yt.derived_field(take_log=False, units=r'')
 def plasma_beta(field, data):  
     return data['mag_pressure'] / data['thermal_pressure']
-#    
-#@yt.derived_field(take_log=False, units=r'Pa')
-#def wave_flux_x(field, data):
-#    Bb = np.array([f.w_dict['bg3'], f.w_dict['bg2'], f.w_dict['bg1']])
-#    Bp = np.array([f.w_dict['b3'], f.w_dict['b2'], f.w_dict['b1']])
-#    V = np.array([f.w_sac['v3'], f.w_sac['v2'], f.w_sac['v1']])
-#    
-#    #Calculate wave flux
-#    Fp = 0.25*np.pi * (np.sum(Bb*Bp, axis=0)[None] * V) - (np.sum(V*Bp, axis=0)[None] * Bb)
-#    Fa = pk[None]*V
-#    
-#    Fwave = Fa + Fp
-    
-#    def get_total_p(self):
-#        if self.header['ndim'] == 3:
-#           gamma = self.header['eqpar'][0]
-#           
-#           vtot2 = (self.w_sac['v1']**2 + self.w_sac['v2']**2 + self.w_sac['v3']**2)
-#           therm = self.w[self.w_["e"]] - (self.w_sac["rho"] * vtot2) / 2.
-#           
-#           Bpert = self.w[self.w_['b1']] + self.w[self.w_['b2']] + self.w[self.w_['b3']]
-#           Bpert2 = self.w[self.w_['b1']]**2 + self.w[self.w_['b2']]**2 + self.w[self.w_['b3']]**2
-#           Bback = self.w[self.w_['bg1']] + self.w[self.w_['bg2']] + self.w[self.w_['bg3']]
-#           mag = Bback * Bpert + (Bpert2 / 2.)
-#           
-#           return (gamma - 1) * therm - (gamma - 2) * mag
-#        else:
-#            raise NotImplementedError("This Dosen't work for 2D yet, go fix")
-#    
-#    def get_temp(self,p=None):
-#        if not(p):
-#            p = self.get_thermalp()
-#        T = (p * 1.2) / (8.3e3 * self.w_sac['rho'])
-#        return T
-#    
-#    def get_bgtemp(self):
-#        print "WARNING: Background Temprature will not work if inital conditions are not V=0"
-#        if self.header['ndim'] == 3:
-#            kp = 0.0#(self.w[self.w_["rhob"]] * (self.w_sac['v1']**2 + self.w_sac['v2']**2 + self.w_sac['v3']**2))/2.
-#            mp = (self.w[self.w_["bg1"]]**2 + self.w[self.w_["bg2"]]**2 + self.w[self.w_["bg3"]]**2) / 2.
-#            T = self.w[self.w_["eb"]] - kp - mp
-#        else:
-#            kp = 0.0#(self.w[self.w_["rhob"]] * (self.w_sac['v1']**2 + self.w_sac['v2']**2))/2.
-#            mp = (self.w[self.w_["bg1"]]**2 + self.w[self.w_["bg2"]]**2) / 2.
-#            T = self.w[self.w_["eb"]] - kp - mp
-#        return T
-#    
-#    def get_va(self):
-#        return (np.sqrt(self.w_sac['b1']**2 + self.w_sac['b2']**2
-#                        + self.w_sac['b3']**2) / np.sqrt(self.w_sac['rho']))
-#        #return (abs(self.w_sac['b1']) + abs(self.w_sac['b2']) + abs(self.w_sac['b3'])) / sqrt(self.w_sac['rho'])
-#    
-#    def get_cs(self,p=None):
-#        if not p:
-#            p = self.get_thermalp()
-#        g1 = self.header['eqpar'][0]
-#        return np.sqrt((g1 * p) / self.w_sac['rho'])

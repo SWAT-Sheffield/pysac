@@ -1,15 +1,22 @@
 # -*- coding: utf-8 -*-
 """
-:Created on: Tue Oct  2 12:25:10 2012
-
-:author: Stuart Mumford
-
-A set of functions for the generation, mainpulation and outputting of 
-"flux surfaces".
+This submodule provides routines to generate and analyse "Flux Surfaces" as
+described in (Mumford et. al. 2014).
+Flux Surfaces are created by the tracing of a closed loop of fieldlines,
+from which a surface is reconstructed by creating polygons between the 
+pesudo parallel streamlines.
 """
 
 import numpy as np
 from tvtk.api import tvtk
+
+__all__ = ['move_seeds', 'make_circle_seeds', 'create_flux_surface', 
+           'update_flux_surface', 'make_poly_norms', 'norms_sanity_check',
+           'get_surface_vectors', 'interpolate_scalars', 'interpolate_vectors',
+           'update_interpolated_vectors', 'update_interpolated_scalars',
+           'get_surface_velocity_comp', 'get_the_line', 'update_the_line',
+           'get_surface_indexes', 'PolyDataWriter', 'write_step', 'write_flux',
+           'write_wave_flux', 'read_step', 'get_data']
 
 def move_seeds(seeds, vfield, dt):
     """
@@ -80,7 +87,7 @@ def make_circle_seeds(n, r, **domain):
 
 def create_flux_surface(bfield, surf_seeds):
     """
-    Create a flux surface from an array of seeds and a tvtk vector field
+    Create a flux surface from an array of seeds and a tvtk vector field.
     
     Parameters
     ----------
@@ -124,7 +131,7 @@ def create_flux_surface(bfield, surf_seeds):
 
 def update_flux_surface(surf_seeds, surf_field_lines, surface):
     """
-    Update the flux surface streamlines and surface
+    Update the flux surface streamlines and surface.
     """
     surf_field_lines.update()
     surface.update()   
@@ -296,7 +303,7 @@ def get_surface_indexes(surf_poly,the_line):
 class PolyDataWriter(object):
     """
     This class allows you to write tvtk polydata objects to a file, with as
-    many or as few associated PointData arrays as you wish
+    many or as few associated PointData arrays as you wish.
     
     Parameters
     ----------
@@ -328,7 +335,7 @@ class PolyDataWriter(object):
         
     def add_array(self, **kwargs):
         """
-        Add any number of arrays via keyword arguments
+        Add any number of arrays via keyword arguments.
         
         Examples
         --------
@@ -350,7 +357,7 @@ class PolyDataWriter(object):
 def write_step(file_name, surface,
                normals, parallels, torsionals, vperp, vpar, vphi):
     """
-    Write out the surface vectors and velocity compnents
+    Write out the surface vectors and velocity compnents.
     """
     
     writer = PolyDataWriter(file_name, surface.output)

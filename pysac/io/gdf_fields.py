@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Write a GDF file in serial 
+This file defines a dictionary that holds the gdf parameters for a 3D MHD varible set in SAC
 """
 
 sac_gdf_output = {
@@ -66,7 +66,7 @@ sac_gdf_output = {
                       'field_units': 'Pa',
                       'field_to_cgs': 0.1,
                       'staggering': 0
-                      },  
+                      },
       'density_bg':{
                       'field_title': 'density_bg',
                       'field_name': 'background density',

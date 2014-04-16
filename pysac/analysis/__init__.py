@@ -1,13 +1,23 @@
+"""
+General routines for the analysis of HD and MHD simulations run with SAC
+"""
+
 import numpy as np
 
+from . import tube3D
+
+__all__ = ['get_wave_flux', 'get_wave_flux_yt', 'tube3D']
+
 def get_wave_flux(f, pk):
-    """
-    This routine calculates the wave energy flux as defined in (Bogdan 2003)
+    r"""
+    This routine calculates the wave energy flux as defined in (Bogdan 2003).
     
-    $\vec{F}_{wave} \equiv \widetilde{p}_k \vec{v} + \frac{1}{\mu_0} \left(\vec{B}_b \cdot \vec{\widetilde{B}}\right) \vec{v} - \frac{1}{\mu_0}\left(\vec{v} \cdot \vec{\widetilde{B}} \right) \vec{B}_b$
+    .. math::
     
-    F = pk*v + 1/mu[(Bb . B)v] * 1/mu[(v.B) Bb]
-    
+        \vec{F}_{wave} \equiv \widetilde{p}_k \vec{v} + \frac{1}{\mu_0} \left(\vec{B}_b \cdot \vec{\widetilde{B}}\right) \vec{v} - \frac{1}{\mu_0}\left(\vec{v} \cdot \vec{\widetilde{B}} \right) \vec{B}_b
+        
+        F = pk*v + 1/mu[(Bb . B)v] * 1/mu[(v.B) Bb]
+        
     Parameters
     ----------
     f: VACdata instance
@@ -33,12 +43,14 @@ def get_wave_flux(f, pk):
     return Fwave
 
 def get_wave_flux_yt(ds):
-    """
-    This routine calculates the wave energy flux as defined in (Bogdan 2003)
+    r"""
+    This routine calculates the wave energy flux as defined in (Bogdan 2003).
     
-    $\vec{F}_{wave} \equiv \widetilde{p}_k \vec{v} + \frac{1}{\mu_0} \left(\vec{B}_b \cdot \vec{\widetilde{B}}\right) \vec{v} - \frac{1}{\mu_0}\left(\vec{v} \cdot \vec{\widetilde{B}} \right) \vec{B}_b$
+    .. math::
     
-    F = pk*v + 1/mu[(Bb . B)v] * 1/mu[(v.B) Bb]
+        \vec{F}_{wave} \equiv \widetilde{p}_k \vec{v} + \frac{1}{\mu_0} \left(\vec{B}_b \cdot \vec{\widetilde{B}}\right) \vec{v} - \frac{1}{\mu_0}\left(\vec{v} \cdot \vec{\widetilde{B}} \right) \vec{B}_b
+        
+        F = pk*v + 1/mu[(Bb . B)v] * 1/mu[(v.B) Bb]
     
     Parameters
     ----------
