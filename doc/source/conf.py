@@ -1,6 +1,6 @@
 import sys
 
-from mock import Mock
+from . mock import Mock
 
 MOCK_MODULES = ['tvtk.api']
 
