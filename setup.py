@@ -6,6 +6,9 @@ Created on Fri Feb 22 16:16:03 2013
 
 pySAC: VAC / SAC routines.
 """
+
+import setuptools
+
 DOCLINES = __doc__.split("\n")
 
 CLASSIFIERS = [
@@ -21,10 +24,7 @@ CLASSIFIERS = [
     'Operating System :: Unix',
 ]
 
-
-def install(setup): #pylint: disable=W0621
-    from setuptools import find_packages
-    setup(
+setuptools.setup(
         author="Stuart Mumford",
         author_email="stuart@mumford.me.uk",
         classifiers=CLASSIFIERS,
@@ -42,12 +42,6 @@ def install(setup): #pylint: disable=W0621
         platforms=["Linux", "Solaris", "Unix"],
         provides=['pysac'],
         name="pysac",
-        packages=find_packages(),
+        packages=setuptools.find_packages(),
         version="0.0.1",
     )
-
-if __name__ == '__main__':
-    from distribute_setup import use_setuptools
-    use_setuptools()
-    from setuptools import setup
-    install(setup)

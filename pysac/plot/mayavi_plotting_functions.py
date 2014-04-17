@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-:Created on: Tue Oct  2 15:10:46 2012
-
-:author: Stuart Mumford
+This module provides a set of helper functions to make mayavi scenes into 
+nice plots. It also provides routines for the visualisation of flux surfaces.
 """
 import numpy as np
+
 from mayavi import mlab
+
+__all__ = ['set_text', 'set_cbar_text', 'add_axes', 'add_cbar_label',
+           'add_colourbar', 'draw_surface', 'change_surface_scalars']
 
 def set_text(text_property):
     """

@@ -21,10 +21,10 @@ __neg__ = __pos__ = __abs__ = __invert__ = __call__
     def __getattr__(self, name):
         if name in ('__file__', '__path__'):
             return '/dev/null'
-        if name == 'sqrt':
-            return math.sqrt
-        elif name[0] != '_' and name[0] == name[0].upper():
-            return type(name, (), {})
+        #if name == 'sqrt':
+        #    return math.sqrt
+        #elif name[0] != '_' and name[0] == name[0].upper():
+        #    return type(name, (), {})
         else:
             return Mock(**vars(self))
 
@@ -57,7 +57,9 @@ __lt__
     def __complex__(self):
         return 1j
 
-MOCK_MODULES = ['tvtk.api', 'h5py']
+    __name__ =  ''
+
+MOCK_MODULES = ['tvtk.api', 'h5py', 'traits.api', 'mayavi']
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
