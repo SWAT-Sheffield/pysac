@@ -2,9 +2,12 @@ import sys
 from mock import Mock
 mock = Mock()
 
-modules = {'h5py':mock, 'tvtk.api':mock, 'traits.api':mock, 'mayavi':mock,
-           'mayavi.tools':mock.module, 'mayavi.tools.sources':mock.module,
-           'mayavi.modules':mock.module, 'mayavi.modules.streamline':mock.module}
+modules = {'h5py':mock, 'tvtk':mock, 'tvtk.api': mock.module, 'traits':mock, 'traits.api':mock.module,
+           'mayavi':mock, 'mayavi.tools':mock.module, 'mayavi.tools.sources':mock.module,
+           'mayavi.modules':mock.module, 'mayavi.modules.streamline':mock.module,
+           'yt':mock, 'yt.mods':mock.moudle}
+
+sys.modules.update(modules)
 
 # Load all of the global Astropy configuration
 from astropy.sphinx.conf import *

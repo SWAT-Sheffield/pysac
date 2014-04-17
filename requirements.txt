@@ -1,5 +1,7 @@
+sphinx
 numpy
 scipy
 astropy
 matplotlib>=1.2
+colormath
 mock
