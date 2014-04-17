@@ -7,6 +7,7 @@ import numpy as np
 from tvtk.api import tvtk
 from traits.api import Instance, TraitPrefixList, Trait, Array
 
+import mayavi
 from mayavi.modules.streamline import Streamline
 
 __all__ = ['SeedStreamline']
