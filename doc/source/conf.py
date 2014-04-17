@@ -21,7 +21,7 @@ except ImportError:
 try:
     import yt.mods
 except ImportError:
-    modules.update({'yt':mock, 'yt.mods':mock.moudle})
+    modules.update({'yt':mock, 'yt.mods':mock.module})
 
 sys.modules.update(modules)
 
