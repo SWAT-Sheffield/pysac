@@ -2,5 +2,3 @@ numpy
 scipy
 astropy
 matplotlib>=1.2
-cython
-h5py>=2.2.0

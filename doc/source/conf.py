@@ -57,7 +57,7 @@ __lt__
     def __complex__(self):
         return 1j
 
-MOCK_MODULES = ['tvtk.api']
+MOCK_MODULES = ['tvtk.api', 'h5py']
 
 for mod_name in MOCK_MODULES:
     sys.modules[mod_name] = Mock()
