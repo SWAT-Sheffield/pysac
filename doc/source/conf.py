@@ -2,10 +2,26 @@ import sys
 from mock import Mock
 mock = Mock()
 
-modules = {'h5py':mock, 'tvtk':mock, 'tvtk.api': mock.module, 'traits':mock, 'traits.api':mock.module,
+modules = {}
+
+try:
+    import h5py
+except ImportError:
+    modules.update({'h5py':mock})
+
+try:
+    from tvtk.api import tvtk
+    import mayavi
+    from mayavi import mlab
+except ImportError:
+    modules.update({'tvtk':mock, 'tvtk.api': mock.module, 'traits':mock, 'traits.api':mock.module,
            'mayavi':mock, 'mayavi.tools':mock.module, 'mayavi.tools.sources':mock.module,
-           'mayavi.modules':mock.module, 'mayavi.modules.streamline':mock.module,
-           'yt':mock, 'yt.mods':mock.moudle}
+           'mayavi.modules':mock.module, 'mayavi.modules.streamline':mock.module})
+
+try:
+    import yt.mods
+except ImportError:
+    modules.update({'yt':mock, 'yt.mods':mock.moudle})
 
 sys.modules.update(modules)
 

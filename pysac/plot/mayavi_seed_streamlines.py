@@ -1,6 +1,19 @@
 # -*- coding: utf-8 -*-
 """
-This module contains a custom streamlining function
+This module contains a custom streamlining class derived from the MayaVi2
+streamlining class, modified to accept an array of seed points for visulaisation
+using mayavi.
+
+.. warning::
+    The documentation for this class cannot be built on Read The Docs, it is possible to build it locally.
+
+You can use this class thus:
+
+Create a new Streamline instance and add it to a pipeline
+
+>>> from pysac.plot.mayavi_seed_streamline import SeedStreamline
+>>> field_lines = SeedStreamline(seed_points = np.array(seeds))
+>>> myvectorfield.add_child(field_lines)
 """
 
 import numpy as np
@@ -21,7 +34,7 @@ class SeedStreamline(Streamline):
     --------
     Create a new Streamline instance and add it to a pipeline
     
-    >>> from pysac.plot.tube3D.mayavi_cust_streamline import SeedStreamline
+    >>> from pysac.plot.mayavi_seed_streamline import SeedStreamline
     >>> field_lines = SeedStreamline(seed_points = np.array(seeds))
     >>> myvectorfield.add_child(field_lines)
     """
