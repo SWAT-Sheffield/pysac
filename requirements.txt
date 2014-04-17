@@ -2,3 +2,4 @@ numpy
 scipy
 astropy
 matplotlib>=1.2
+mock
