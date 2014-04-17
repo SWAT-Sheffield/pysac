@@ -112,8 +112,23 @@ def get_yt_mlab(ds, cube_slice, flux=True):
 
 def process_next_step_yt(ds, cube_slice, bfield, vfield, density, valf, cs, beta):
     """
-    Update all vtk arrays from current file state including flux
+    Update all mayavi sources using a yt dataset
     
+    Parameters
+    ----------
+    ds : yt dataset
+        The dataset to use to update the mayavi fields
+    
+    cube_slice : np.s_
+        A array slice to cut the yt fields with
+    
+    bfield, vfield, density, valf, cs, beta : mayavi sources
+        The sources to update
+    
+    Returns
+    -------
+    bfield, vfield, density, valf, cs, beta : mayavi sources
+        The updated sources    
     """
     cg = ds.h.grids[0]
     
@@ -134,7 +149,25 @@ def process_next_step_yt(ds, cube_slice, bfield, vfield, density, valf, cs, beta
     return bfield, vfield, density, valf, cs, beta
 
 def process_next_step_sacdata(f, cube_slice, bfield, vfield, density, valf, cs, beta):
-    """ Update all vtk arrays from current file state including flux"""
+    """
+    Update all mayavi sources using a SACData instance
+    
+    Parameters
+    ----------
+    ds : SACData instance
+        The dataset to use to update the mayavi fields
+    
+    cube_slice : np.s_
+        A array slice to cut the yt fields with
+    
+    bfield, vfield, density, valf, cs, beta : mayavi sources
+        The sources to update
+    
+    Returns
+    -------
+    bfield, vfield, density, valf, cs, beta : mayavi sources
+        The updated sources
+    """
     va_f = f.get_va()
     cs_f = f.get_cs()
     thermal_p,mag_p = f.get_thermalp(beta=True)
