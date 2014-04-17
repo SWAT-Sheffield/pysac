@@ -31,7 +31,6 @@ def install(setup): #pylint: disable=W0621
         description=DOCLINES[0],
         install_requires=[
             'numpy',
-            'h5py',
             'scipy',
             'astropy>=0.3.0',
             'matplotlib>=1.2',
