@@ -13,7 +13,8 @@ __all__ = ['density', 'velocity_magnitude', 'internal_energy',
            'plasma_beta', 'mag_field_x', 'mag_field_y', 'mag_field_z',
            'mag_field_magnitude', 'mag_field_pert_magnitude']
 
-mu0 = 1.25663706e-6
+#mu0 = 1.25663706e-6
+mu0 = np.pi * 4
 gamma = 1.6666
 
 @yt.derived_field(take_log=False, units=r'g cm^{-3}')
@@ -52,7 +53,7 @@ def internal_energy(field, data):
 
 @yt.derived_field(take_log=False, units=r'Ba')
 def mag_pressure(field, data):
-    return (data['mag_field_x']**2 + data['mag_field_y']**2 + data['mag_field_z']**2) / (8 * np.pi)#/ (2. * mu0)
+    return (data['mag_field_x']**2 + data['mag_field_y']**2 + data['mag_field_z']**2) / (2. * mu0)
 
 @yt.derived_field(take_log=False, units=r'Ba')
 def thermal_pressure(field, data):
@@ -63,10 +64,10 @@ def thermal_pressure(field, data):
 
 @yt.derived_field(take_log=False, units=r'cm s^{-1}')
 def alfven_speed(field, data):
-    return np.sqrt(data['mag_field_x']**2 + data['mag_field_y']**2 + data['mag_field_z']**2) / np.sqrt(data['density'])
+    return np.sqrt(data['mag_field_x']**2 + data['mag_field_y']**2 + data['mag_field_z']**2) / np.sqrt( mu0 * data['density'])
 
 @yt.derived_field(take_log=False, units=r'cm s^{-1}')
-def sound_speed(field, data):  
+def sound_speed(field, data):
     return np.sqrt((gamma * data['thermal_pressure']) / data['density'])
 
 @yt.derived_field(take_log=False, units=r'')
