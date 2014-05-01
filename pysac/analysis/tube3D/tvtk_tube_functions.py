@@ -1,96 +1,28 @@
 # -*- coding: utf-8 -*-
 """
-:Created on: Tue Oct  2 12:25:10 2012
-
-:author: Stuart Mumford
+This submodule provides routines to generate and analyse "Flux Surfaces" as
+described in (Mumford et. al. 2014).
+Flux Surfaces are created by the tracing of a closed loop of fieldlines,
+from which a surface is reconstructed by creating polygons between the 
+pesudo parallel streamlines.
 """
 
 import numpy as np
 from tvtk.api import tvtk
-import vtk_read_functions as vrf
 
-def vector_field(u, v, w, transpose=True, copy_data=True, field_name=None):
-    """
-    Take 3 numpy arrays and return a tvtk ImageData object
-    
-    It is unknown if this will work for non-cube data
-    
-    Parameters
-    ----------
-    u, v, w: np.ndarray
-        Components of a vector field
-    
-    transpose: bool
-        Transpose the arrays before conversion. Normally needed to convert from
-        numpy's z,y,x order to vtk's x,y,z
-    
-    copy_data: bool
-        Copy the numpy data in memory. If False, the numpy array must not be 
-        deleted while the ImageData object exists, as it is using the pointer 
-        to the numpy.ndata array.
-    
-    Returns
-    -------
-    vfield: tvtk.ImageData
-    """
-    vector_data = np.c_[u.ravel(), w.ravel(),  v.ravel()].ravel()
-    data = vector_data.reshape([u.shape[0] , w.shape[1], v.shape[2], 3])
-    
-    imd = tvtk.ImageData()
-    dims = list(data.shape)
-    if len(dims) == 3:
-        dims.insert(2, 1)
-        data = np.reshape(data, dims)
-    imd.dimensions = tuple(dims[:-1])
-    imd.extent = 0, dims[0]-1, 0, dims[1]-1, 0, dims[2]-1
-    imd.update_extent = 0, dims[0]-1, 0, dims[1]-1, 0, dims[2]-1
-    sz = np.size(data)
-    if transpose:
-        data_t = np.transpose(data, (2, 1, 0, 3))
-    else:
-        data_t = data
-    imd.point_data.vectors = np.reshape(data_t, (sz/3, 3))
-    imd.point_data.vectors.name = field_name
-    imd.update()
-    
-    return imd
+__all__ = ['move_seeds', 'make_circle_seeds', 'create_flux_surface', 
+           'update_flux_surface', 'make_poly_norms', 'norms_sanity_check',
+           'get_surface_vectors', 'interpolate_scalars', 'interpolate_vectors',
+           'update_interpolated_vectors', 'update_interpolated_scalars',
+           'get_surface_velocity_comp', 'get_the_line', 'update_the_line',
+           'get_surface_indexes', 'PolyDataWriter', 'write_step', 'write_flux',
+           'write_wave_flux', 'read_step', 'get_data']
 
-def scalar_field(u, ravel=True, copy_data=True):
+def move_seeds(seeds, vfield, dt):
     """
-    Take a numpy array and return a tvtk ImageData object
-    
-    Parameters
-    ----------
-    u: np.ndarray
-        A scalar field
-    
-    ravel: bool
-        Re-order the numpy array to be FORTRAN contiguious to be in x,y,z 
-        order.
-    
-    copy_data: bool
-        Copy the numpy data in memory. If False, the numpy array must not be 
-        deleted while the ImageData object exists, as it is using the pointer 
-        to the numpy.ndata array.
-    
-    Returns
-    -------
-    sdata: tvtk.ImageData
-    """
-    if ravel:
-        sd = u.ravel().reshape(u.shape,order='F')
-    else:
-        sd = u
-    
-    sdata = vrf.array_to_vtk_image(sd, copy_data, data_type='scalar')
-    
-    return tvtk.to_tvtk(sdata)
+    Move a list of seeds based on a velocity field.
 
-def move_seeds(seeds,vfield,dt):
-    """ Move a list of seeds based on a velocity field
-    
-    TODO:
-    WARNING: THIS IS HARD CODED FOR GRID SIZE!
+    .. warning:: WARNING: THIS IS HARD CODED FOR GRID SIZE!
     
     Parameters
     ----------
@@ -118,8 +50,9 @@ def move_seeds(seeds,vfield,dt):
     #seeds.points = seed_arr
     return seed_arr
 
-def make_circle_seeds(n,r,**domain):
-    """ Generate an array of n seeds evenly spaced in a circle at radius r
+def make_circle_seeds(n, r, **domain):
+    """
+    Generate an array of n seeds evenly spaced in a circle at radius r.
     
     Parameters
     ----------
@@ -152,7 +85,26 @@ def make_circle_seeds(n,r,**domain):
     surf_seeds.points = surf_seeds_arr
     return surf_seeds
 
-def create_flux_surface(bfield,surf_seeds):
+def create_flux_surface(bfield, surf_seeds):
+    """
+    Create a flux surface from an array of seeds and a tvtk vector field.
+    
+    Parameters
+    ----------
+    bfield: tvtk.ImageData
+        The vector field to use for streamline traceing
+    
+    surf_seeds: numpy.ndarray
+        The array of seed points to start the fieldline tracing from
+    
+    Returns
+    -------
+    surf_field_lines: tvtk.StreamTracer instance
+        The fieldline tracer with the fieldlines stored inside it.
+    
+    surface: tvtk.RuledSurfaceFilter instance
+        The surface built from the StreamTracer instance
+    """
     #Make a streamline instance with the bfield
     surf_field_lines = tvtk.StreamTracer()
     surf_field_lines.input = bfield
@@ -178,12 +130,27 @@ def create_flux_surface(bfield,surf_seeds):
     return surf_field_lines, surface
 
 def update_flux_surface(surf_seeds, surf_field_lines, surface):
-    #import pdb; pdb.set_trace()
+    """
+    Update the flux surface streamlines and surface.
+    """
     surf_field_lines.update()
     surface.update()   
 
 
 def make_poly_norms(poly_data):
+    """
+    Extract the normal vectors from a PolyData instance (A surface).
+    
+    Parameters
+    ----------
+    poly_data: tvtk.PolyData instance
+        The poly data to extract normal vectors from
+    
+    Returns
+    -------
+    poly_norms: tvtk.PolyDataNormals instance
+        The normal vectors
+    """
     poly_norms = tvtk.PolyDataNormals()
     poly_norms.input = poly_data
     poly_norms.compute_point_normals = True
@@ -193,6 +160,21 @@ def make_poly_norms(poly_data):
     return poly_norms
 
 def norms_sanity_check(poly_norms):
+    """
+    Check that the normals are pointing radially outwards.
+    
+    ..warning:: THIS IS HARD CODED to grid size and surface size
+    
+    Parameters
+    ----------
+    poly_norms: tvtk.PolyDataNormals instance
+        The normals to check
+    
+    Returns
+    -------
+    poly_normals: tvtk.PolyDataNormals instance
+        The same normals but flipped if needed
+    """
     norm1 = poly_norms.output.point_data.normals[1000]
     norm_sanity = np.dot(norm1,
                          np.array(poly_norms.input.points.get_point(1000))-
@@ -318,31 +300,78 @@ def get_surface_indexes(surf_poly,the_line):
     
     return surf_line_index, surf_line_points
 
-def write_step(file_name,surface,normals,parallels,torsionals,vperp,vpar,vphi):
-    pd_par = tvtk.PointData(scalars=vpar,vectors=parallels)
-    pd_par.scalars.name = "vpar"
-    pd_par.vectors.name = "par"
+class PolyDataWriter(object):
+    """
+    This class allows you to write tvtk polydata objects to a file, with as
+    many or as few associated PointData arrays as you wish.
     
-    pd_perp = tvtk.PointData(scalars=vperp,vectors=normals)
-    pd_perp.scalars.name = "vperp"
-    pd_perp.vectors.name = "perp"
+    Parameters
+    ----------
     
-    pd_phi = tvtk.PointData(scalars=vphi,vectors=torsionals)
-    pd_phi.scalars.name = "vphi"
-    pd_phi.vectors.name = "phi"
+    """
+    def __init__(self, filename, polydata):
+        self.poly_out = polydata
+        self.filename = filename
     
-    poly_out = surface.output
-    poly_out.point_data.add_array(pd_par.scalars)
-    poly_out.point_data.add_array(pd_par.vectors)
+    def add_point_data(self, vectors=None, scalars=None,
+                       vector_name=None, scalar_name=None):
+        """
+        Add a vector comonent and a associated scalar
+        """
+        #Error Checking:
+        if vectors is not None or scalars is not None:
+            raise ValueError("Need to specify Vectors or scalars")
+        if vectors is not None and vector_name is None:
+            raise ValueError("If vectors is specified a name must be specified")
+        if scalars is not None and scalar_name is None:
+            raise ValueError("If scalars is specified a name must be specified")
+        
+        pd_par = tvtk.PointData(scalars=scalars,vectors=vectors)
+        pd_par.scalars.name = scalar_name
+        pd_par.vectors.name = vector_name
+
+        self.poly_out.point_data.add_array(pd_par.scalars)
+        self.poly_out.point_data.add_array(pd_par.vectors)
+        
+    def add_array(self, **kwargs):
+        """
+        Add any number of arrays via keyword arguments.
+        
+        Examples
+        --------
+        Add one scalar
+        
+        >>> writer = PolyDataWriter(filename, polydata)
+        >>> writer.add_array(myscalar=myarray)
+        >>> writer.write
+        """
+        for name, array in kwargs.items():
+            pd_par = tvtk.PointData(scalars=array)
+            pd_par.scalars.name = name
+            self.poly_out.point_data.add_array(pd_par.scalars)
+
+    def write(self):
+        w = tvtk.XMLPolyDataWriter(input=self.poly_out,file_name=self.filename)
+        w.write()
+
+def write_step(file_name, surface,
+               normals, parallels, torsionals, vperp, vpar, vphi):
+    """
+    Write out the surface vectors and velocity compnents.
+    """
     
-    poly_out.point_data.add_array(pd_perp.scalars)
-    poly_out.point_data.add_array(pd_perp.vectors)
+    writer = PolyDataWriter(file_name, surface.output)
     
-    poly_out.point_data.add_array(pd_phi.scalars)
-    poly_out.point_data.add_array(pd_phi.vectors)
+    writer.add_point_data(scalars=vpar, vectors=parallels,
+                          scalar_name="vpar", vector_name="par")
     
-    w = tvtk.XMLPolyDataWriter(input=poly_out,file_name=file_name)
-    w.write()
+    writer.add_point_data(scalars=vperp,vectors=normals,
+                          scalar_name="vperp", vector_name="perp")
+    
+    writer.add_point_data(scalars=vphi, vectors=torsionals,
+                          scalar_name="vphi", vector_name="phi")
+    
+    writer.write()
 
 def write_flux(file_name, surface, surface_density, surface_va, surface_beta,
                surface_cs, Fpar, Fperp, Fphi):

@@ -1,20 +1,8 @@
 .. _plotting:
 
-========
-Plotting
-========
+.. automodapi:: pysac.plot
 
-.. currentmodule:: pysac.plot
+.. automodapi:: pysac.plot.mayavi_plotting_functions
 
-Introduction
-^^^^^^^^^^^^
+.. automodapi:: pysac.plot.mayavi_seed_streamlines
 
-Hello World
-
-.. automodule:: pysac.plot
-    :members:
-    :undoc-members:
-
-.. automodule:: pysac.plot.plot
-    :members:
-    :undoc-members:
