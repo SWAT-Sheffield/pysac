@@ -105,6 +105,23 @@ class SeedStreamline(Streamline):
     
     def _seed_points_changed(self, old, new):
         self.seed = tvtk.PolyData(points=self.seed_points)
+
+    def _stream_tracer_changed(self, old, new):
+        if old is not None:
+            old.on_trait_change(self.render, remove=True)
+        seed = self.seed
+        if seed is not None:
+            new.source = seed
+        new.on_trait_change(self.render)
+        mm = self.module_manager
+        if mm is not None:
+            new.input = mm.source.outputs[0]
+
+        # A default output so there are no pipeline errors.  The
+        # update_pipeline call corrects this if needed.
+        self.outputs = [new.output]
+
+        self.update_pipeline()
         
     def _seed_changed(self, old, new):
         st = self.stream_tracer
