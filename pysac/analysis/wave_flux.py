@@ -44,7 +44,7 @@ def get_wave_flux(f, pk):
     Fwave = Fa + Fp
     return Fwave
 
-def get_wave_flux_yt(ds):
+def get_wave_flux_yt(ds, B_to_SI=1, V_to_SI=1, Pk_to_SI=1):
     """
     Calculate the wave energy flux from a yt dataset.
     
@@ -64,9 +64,13 @@ def get_wave_flux_yt(ds):
     Bp = np.array([cg['mag_field_x_pert'], cg['mag_field_y_pert'], cg['mag_field_z_pert']])
     V = np.array([cg['velocity_x'], cg['velocity_y'], cg['velocity_z']])
     
+    Bb *= B_to_SI
+    Bp *= B_to_SI
+    Pk = cg['thermal_pressure'] * Pk_to_SI
+    
     #Calculate wave flux
     Fp = 0.25*np.pi * (np.sum(Bb*Bp, axis=0)[None] * V) - (np.sum(V*Bp, axis=0)[None] * Bb)
-    Fa = cg['thermal_pressure'][None]*V
+    Fa = Pk[None]*V
     
     Fwave = Fa + Fp
     return Fwave
