@@ -8,7 +8,7 @@ import numpy as np
 from mayavi.tools.sources import vector_field, scalar_field
 
 __all__ = ['get_sacdata_mlab', 'get_yt_mlab', 'process_next_step_yt',
-           'process_next_step_sacdata']
+           'process_next_step_sacdata', 'yt_to_mlab_vector']
 
 def get_sacdata_mlab(f, cube_slice, flux=True):
     """
@@ -64,17 +64,86 @@ def get_sacdata_mlab(f, cube_slice, flux=True):
     else:
         return bfield, vfield    
 
+def yt_to_mlab_vector(ds, xkey, ykey, zkey, cube_slice=np.s_[:,:,:],
+                      SI_scale=1, field_name=""):
+    """
+    Convert three yt keys to a mlab vector field
+    
+    Parameters
+    ----------
+    ds : yt dataset
+        The dataset to get the data from.
+    
+    xkey, ykey, zkey : string
+        yt field names for the three vector components.
+    
+    cube_slice : numpy slice
+        The array slice to crop the yt fields with.
+    
+    SI_scale : float
+        Conversion factor to SI units (multipled by the field).
+    
+    field_name : string
+        The mlab name for the field.
+    
+    Returns
+    -------
+    field : mayavi vector field
+    """
+    cg = ds.h.grids[0]
+    
+    return vector_field(cg[xkey][cube_slice] * SI_scale,
+                        cg[ykey][cube_slice] * SI_scale,
+                        cg[zkey][cube_slice] * SI_scale,
+                        name=field_name,figure=None)
+
+def update_yt_to_mlab_vector(field, ds, xkey, ykey, zkey,
+                             cube_slice=np.s_[:,:,:], SI_scale=1):
+    """
+    Update a mayavi field based on a yt dataset.
+    
+    Parameters
+    ----------
+    field : mayavi vector field
+        The field to update.
+
+    ds : yt dataset
+        The dataset to get the data from.
+    
+    xkey, ykey, zkey : string
+        yt field names for the three vector components.
+    
+    cube_slice : numpy slice
+        The array slice to crop the yt fields with.
+    
+    SI_scale : float
+        Conversion factor to SI units (multipled by the field).
+    
+    Returns
+    -------
+    field : mayavi vector field
+    """
+    cg = ds.h.grids[0]
+    
+    # Update Datasets
+    field.set(vector_data = np.rollaxis(np.array([cg[xkey][cube_slice] * SI_scale,
+                                                  cg[ykey][cube_slice] * SI_scale,
+                                                  cg[zkey][cube_slice] * SI_scale]),
+                                                  0, 4))
+    return field
+
 def get_yt_mlab(ds, cube_slice, flux=True):
     """
-    Reads in useful variables from yt to vtk data structures
+    Reads in useful variables from yt to vtk data structures, converts into SI
+    units before return.
     
     Arguments
     ---------
-    ds: yt dataset
+    ds : yt dataset
         with derived fields
-    flux    boolean:
+    flux : boolean
         Read variables for flux calculation?
-    cube_slice  np.slice:
+    cube_slice : np.slice
         Slice to apply to the arrays
     
     Returns
@@ -87,15 +156,13 @@ def get_yt_mlab(ds, cube_slice, flux=True):
     cg = ds.h.grids[0]
     
     # Create TVTK datasets
-    bfield = vector_field(cg['mag_field_x'][cube_slice] * 1e3,
-                          cg['mag_field_y'][cube_slice] * 1e3, 
-                          cg['mag_field_z'][cube_slice] * 1e3,
-                          name="Magnetic Field",figure=None)
-    
-    vfield = vector_field(cg['velocity_x'][cube_slice] / 1e3,
-                          cg['velocity_y'][cube_slice] / 1e3,
-                          cg['velocity_z'][cube_slice] / 1e3,
-                          name="Velocity Field",figure=None)
+    bfield = yt_to_mlab_vector(ds, 'mag_field_x', 'mag_field_y', 'mag_field_z',
+                               cube_slice=cube_slice, SI_scale=1e3 * 1e4,
+                               field_name="Magnetic Field")
+
+    vfield = yt_to_mlab_vector(ds, 'velocity_x', 'velocity_y', 'velocity_z',
+                               cube_slice=cube_slice, SI_scale=1e3 * 1e-2,
+                               field_name="Velocity Field")
     
     if flux:
         density = scalar_field(cg['density'][cube_slice],
@@ -112,7 +179,7 @@ def get_yt_mlab(ds, cube_slice, flux=True):
 
 def process_next_step_yt(ds, cube_slice, bfield, vfield, density, valf, cs, beta):
     """
-    Update all mayavi sources using a yt dataset
+    Update all mayavi sources using a yt dataset, in SI units.
     
     Parameters
     ----------
@@ -133,13 +200,13 @@ def process_next_step_yt(ds, cube_slice, bfield, vfield, density, valf, cs, beta
     cg = ds.h.grids[0]
     
     # Update Datasets
-    bfield.set(vector_data = np.rollaxis(np.array([cg['mag_field_x'][cube_slice] * 1e3,
-                                                   cg['mag_field_y'][cube_slice] * 1e3,
-                                                   cg['mag_field_z'][cube_slice] * 1e3]),
+    bfield.set(vector_data = np.rollaxis(np.array([cg['mag_field_x'][cube_slice] * 1e3 * 1e4,
+                                                   cg['mag_field_y'][cube_slice] * 1e3 * 1e4,
+                                                   cg['mag_field_z'][cube_slice] * 1e3 * 1e4]),
                                                    0, 4))
-    vfield.set(vector_data = np.rollaxis(np.array([cg['velocity_x'][cube_slice] / 1e3,
-                                                   cg['velocity_y'][cube_slice] / 1e3,
-                                                   cg['velocity_z'][cube_slice] / 1e3]),
+    vfield.set(vector_data = np.rollaxis(np.array([cg['velocity_x'][cube_slice] / 1e3 * 1e-2,
+                                                   cg['velocity_y'][cube_slice] / 1e3 * 1e-2,
+                                                   cg['velocity_z'][cube_slice] / 1e3 * 1e-2]),
                                                    0, 4))
     valf.set(scalar_data = cg['alfven_speed'])
     cs.set(scalar_data = cg['sound_speed'])
