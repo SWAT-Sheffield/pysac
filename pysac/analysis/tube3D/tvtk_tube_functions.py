@@ -43,7 +43,7 @@ def move_seeds(seeds, vfield, dt):
     """
     v_seed = tvtk.ProbeFilter(source=vfield,input=seeds)
     v_seed.update()
-    int_vels = np.array(v_seed.output.point_data.vectors)[:,:2]/15.625
+    int_vels = np.array(v_seed.output.point_data.vectors)[:,:2]/(15.625*1e3)
     seed_arr = np.array(seeds.points)
     seed_arr[:,:2] += int_vels * dt
     
