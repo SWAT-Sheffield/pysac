@@ -157,19 +157,19 @@ def get_yt_mlab(ds, cube_slice, flux=True):
     
     # Create TVTK datasets
     bfield = yt_to_mlab_vector(ds, 'mag_field_x', 'mag_field_y', 'mag_field_z',
-                               cube_slice=cube_slice, SI_scale=1e3 * 1e4,
+                               cube_slice=cube_slice, SI_scale=1e4,
                                field_name="Magnetic Field")
 
     vfield = yt_to_mlab_vector(ds, 'velocity_x', 'velocity_y', 'velocity_z',
-                               cube_slice=cube_slice, SI_scale=1e3 * 1e-2,
+                               cube_slice=cube_slice, SI_scale=1e-2,
                                field_name="Velocity Field")
     
     if flux:
-        density = scalar_field(cg['density'][cube_slice] * 1e-1,
+        density = scalar_field(cg['density'][cube_slice] * 1e-3,
                                              name="Density", figure=None)
                                              
         valf = scalar_field(cg['alfven_speed'] * 1e-2, name="Alven Speed", figure=None)
-        cs = scalar_field(cg['sound_speed'] * 1e-2 , name="Sound Speed", figure=None)
+        cs = scalar_field(cg['sound_speed'] * 1e-2, name="Sound Speed", figure=None)
         beta = scalar_field(cg['plasma_beta'], name="Beta", figure=None)
         
         return bfield, vfield, density, valf, cs, beta
@@ -200,18 +200,18 @@ def process_next_step_yt(ds, cube_slice, bfield, vfield, density, valf, cs, beta
     cg = ds.h.grids[0]
     
     # Update Datasets
-    bfield.set(vector_data = np.rollaxis(np.array([cg['mag_field_x'][cube_slice] * 1e3 * 1e4,
-                                                   cg['mag_field_y'][cube_slice] * 1e3 * 1e4,
-                                                   cg['mag_field_z'][cube_slice] * 1e3 * 1e4]),
+    bfield.set(vector_data = np.rollaxis(np.array([cg['mag_field_x'][cube_slice] * 1e4,
+                                                   cg['mag_field_y'][cube_slice] * 1e4,
+                                                   cg['mag_field_z'][cube_slice] * 1e4]),
                                                    0, 4))
-    vfield.set(vector_data = np.rollaxis(np.array([cg['velocity_x'][cube_slice] / 1e3 * 1e-2,
-                                                   cg['velocity_y'][cube_slice] / 1e3 * 1e-2,
-                                                   cg['velocity_z'][cube_slice] / 1e3 * 1e-2]),
+    vfield.set(vector_data = np.rollaxis(np.array([cg['velocity_x'][cube_slice] * 1e-2,
+                                                   cg['velocity_y'][cube_slice] * 1e-2,
+                                                   cg['velocity_z'][cube_slice] * 1e-2]),
                                                    0, 4))
     valf.set(scalar_data = cg['alfven_speed'] * 1e-2)
     cs.set(scalar_data = cg['sound_speed'] * 1e-2)
     beta.set(scalar_data = cg['plasma_beta'])
-    density.set(scalar_data = cg['density'] * 1e-1)
+    density.set(scalar_data = cg['density'] * 1e-3)
     
     return bfield, vfield, density, valf, cs, beta
 
