@@ -165,11 +165,11 @@ def get_yt_mlab(ds, cube_slice, flux=True):
                                field_name="Velocity Field")
     
     if flux:
-        density = scalar_field(cg['density'][cube_slice],
+        density = scalar_field(cg['density'][cube_slice] * 1e-1,
                                              name="Density", figure=None)
                                              
-        valf = scalar_field(cg['alfven_speed'], name="Alven Speed", figure=None)
-        cs = scalar_field(cg['sound_speed'], name="Sound Speed", figure=None)
+        valf = scalar_field(cg['alfven_speed'] * 1e-2, name="Alven Speed", figure=None)
+        cs = scalar_field(cg['sound_speed'] * 1e-2 , name="Sound Speed", figure=None)
         beta = scalar_field(cg['plasma_beta'], name="Beta", figure=None)
         
         return bfield, vfield, density, valf, cs, beta
@@ -208,10 +208,10 @@ def process_next_step_yt(ds, cube_slice, bfield, vfield, density, valf, cs, beta
                                                    cg['velocity_y'][cube_slice] / 1e3 * 1e-2,
                                                    cg['velocity_z'][cube_slice] / 1e3 * 1e-2]),
                                                    0, 4))
-    valf.set(scalar_data = cg['alfven_speed'])
-    cs.set(scalar_data = cg['sound_speed'])
+    valf.set(scalar_data = cg['alfven_speed'] * 1e-2)
+    cs.set(scalar_data = cg['sound_speed'] * 1e-2)
     beta.set(scalar_data = cg['plasma_beta'])
-    density.set(scalar_data = cg['density'])
+    density.set(scalar_data = cg['density'] * 1e-1)
     
     return bfield, vfield, density, valf, cs, beta
 
