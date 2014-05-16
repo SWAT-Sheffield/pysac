@@ -234,8 +234,8 @@ class VACfile():
 #        for i in range(0,self.header['ndim']):
 #            self.x[i] = np.reshape(self.file.readReals(), self.header['nx'], order='F')
         self.x = self.file.readReals()
-#        s = self.header['nx'] + [self.header['ndim']]
-        s = [self.header['ndim']] + self.header['nx']
+        s = self.header['nx'] + [self.header['ndim']]
+#        s = [self.header['ndim']] + self.header['nx']
         self.x = np.reshape(self.x,s,order='F') ## - Don't know! Array was wrong
         #shape when using F order, makes me wonder!
 
