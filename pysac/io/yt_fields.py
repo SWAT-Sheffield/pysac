@@ -42,7 +42,7 @@ def mag_field_pert_magnitude(field, data):
     return np.sqrt(data['mag_field_x_pert']**2 + data['mag_field_y_pert']**2 +
                     data['mag_field_z_pert']**2)
 
-@yt.derived_field(take_log=False, units=r'G')
+@yt.derived_field(take_log=False, units=r'cm s^{-1}')
 def velocity_magnitude(field, data):
     return np.sqrt(data['velocity_x']**2 + data['velocity_x']**2 +
                     data['velocity_x']**2)
