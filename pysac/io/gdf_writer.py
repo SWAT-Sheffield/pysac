@@ -425,9 +425,9 @@ def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:],
     fv.attrs['staggering'] = field['staggering']
     
     if api == 'high':
-        _write_dset_high(dset, field['field'], arr_slice)
+        _write_dset_high(dset, field['field'], arr_slice, collective=collective)
     elif api == 'low':
-        _write_dset_low(dset, field['field'], arr_slice)
+        _write_dset_low(dset, field['field'], arr_slice, collective=collective)
     else:
         raise ValueError("Please specifiy 'high' or 'low'")
     
