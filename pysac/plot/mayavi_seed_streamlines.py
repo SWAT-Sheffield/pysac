@@ -1,20 +1,44 @@
 # -*- coding: utf-8 -*-
 """
-:Created on: Tue Jun 26 17:53:42 2012
+This module contains a custom streamlining class derived from the MayaVi2
+streamlining class, modified to accept an array of seed points for visulaisation
+using mayavi.
 
-:author: Stuart Mumford
-This is a custom streamline class for MayaVi to do my custom streamline seeding
+.. warning::
+    The documentation for this class cannot be built on Read The Docs, it is possible to build it locally.
+
+You can use this class thus:
+
+Create a new Streamline instance and add it to a pipeline
+
+>>> from pysac.plot.mayavi_seed_streamline import SeedStreamline
+>>> field_lines = SeedStreamline(seed_points = np.array(seeds))
+>>> myvectorfield.add_child(field_lines)
 """
 
 import numpy as np
-from traits.api import Instance, Bool, Str, TraitPrefixList, Trait, Delegate, Button, Array
 from tvtk.api import tvtk
+from traits.api import Instance, TraitPrefixList, Trait, Array
 
-from mayavi.components.actor import Actor
+import mayavi
 from mayavi.modules.streamline import Streamline
 
+__all__ = ['SeedStreamline']
 
-class sStreamline(Streamline):
+class SeedStreamline(Streamline):
+    """
+    This class is a modification of the mayavi Streamline class that accepts
+    an array of seed points as a input rather than a widget.
+    
+    Examples
+    --------
+    Create a new Streamline instance and add it to a pipeline
+    
+    >>> from pysac.plot.mayavi_seed_streamline import SeedStreamline
+    >>> field_lines = SeedStreamline(seed_points = np.array(seeds))
+    >>> myvectorfield.add_child(field_lines)
+    """
+    
     seed_points = Array(allow_none=False)
     seed = Instance(tvtk.PolyData, args=())
     update_mode = Trait('interactive', TraitPrefixList(['interactive',
@@ -44,7 +68,7 @@ class sStreamline(Streamline):
         self.ribbon_filter = tvtk.RibbonFilter()
         self.tube_filter = tvtk.TubeFilter()
 
-        self.actor = Actor()
+        self.actor = mayavi.components.actor.Actor()
         # Setup the actor suitably for this module.
         self.actor.property.line_width = 2.0
 
@@ -79,12 +103,15 @@ class sStreamline(Streamline):
 
         self.pipeline_changed = True
     
+    def _seed_points_changed(self, old, new):
+        self.seed = tvtk.PolyData(points=self.seed_points)
+
     def _stream_tracer_changed(self, old, new):
         if old is not None:
             old.on_trait_change(self.render, remove=True)
         seed = self.seed
         if seed is not None:
-            new.source = seed#.polydata
+            new.source = seed
         new.on_trait_change(self.render)
         mm = self.module_manager
         if mm is not None:
@@ -95,9 +122,6 @@ class sStreamline(Streamline):
         self.outputs = [new.output]
 
         self.update_pipeline()
-    
-    def _seed_points_changed(self, old, new):
-        self.seed = tvtk.PolyData(points=self.seed_points)
         
     def _seed_changed(self, old, new):
         st = self.stream_tracer

@@ -4,16 +4,13 @@
 Input / Output
 ==============
 
-.. currentmodule:: pysac.io
+.. automodapi:: pysac.io
 
-Introduction
-^^^^^^^^^^^^
+.. automodapi:: pysac.io.yt_fields
 
-Hello World
+.. automodapi:: pysac.io.gdf_writer
 
-Code Reference
-^^^^^^^^^^^^^^
+.. automodapi:: pysac.io.util
 
-.. automodule:: pysac.io
-    :members:
-    :undoc-members:
+.. automodapi:: pysac.io.legacy
+

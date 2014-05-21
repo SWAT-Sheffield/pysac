@@ -1,5 +1,7 @@
-distribute==0.6.24
+sphinx
 numpy
 scipy
+astropy
 matplotlib>=1.2
-h5py
+colormath
+mock
