@@ -240,8 +240,8 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
 
     f.close()
 
-def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
-                data_author="", data_comment=""):
+def create_file(f, simulation_parameters, grid_dimensions, 
+                data_author=None, data_comment=None):
     """
     Do all the structral creation of a gdf file.
 
@@ -253,14 +253,11 @@ def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
     gdf_path: string or h5py instance
         Filename to save out
 
-    header: dict
-        A 'VACdata' like header, containg:
-        ndim, nx, t
-        and optionally: eqpar, varnames, final t
+    simulation_parameters: dict
+        Key value pairs for attributes to be written to the 
+        simulation_parameters group.
 
-    domain_left_edge
-
-    domain_right_edge
+    grid_dimensions
 
     data_author: (optional) string
         Author to write to file
@@ -281,7 +278,8 @@ def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
 
     # "gridded_data_format" group
     g = f.create_group("gridded_data_format")
-    g.attrs["data_software"] = "SAC"
+    g.attrs["data_software"] = "Sheffield Advanced Code"
+    g.attrs["data_software_version"] = "pySAC0.2"
     if data_author is not None:
         g.attrs["data_author"] = data_author
     if data_comment is not None:
@@ -289,29 +287,9 @@ def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
 
     # "simulation_parameters" group
     g = f.create_group("simulation_parameters")
-    g.attrs["refine_by"] = 0
-    g.attrs["dimensionality"] = header['ndim']
-    g.attrs["domain_dimensions"] = header['nx']
-    g.attrs["current_time"] = header['t']
-    g.attrs["domain_left_edge"] = domain_left_edge
-    g.attrs["domain_right_edge"] = domain_right_edge
-    g.attrs["unique_identifier"] = np.random.randint(1e15)
-    g.attrs["cosmological_simulation"] = 0
-    #TODO: hmmmm
-    g.attrs["num_ghost_zones"] = 0
-    g.attrs["field_ordering"] = 0
-    # @todo: not yet supported by yt.
-    g.attrs["boundary_conditions"] = np.array([0, 0, 0, 0, 0, 0], 'int32')
+    for key, value in simulation_parameters:
+        g.attrs[key] = value
 
-    #Write some VAC info just in case
-    if 'final t' in header.keys():
-        g.attrs['simulation_run_time'] = header['final t']
-    if 'eqpar' in header.keys():
-        g.attrs["eqpar"] = header['eqpar']
-    if 'varnames' in header.keys():
-        index = next((i for i in xrange(len(header['varnames']))
-                        if not(header['varnames'][i] in ["x","y","z"])),header['ndim'])
-        g.attrs["eqpar_names"] = header['varnames'][index+header['nw']-1:]
 
     # "field_types" group
     g = f.create_group("field_types")
@@ -320,8 +298,8 @@ def create_file(f, header, domain_left_edge=[], domain_right_edge=[],
     g = f.create_group("particle_types")
 
     # root datasets -- info about the grids
-    f["grid_dimensions"] = np.array([header['nx']]) #needs to be 1XN
-    f["grid_left_index"] = np.array([[0]*header['ndim']]) #needs to be 1XN
+    f["grid_dimensions"] = grid_dimensions #needs to be 1XN
+    f["grid_left_index"] = np.zeros(3) #needs to be 1XN
     f["grid_level"] = np.zeros(1)
     # @todo: Fill with proper values
     f["grid_parent_id"] = np.zeros(1)
