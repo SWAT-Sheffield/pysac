@@ -4,6 +4,7 @@ and define magnitudes, as well as calculate things like charaistic speeds.
 
 Note: These use yt 3.x like field naming conventions
 """
+import warnings
 
 import yt.mods as yt
 import numpy as np
@@ -44,8 +45,8 @@ def mag_field_pert_magnitude(field, data):
 
 @yt.derived_field(take_log=False, units=r'cm s^{-1}')
 def velocity_magnitude(field, data):
-    return np.sqrt(data['velocity_x']**2 + data['velocity_x']**2 +
-                    data['velocity_x']**2)
+    return np.sqrt(data['velocity_x']**2 + data['velocity_y']**2 +
+                   data['velocity_z']**2)
 
 @yt.derived_field(take_log=False, units=r'Ba')
 def internal_energy(field, data):
@@ -71,5 +72,10 @@ def sound_speed(field, data):
     return np.sqrt((gamma * data['thermal_pressure']) / data['density'])
 
 @yt.derived_field(take_log=False, units=r'')
-def plasma_beta(field, data):  
+def plasma_beta(field, data):
     return data['mag_pressure'] / data['thermal_pressure']
+
+@yt.derived_field(take_log=False, units=r'K')
+def temperature(field, data):
+    warnings.warn("Hard coded numbers", Warning)
+    return (data['thermal_pressure'] * 1.2) / (8.3e3 * data['density'])
