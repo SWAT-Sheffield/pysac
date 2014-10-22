@@ -217,7 +217,7 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     if isinstance(gdf_path, h5py.File):
         f = gdf_path
     else:
-        f = h5py.File(gdf_path, "w")
+        f = h5py.File(gdf_path, "a")
 
     domain_left_edge = [x[0][0,0,0].to(u.cm).value,
                         x[1][0,0,0].to(u.cm).value,
@@ -274,10 +274,10 @@ def create_file(f, simulation_parameters, grid_dimensions,
     GDF is defined here: https://bitbucket.org/yt_analysis/grid_data_format/
     """
     if isinstance(f, basestring):
-        f = h5py.File(f)
+        f = h5py.File(f,'a')
 
     # "gridded_data_format" group
-    g = f.create_group("gridded_data_format")
+    g = f.require_group("gridded_data_format")
     g.attrs["data_software"] = "Sheffield Advanced Code"
     g.attrs["data_software_version"] = "pySAC0.2"
     if data_author is not None:
@@ -286,16 +286,15 @@ def create_file(f, simulation_parameters, grid_dimensions,
         g.attrs["data_comment"] = data_comment
 
     # "simulation_parameters" group
-    g = f.create_group("simulation_parameters")
-    for key, value in simulation_parameters:
+    g = f.require_group("simulation_parameters")
+    for key, value in simulation_parameters.items():
         g.attrs[key] = value
 
-
     # "field_types" group
-    g = f.create_group("field_types")
+    g = f.require_group("field_types")
 
     # "particle_types" group
-    g = f.create_group("particle_types")
+    g = f.require_group("particle_types")
 
     # root datasets -- info about the grids
     f["grid_dimensions"] = grid_dimensions #needs to be 1XN
@@ -306,7 +305,7 @@ def create_file(f, simulation_parameters, grid_dimensions,
     f["grid_particle_count"] = np.zeros((1,1))
 
     # "data" group -- where we should spend the most time
-    d = f.create_group("data")
+    d = f.require_group("data")
     gr = d.create_group("grid_%010i"%0)
 
     return f
