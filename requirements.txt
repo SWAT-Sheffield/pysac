@@ -5,3 +5,7 @@ astropy
 matplotlib>=1.2
 colormath
 mock
+yt
+mayavi
+sympy
+h5py
