@@ -74,7 +74,7 @@ install:
 
 script:
    - if [[ $SETUP_CMD != 'test --coverage' ]]; then python setup.py $SETUP_CMD; fi
-   - if [[ $SETUP_CMD == 'test --coverage' ]]; then py.test pysac --cov pysac --cov-report html; fi
+   - if [[ $SETUP_CMD == 'test --coverage' ]]; then python setup.py develop; py.test pysac --cov pysac --cov-report html; fi
 
 after_success:
     # If coveralls.io is set up for this package, uncomment the line
