@@ -62,9 +62,10 @@ except ImportError:
            'mayavi.modules':mock.module, 'mayavi.modules.streamline':mock.module})
 
 try:
-    import yt.mods
+    import yt
 except ImportError:
-    modules.update({'yt':mock, 'yt.mods':mock.module, 'yt.__version__':'2.0.0'})
+    modules.update({'yt':mock, 'yt.mods':mock.module})
+    modules['yt'].__version__ = '2.0.0'
 
 sys.modules.update(modules)
 
