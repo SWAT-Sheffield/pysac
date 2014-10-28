@@ -137,8 +137,8 @@ def get_yt_mlab(ds, cube_slice, flux=True):
     Reads in useful variables from yt to vtk data structures, converts into SI
     units before return.
     
-    Arguments
-    ---------
+    Parameters
+    ----------
     ds : yt dataset
         with derived fields
     flux : boolean
@@ -186,7 +186,7 @@ def process_next_step_yt(ds, cube_slice, bfield, vfield, density, valf, cs, beta
     ds : yt dataset
         The dataset to use to update the mayavi fields
     
-    cube_slice : np.s_
+    cube_slice : np.s\_
         A array slice to cut the yt fields with
     
     bfield, vfield, density, valf, cs, beta : mayavi sources
@@ -224,7 +224,7 @@ def process_next_step_sacdata(f, cube_slice, bfield, vfield, density, valf, cs, 
     ds : SACData instance
         The dataset to use to update the mayavi fields
     
-    cube_slice : np.s_
+    cube_slice : np.s\_
         A array slice to cut the yt fields with
     
     bfield, vfield, density, valf, cs, beta : mayavi sources

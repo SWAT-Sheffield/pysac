@@ -33,7 +33,7 @@ class FortranFile(file):
 
         Parameters
         ----------
-        `c` : string
+        c : string
             The endian-ness to use when reading from this file.
         """
         if c == '<' or c == '>' or c =='@' or c == '=':
@@ -55,7 +55,7 @@ class FortranFile(file):
 
         Parameters
         ----------
-        `s`: str
+        s : str
             The string to write
         """
         self.write(struct.pack(self.ENDIAN + 'i', len(s)))
@@ -85,9 +85,9 @@ class FortranFile(file):
 
         Parameters
         ----------
-        reals: array
+        reals : array
             Data to write
-        prec: str
+        prec : str
             Character code for the precision to use in writing
         """
         reals = np.asarray(reals)
@@ -118,7 +118,7 @@ class FortranFile(file):
 
         Parameters
         ----------
-        ints: array
+        ints : array
             Data to write
         """
         self.write(struct.pack(self.ENDIAN + 'i', struct.calcsize('i') * len(ints)))
@@ -160,28 +160,30 @@ class VACfile():
         Base input class for VAC Unformatted binary files.
         Based on FortranFile has been modified to read VAC / SAC output files.
 
-       Parameters
-       ----------
-       fname:    string
-           Input Filename
+        Parameters
+        ----------
+        fname:    string
+            Input Filename
 
-       mode: {'r' | 'w'}
-           I/O mode (only 'r' is fully supported)
+        mode: {'r' | 'w'}
+            I/O mode (only 'r' is fully supported)
 
-       buf: int
-           underlying I/O buffer size
-       Returns
-       -------
+        buf: int
+            underlying I/O buffer size
+        Returns
+        -------
         Reads a iteration into the following structure:
-           file.header: -Dictionary containging
-                        -filehead: string at begging of file
-                        -params: Iteration Parameters, it, t, ndim, neqpar, nw
-                        -nx: Size of cordinate array [list]
-                        -eqpar: eqpar_ parameters [list]
-                        -varnames: list containg varible names for dimensions, nw and eqpar?
-            file.w : w array from file which is [params,[nx]] in size
-            file.w\_: dict containing the {varname:index} pairs for the w array
-            file.x : x array from file which is [ndim,[nx]] in size
+        
+        file.header: -Dictionary containging
+                     -filehead: string at begging of file
+                     -params: Iteration Parameters, it, t, ndim, neqpar, nw
+                     -nx: Size of cordinate array [list]
+                     -eqpar: eqpar\_ parameters [list]
+                     -varnames: list containg varible names for dimensions, nw and eqpar?
+        file.w : w array from file which is [params,[nx]] in size
+        file.w\_: dict containing the {varname:index} pairs for the w array
+        file.x : x array from file which is [ndim,[nx]] in size
+        
         """
         #Do FORTRAN read init, set Endian for VAC/SAC files
         self.file = FortranFile(fname,mode,buf)
@@ -302,19 +304,22 @@ class VAChdf5():
         Based on FortranFile has been modified to read VAC / SAC HDF5 files.
 
         Reads a iteration into the following structure:
-           file.header: -Dictionary containging
-                        -filehead: string at begging of file
-                        -params: Iteration Parameters, it, t, ndim, neqpar, nw
-                        -nx: Size of cordinate array [list]
-                        -eqpar: eqpar_ parameters [list]
-                        -varnames: list containg varible names for dimensions, nw and eqpar?
-            file.w : w array from file which is [params,[nx]] in size
-            file.w\_: dict containing the {varname:index} pairs for the w array
-            file.x : x array from file which is [ndim,[nx]] in size
+        
+        file.header: 
+        -Dictionary containging
+        -filehead: string at begging of file
+        -params: Iteration Parameters, it, t, ndim, neqpar, nw
+        -nx: Size of cordinate array [list]
+        -eqpar: eqpar\_ parameters [list]
+        -varnames: list containg varible names for dimensions, nw and eqpar?
+        file.w : w array from file which is [params,[nx]] in size
+        file.w\_: dict containing the {varname:index} pairs for the w array
+        file.x : x array from file which is [ndim,[nx]] in size
 
         Also creates HDF5 specific attributes:
-            file.sac_group - Holds the x and time_group attributes.
-            file.time_group - Holds the series of w arrays.
+        
+        file.sac_group - Holds the x and time_group attributes.
+        file.time_group - Holds the series of w arrays.
 
         Largely the HDF5 file is designed so the functionality mimics the VAC
         binary file, i.e. all the vars are still in the W array etc.
