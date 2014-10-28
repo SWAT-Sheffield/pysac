@@ -70,10 +70,11 @@ install:
     - if [[ $SETUP_CMD == build_sphinx* ]]; then $CONDA_INSTALL numpy=$NUMPY_VERSION Sphinx matplotlib; fi
 
     # COVERAGE DEPENDENCIES
-    - if [[ $SETUP_CMD == 'test --coverage' ]]; then $PIP_INSTALL coverage coveralls; fi
+    - if [[ $SETUP_CMD == 'test --coverage' ]]; then $PIP_INSTALL coverage coveralls pytest-cov; fi
 
 script:
-   - python setup.py $SETUP_CMD
+   - if [[ $SETUP_CMD != 'test --coverage' ]]; then python setup.py $SETUP_CMD; fi
+   - if [[ $SETUP_CMD == 'test --coverage' ]]; then py.test pysac --cov pysac --cov-report html; fi
 
 after_success:
     # If coveralls.io is set up for this package, uncomment the line
