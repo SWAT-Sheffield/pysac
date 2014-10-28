@@ -28,18 +28,45 @@
 import datetime
 import os
 import sys
+from mock import Mock
 
 try:
     import astropy_helpers
 except ImportError:
     # Building from inside the docs/ directory?
-    if os.path.basename(os.getcwd()) == 'docs':
+    if os.path.basename(os.getcwd()) == 'doc':
         a_h_path = os.path.abspath(os.path.join('..', 'astropy_helpers'))
         if os.path.isdir(a_h_path):
             sys.path.insert(1, a_h_path)
 
 # Load all of the global Astropy configuration
 from astropy_helpers.sphinx.conf import *
+
+
+mock = Mock()
+
+modules = {}
+
+try:
+    import h5py
+except ImportError:
+    modules.update({'h5py':mock})
+
+try:
+    from tvtk.api import tvtk
+    import mayavi
+    from mayavi import mlab
+except ImportError:
+    modules.update({'tvtk':mock, 'tvtk.api': mock.module, 'traits':mock, 'traits.api':mock.module,
+           'mayavi':mock, 'mayavi.tools':mock.module, 'mayavi.tools.sources':mock.module,
+           'mayavi.modules':mock.module, 'mayavi.modules.streamline':mock.module})
+
+try:
+    import yt.mods
+except ImportError:
+    modules.update({'yt':mock, 'yt.mods':mock.module})
+
+sys.modules.update(modules)
 
 # Get configuration information from setup.cfg
 from distutils import config

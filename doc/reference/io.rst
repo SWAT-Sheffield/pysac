@@ -10,7 +10,5 @@ Input / Output
 
 .. automodapi:: pysac.io.gdf_writer
 
-.. automodapi:: pysac.io.util
-
 .. automodapi:: pysac.io.legacy
 
