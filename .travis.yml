@@ -41,6 +41,9 @@ before_install:
     # DOCUMENTATION DEPENDENCIES
     - if [[ $SETUP_CMD == build_sphinx* ]]; then sudo apt-get install graphviz texlive-latex-extra dvipng; fi
 
+    - export DISPLAY=:99.0
+    - sh -e /etc/init.d/xvfb start
+
 install:
 
     # CONDA
