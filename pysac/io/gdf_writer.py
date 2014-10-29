@@ -99,7 +99,7 @@ def create_file(f, simulation_parameters, grid_dimensions,
     GDF is defined here: https://bitbucket.org/yt_analysis/grid_data_format/
     """
     if isinstance(f, basestring):
-        f = h5py.File(f)
+        f = h5py.File(f, 'a')
 
     # "gridded_data_format" group
     g = f.create_group("gridded_data_format")
@@ -112,7 +112,7 @@ def create_file(f, simulation_parameters, grid_dimensions,
 
     # "simulation_parameters" group
     g = f.create_group("simulation_parameters")
-    for key, value in simulation_parameters:
+    for key, value in simulation_parameters.items():
         g.attrs[key] = value
 
 

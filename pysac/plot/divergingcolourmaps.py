@@ -8,7 +8,7 @@ Create Diverging colormaps like (Moreland 2005)
 """
 from __future__ import division
 import numpy as np
-from colormath.color_objects import RGBColor, LabColor
+from colormath.color_objects import BaseRGBColor as RGBColor, LabColor
 
 __all__ = ['get_mpl_colourmap','get_mayavi_colourmap']
 
