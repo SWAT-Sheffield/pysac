@@ -124,7 +124,7 @@ def create_file(f, simulation_parameters, grid_dimensions,
 
     # root datasets -- info about the grids
     f["grid_dimensions"] = grid_dimensions #needs to be 1XN
-    f["grid_left_index"] = np.zeros(3) #needs to be 1XN
+    f["grid_left_index"] = np.zeros((1,3)) #needs to be 1XN
     f["grid_level"] = np.zeros(1)
     # @todo: Fill with proper values
     f["grid_parent_id"] = np.zeros(1)
