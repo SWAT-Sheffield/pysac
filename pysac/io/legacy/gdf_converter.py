@@ -7,7 +7,7 @@ import astropy.units as u
 
 import h5py
 
-from ..gdf_writer import write_field_u, create_file
+from ..gdf_writer import write_field_u, create_file, SimulationParameters
 
 __all__ = ['convert_w_3D', 'convert_w_2D', 'write_gdf']
            
@@ -227,8 +227,18 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
                          x[1][-1,-1,-1].to(u.cm).value,
                          x[2][-1,-1,-1].to(u.cm).value]
 
-    create_file(f, header, domain_left_edge=domain_left_edge,
-                domain_right_edge=domain_right_edge, data_author=data_author,
+
+    simulation_params = SimulationParameters()
+    simulation_params['dimensionality'] = 3
+    simulation_params['domain_dimensions'] = header['nx']
+    simulation_params['current_time'] = header['t']
+    simulation_params['domain_left_edge'] = domain_left_edge
+    simulation_params['domain_right_edge'] = domain_right_edge
+    simulation_params['num_ghost_zones'] = [0]
+    simulation_params['field_ordering'] = 0
+    simulation_params['boundary_conditions'] = np.zeros([6], dtype=int)+2
+
+    create_file(f, simulation_params, x[0].shape, data_author=data_author, 
                 data_comment=data_comment)
 
     #Write the x array
