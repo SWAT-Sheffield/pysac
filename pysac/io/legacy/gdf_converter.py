@@ -180,7 +180,8 @@ def convert_w_2D(w, w_):
     return sac_gdf_output
 
 def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
-              data_author=None, data_comment=None):
+              data_author=None, data_comment=None,
+                collective=False, api='high'):
     """
     Write a gdf file from a vac-data header a w array and an x array.
 
@@ -209,6 +210,12 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
 
     data_comment : (optional) string
         A comment to write to file.
+    
+    collective : bool
+        Use mpi collective driver
+    
+    api : string
+        h5py API to use. ('high' | 'low')
 
     Notes
     -----
@@ -237,6 +244,16 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     simulation_params['num_ghost_zones'] = [0]
     simulation_params['field_ordering'] = 0
     simulation_params['boundary_conditions'] = np.zeros([6], dtype=int)+2
+    
+    simulation_params['eqpar'] = header['eqpar']
+#    simulation_params['gravity0']
+#    simulation_params['gravity1']
+#    simulation_params['gravity2']
+#    simulation_params['nu']
+#    simulation_params['eta']
+#    simulation_params['gamma']
+#    simulation_params['current_iteration']
+    
 
     create_file(f, simulation_params, x[0].shape, data_author=data_author, 
                 data_comment=data_comment)
@@ -247,6 +264,7 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     for field_title,afield in fields.items():
        write_field_u(f, afield['field'], field_title, afield['field_name'],
                    field_shape=header['nx'], arr_slice=arr_slice,
-                   staggering=afield['staggering'])
+                   staggering=afield['staggering'],
+                   collective=False, api='high')
 
     f.close()

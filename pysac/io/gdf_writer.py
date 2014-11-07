@@ -123,7 +123,7 @@ def create_file(f, simulation_parameters, grid_dimensions,
     g = f.create_group("particle_types")
 
     # root datasets -- info about the grids
-    f["grid_dimensions"] = grid_dimensions #needs to be 1XN
+    f["grid_dimensions"] = np.reshape(grid_dimensions, (1, 3)) #needs to be 1XN
     f["grid_left_index"] = np.zeros((1,3)) #needs to be 1XN
     f["grid_level"] = np.zeros(1)
     # @todo: Fill with proper values
@@ -137,7 +137,8 @@ def create_file(f, simulation_parameters, grid_dimensions,
     return f
 
 def write_field_u(gdf_file, data, field_title, field_name, field_shape=None,
-                arr_slice=np.s_[:], staggering=0):
+                arr_slice=np.s_[:], staggering=0,
+                collective=False, api='high'):
     """
     Write a field to an existing gdf file.
 
@@ -172,7 +173,7 @@ def write_field_u(gdf_file, data, field_title, field_name, field_shape=None,
     if not field_shape:
         field_shape = field.shape
 
-    gr.create_dataset(field_title, field_shape, dtype='d')
+    dset = gr.create_dataset(field_title, field_shape, dtype='d')
 
     fv = gdf_file['field_types'].create_group(field_title)
     fv.attrs['field_name'] = field_name
@@ -180,7 +181,13 @@ def write_field_u(gdf_file, data, field_title, field_name, field_shape=None,
     fv.attrs['field_units'] = np.string_(field.unit.to_string("latex").strip('$'))
     fv.attrs['staggering'] = staggering
 
-    gr[field_title][arr_slice] = np.array(field)
+#    gr[field_title][arr_slice] = np.array(field)
+    if api == 'high':
+        _write_dset_high(dset, field, arr_slice, collective=collective)
+    elif api == 'low':
+        _write_dset_low(dset, field, arr_slice, collective=collective)
+    else:
+        raise ValueError("Please specifiy 'high' or 'low'")
 
 def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:],
                 collective=False, api='high'):
