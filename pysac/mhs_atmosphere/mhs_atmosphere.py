@@ -186,17 +186,22 @@ pressure, rho = atm.mhs_3D_profile(z,
                                   )
 magp = (Bx**2 + By**2 + Bz**2)/(2.*physical_constants['mu0'])
 if rank ==0:
-    print'max B corona = ',magp[:,:,-1].max()*scales['energy']                               
+    print'max B corona = ',magp[:,:,-1].max()*scales['energy density']                               
 energy = atm.get_internal_energy(pressure, 
                                                   magp, 
                                                   physical_constants)
 #============================================================================
-# Recombine arrays across processors
+# Save data for SAC and plotting
 #============================================================================
+# set up data directory and file names 
+# may be worthwhile locating on /data if files are large                                                  
 datadir = os.path.expanduser(homedir+'/'+model+'/')
 filename = datadir + model + logical_pars['suffix']
 if not os.path.exists(datadir+model):
     os.makedirs(datadir+model)
+sourcefile = datadir + model + 'sources' + logical_pars['suffix']
+auxfile = datadir + model + 'aux' + logical_pars['suffix']
+
 
 atm.save_SACvariables(model, 
               filename,
@@ -211,3 +216,36 @@ atm.save_SACvariables(model,
               coords, 
               Nxyz
              )
+atm.save_SACsources(model, 
+              sourcefile,
+              Fx,
+              Fy,
+              logical_pars, 
+              physical_constants,
+              scales,
+              coords, 
+              Nxyz
+             )
+
+atm.save_auxilliary1D(
+              model, 
+              auxfile,
+              pressure_m,
+              rho_m,
+              dxB2,
+              dyB2,
+              val,
+              mtw,
+              pressure_Z,
+              rho_Z,
+              Rgas_Z,
+              logical_pars, 
+              physical_constants,
+              scales,
+              coords, 
+              Nxyz
+             )
+Rgas = np.zeros(x.shape)
+Rgas[:] = Rgas_z
+temperature = pressure/rho/Rgas
+

@@ -59,7 +59,7 @@ def interpolate_atmosphere(filenames,
         pdata=np.zeros(nzv+nzm)
         pdata[0:nzv]=VAL3c[:,2]
         pdata[nzv:nzv+nzm]=MTW[:,2]
-        pdata /= scales['energy']
+        pdata /= scales['energy density']
     
         Tdata=np.zeros(nzv+nzm)
         Tdata[0:nzv]=VAL3c[:,3]

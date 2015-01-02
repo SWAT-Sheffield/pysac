@@ -26,12 +26,12 @@ def get_parameters(model, l_mpi, logical_pars, size):
                 'length':lscale, 
                 'density':rhoscale,
                 'velocity':uscale,
-                'energy':escale, 
+                'energy density':escale, 
                 'time':tmscale, 
                 'mass':mscale,
                 'temperature':Tscale,
                 'magnetic':Bscale,
-                'force':Fscale
+                'force density':Fscale
                }
     if logical_pars['l_CGS']:
         lscale   = 1e8                     #cm
@@ -48,12 +48,12 @@ def get_parameters(model, l_mpi, logical_pars, size):
                 'length':lscale, 
                 'density':rhoscale,
                 'velocity':uscale,
-                'energy':escale, 
+                'energy density':escale, 
                 'time':tmscale, 
                 'mass':mscale,
                 'temperature':Tscale,
                 'magnetic':Bscale,
-                'force':Fscale
+                'force density':Fscale
                }
 #============================================================================
 # physical constants
