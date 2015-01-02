@@ -395,5 +395,41 @@ def save_auxilliary1D(
                               '3D_mag_tension_y',
                               'y-component bg magnetic tension' 
                               )
+        gdf.write_field_u(gdf_file,
+                              val[:,0]*u.Unit('m'), 
+                              'val3c_z',
+                              'Height of VAL data' 
+                              )
+        gdf.write_field_u(gdf_file,
+                              val[:,1]*u.Unit('kg/m^3'), 
+                              'val3c_density',
+                              'VAL plasma density data' 
+                              )
+        gdf.write_field_u(gdf_file,
+                              val[:,2]*u.Unit('Pa'), 
+                              'val3c_pressure',
+                              'VAL plasma pressure data' 
+                              )
+        gdf.write_field_u(gdf_file,
+                              val[:,3]*u.Unit('K'), 
+                              'val3c_temperature',
+                              'VAL temperature data' 
+                              )
+        gdf.write_field_u(gdf_file,
+                              mtw[:,0]*u.Unit('m'), 
+                              'mtw_z',
+                              'Height of MTW data' 
+                              )
+        gdf.write_field_u(gdf_file,
+                              mtw[:,2]*u.Unit('Pa'), 
+                              'mtw_pressure',
+                              'MTW plasma pressure data' 
+                              )
+        gdf.write_field_u(gdf_file,
+                              mtw[:,1]*u.Unit('K'), 
+                              'mtw_temperature',
+                              'MTW temperature data' 
+                              )
+       
     
         gdf_file.close()
