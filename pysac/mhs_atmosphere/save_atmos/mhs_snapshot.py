@@ -285,6 +285,10 @@ def save_auxilliary1D(
                     auxfile,
                     pressure_m,
                     rho_m,
+                    temperature,
+                    pbeta,
+                    alfven,
+                    cspeed,
                     dxB2,
                     dyB2,
                     val,
@@ -310,6 +314,10 @@ def save_auxilliary1D(
         gather_vars = [
                        pressure_m,
                        rho_m,
+                       temperature,
+                       pbeta,
+                       alfven,
+                       cspeed,
                        dxB2,
                        dyB2
                       ]
@@ -322,7 +330,8 @@ def save_auxilliary1D(
             for cvar in concat_vars:
                 out_vars.append(np.concatenate(cvar, axis=0))
     
-            pressure_m, rho_m, dxB2, dyB2 = out_vars
+            pressure_m, rho_m, temperature, pbeta,\
+                alfven, cspeed, dxB2, dyB2 = out_vars
     if rank == 0:
 #    
         grid_dimensions = [[Nxyz[0], Nxyz[1], Nxyz[2]]]
@@ -384,6 +393,26 @@ def save_auxilliary1D(
                               rho_m*scales['density']*u.Unit('kg/m^3'), 
                               '3D_plasma_density_balance',
                               'Background magneto-density balance' 
+                              )
+        gdf.write_field_u(gdf_file, 
+                              temperature*scales['temperature']*u.Unit('K'), 
+                              '3D_temperature',
+                              'Background temperature' 
+                              )
+        gdf.write_field_u(gdf_file,
+                              pbeta*u.Unit(''), 
+                              '3D_plasma_beta',
+                              'Background plasma beta' 
+                              )
+        gdf.write_field_u(gdf_file, 
+                              alfven*scales['velocity']*u.Unit('m/s'), 
+                              '3D_Alfven_speed',
+                              'Background Alfven speed' 
+                              )
+        gdf.write_field_u(gdf_file,
+                              cspeed*scales['velocity']*u.Unit('m/s'), 
+                              '3D_sound_speed',
+                              'Background sound speed' 
                               )
         gdf.write_field_u(gdf_file, 
                               dxB2*scales['energy density']*u.Unit('Pa'), 

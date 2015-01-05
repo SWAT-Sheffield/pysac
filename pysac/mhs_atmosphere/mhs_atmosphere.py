@@ -116,18 +116,18 @@ if l_mpi:
     z = comm.scatter(z_chunks, root=0)
 else:
     x, y, z = ax, ay, az
-# initialize zero arrays in which to add magnetic adjustments     
-Bx   = np.zeros(x.shape) 
-By   = np.zeros(x.shape)
-Bz   = np.zeros(x.shape)
-pressure_m = np.zeros(x.shape)
-rho_m = np.zeros(x.shape)
-Fx   = np.zeros(x.shape)
-Fy   = np.zeros(x.shape)
-#Fxta  = np.zeros(x.shape)
-#Fyta  = np.zeros(x.shape)
-dxB2  = np.zeros(x.shape)
-dyB2  = np.zeros(x.shape)
+# initialize zero arrays in which to add magnetic field and mhs adjustments     
+Bx   = np.zeros(x.shape)  # magnetic x-component 
+By   = np.zeros(x.shape)  # magnetic y-component
+Bz   = np.zeros(x.shape)  # magnetic z-component
+pressure_m = np.zeros(x.shape) # magneto-hydrostatic adjustment to pressure
+rho_m = np.zeros(x.shape)      # magneto-hydrostatic adjustment to density
+# initialize zero arrays in which to add balancing forces and magnetic tension    
+Fx   = np.zeros(x.shape)  # balancing force x-component
+Fy   = np.zeros(x.shape)  # balancing force y-component
+# total tension force for comparison with residual balancing force 
+Btensx  = np.zeros(x.shape) 
+Btensy  = np.zeros(x.shape)
 #==============================================================================
 #calculate the magnetic field and pressure/density balancing expressions
 #==============================================================================
@@ -145,12 +145,11 @@ for i in range(0,model_pars['nftubes']):
                                              scales
                                             )
             Bx, By, Bz = Bxi+Bx, Byi+By ,Bzi+Bz
-            dxB2 += B2x
-            dyB2 += B2y  
+            Btensx += B2x
+            Btensy += B2y  
             pressure_m += pressure_mi
             rho_m += rho_mi
         else:
-#            fph, frhoh, Fx, Fy, B2x, B2y, Fxa, Fya =\
             pressure_mi, rho_mi, Fxi, Fyi, B2x, B2y =\
                 atm.construct_pairwise_field(
                                              x, y, z,
@@ -165,14 +164,8 @@ for i in range(0,model_pars['nftubes']):
             rho_m += rho_mi
             Fx   += Fxi
             Fy   += Fyi
-#            Fxta  += Fxa
-#            Fyta  += Fya
-            dxB2 += B2x
-            dyB2 += B2y  
-#
-#if rank == 0:
-#    time6 = time.clock()
-#    print'iterate time = ',(time6 - time5),' seconds'
+            Btensx += B2x
+            Btensy += B2y  
 
 # select the 1D array spanning the local mpi process 
 indz = np.where(coords['Z'] >= z.min()) and np.where(coords['Z'] <= z.max())
@@ -202,7 +195,7 @@ if not os.path.exists(datadir+model):
 sourcefile = datadir + model + 'sources' + logical_pars['suffix']
 auxfile = datadir + model + 'aux' + logical_pars['suffix']
 
-
+# save the variables for the initialisation of a SAC simulation
 atm.save_SACvariables(model, 
               filename,
               rho,
@@ -216,6 +209,7 @@ atm.save_SACvariables(model,
               coords, 
               Nxyz
              )
+# save the balancing forces as the background source terms for SAC simulation
 atm.save_SACsources(model, 
               sourcefile,
               Fx,
@@ -226,14 +220,30 @@ atm.save_SACsources(model,
               coords, 
               Nxyz
              )
-
+# save auxilliary variable and 1D profiles for plotting and analysis
+Rgas = np.zeros(x.shape)
+Rgas[:] = Rgas_z
+temperature = pressure/rho/Rgas
+if not logical_pars['l_hdonly']:    
+    inan = np.where(magp <=1e-7*pressure.min())
+    magpbeta = magp
+    magpbeta[inan] = 1e-7*pressure.min()
+    pbeta  = pressure/magpbeta
+else:
+    pbeta  = magp+1.0    
+alfven = np.sqrt(2.*physical_constants['mu0']*magp/rho)
+cspeed = np.sqrt(physical_constants['gamma']*pressure/rho)
 atm.save_auxilliary1D(
               model, 
               auxfile,
               pressure_m,
               rho_m,
-              dxB2,
-              dyB2,
+              temperature,
+              pbeta,
+              alfven,
+              cspeed,
+              Btensx,
+              Btensy,
               val,
               mtw,
               pressure_Z,
@@ -245,7 +255,4 @@ atm.save_auxilliary1D(
               coords, 
               Nxyz
              )
-Rgas = np.zeros(x.shape)
-Rgas[:] = Rgas_z
-temperature = pressure/rho/Rgas
 

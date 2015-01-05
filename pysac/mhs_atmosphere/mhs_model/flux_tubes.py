@@ -93,35 +93,28 @@ def construct_magnetic_field(
     G02 = G0*G0
     B0z3 = B0z2*B0z
     B0z4 = B0z3*B0z
-#    fxyz2 = fxyz*fxyz
-    G0f02  = G0/f02
-    #Define x-derivatives
+    B10dz2 = B10dz**2
+    #Define derivatives of Bx
     dxBx = - S * (B10dz * B0z * G0) \
-           + 2 * S * (x-x0)**2       * B10dz * B0z3 * G0f02  
-    dxBy =   2 * S * (x-x0) * (y-y0) * B10dz * B0z3 * G0f02  
-    dxBz = - 2 * S * (x-x0) *                  B0z4 * G0f02 
-    #Define y-derivatives
+           + 2 * S * (x-x0)**2       * B10dz * B0z3 * G0/f0  
+    dyBx =   2 * S * (x-x0) * (y-y0) * B10dz * B0z3 * G0/f0  
+    dzBx = - 2 * S * (x-x0) * (B0z*B20dz + (1. + 2.*fxyz/f0)*B10dz2)*G0
+    #Define derivatives By
     dyBy = - S * (B10dz * B0z * G0) \
-           + 2 * S * (y-y0)**2       * B10dz * B0z3 * G0f02  
-    dyBx =   2 * S * (x-x0) * (y-y0) * B10dz * B0z3 * G0f02  
-    dyBz = - 2 * S * (y-y0) *                  B0z4 * G0f02 
+           + 2 * S * (y-y0)**2       * B10dz * B0z3 * G0/f0  
+    dxBy =   2 * S * (x-x0) * (y-y0) * B10dz * B0z3 * G0/f0  
+    dzBy = - 2 * S * (y-y0) * (B0z*B20dz + (1. + 2.*fxyz/f0)*B10dz2)*G0
     #Magnetic Pressure and horizontal thermal pressure balance term
-#    magp = (Bx**2 + By**2 + Bz**2)/(2. * mu0) B1z = Bf1 * z1 /(z + z1)
-#        B2z = Bf2 * z2**2 / (z**2 + z2**2)
-#        B0z = B1z + B2z
-#        B10dz= - B1z**2/z1    - 2 * z * B2z**2/z2**2 
-#        B20dz= 2*B1z**3/z1**2 + 8*z**2* B2z**3/z2**4 - 2 *   B2z**2/z2**2 
-#        B30dz=-6*B1z*
     pbbal= 0.5/mu0 * S**2 * G02 * (
            f02*B0z*B20dz + 2*fxyz*B10dz**2 - B0z4 )
-        #density balancing B
+    #density balancing B
     rho_1 = \
             S**2 * G02 / mu0 /g0 * (
             (0.5*f02 + 2*fxyz) * B10dz*B20dz + 0.5*f02 * B0z*B30dz 
              - 2. * B0z3*B10dz 
             )
-    B2x = (Bx * dxBx + By * dxBy + Bz * dxBz)/mu0
-    B2y = (Bx * dyBx + By * dyBy + Bz * dyBz)/mu0
+    B2x = (Bx * dxBx + By * dyBx + Bz * dzBx)/mu0
+    B2y = (Bx * dxBy + By * dyBy + Bz * dzBy)/mu0
     
     print"pbbal.max() = ",pbbal.max()
     return pbbal, rho_1, Bx, By, Bz, B2x, B2y
@@ -183,6 +176,7 @@ def construct_pairwise_field(x, y, z,
     f02 = f0*f0
     G0i = np.exp(fxyzi/f02)     
     G0j = np.exp(fxyzj/f02)     
+    G0ij = G0i*G0j
 #Define Field
     Bxi = -Si * (x-xi) * (B10dz * B0z * G0i) 
     Byi = -Si * (y-yi) * (B10dz * B0z * G0i) 
@@ -194,15 +188,14 @@ def construct_pairwise_field(x, y, z,
     B0z2 = B0z*B0z
     B0z3 = B0z2*B0z
     B0z4 = B0z3*B0z
-    G0f02i = G0i/f02
-    G0f02j = G0j/f02
+
 
         #Magnetic Pressure and horizontal thermal pressure balance term
-    pbbal= 0.5*Si*Sj*G0i*G0j*(f02*(B10dz2 +
+    pbbal= 0.5*Si*Sj*G0ij*(f02*(B10dz2 +
                            B0z*B20dz)-B0z4)/mu0      
         #density balancing B
     rho_1 = \
-            2.*Si*Sj*G0i*G0j*BB10dz*(
+            2.*Si*Sj*G0ij*BB10dz*(
             + (fxyzi + fxyzj) * (B10dz2/B0z2 + B20dz/B0z)
             - ((fxyzi + fxyzj)/f02 + 2.) * B0z2 
             + 0.5*f02 * (3.*B20dz/B0z + B30dz/B10dz)
@@ -210,44 +203,37 @@ def construct_pairwise_field(x, y, z,
             1. + (fxyzi + fxyzj)/f02) * B10dz2 + BB20dz - B0z4/f02)
             )
     rho_1 /= (g0 * mu0)
-    Fx   = Si * G0i * (x-xi) * (Sj*B0z2*G0j) * (
-           2*fxyzi/f02*BB10dz2)/mu0 \
-         + Sj * G0j * (x-xj) * (Si*B0z2*G0i + Bbz) * (
-           2*fxyzj/f02*BB10dz2)/mu0 
-    Fy   = Si * G0i * (y-yi) * (Sj*B0z2*G0j + Bbz) * (
-           2*fxyzi/f02*BB10dz2)/mu0 \
-         + Sj * G0j * (y-yj) * (Si*B0z2*G0i + Bbz) * (
-           2*fxyzj/f02*BB10dz2)/mu0 
-#    Fxa  = Si * G0i * (x-xi) * (Sj*B0z2*G0j + Bbz) * (
-#           2*fxyzi2/f02*B10dz2)/mu0 \
-#         + Sj * G0j * (x-xj) * (Si*B0z2*G0i + Bbz) * (
-#           2*fxyzj2/f02*B10dz2)/mu0 
-#    Fya  = Si * G0i * (y-yi) * (Sj*B0z2*G0j + Bbz) * (
-#           2*fxyzi2/f02*B10dz2)/mu0 \
-#         + Sj * G0j * (y-yj) * (Si*B0z2*G0i + Bbz) * (
-#           2*fxyzj2/f02*B10dz2)/mu0 
-    #Define x-derivatives
+    Fx   = - 2*Si*Sj/mu0 * G0ij*BB10dz2*B0z2 * (
+               (x-xi) * fxyzi/f02
+             + (x-xj) * fxyzj/f02
+                                               )
+    Fy   = - 2*Si*Sj/mu0 * G0ij*BB10dz2*B0z2 * (
+               (y-yi) * fxyzi/f02
+             + (y-yj) * fxyzj/f02
+                                               )
+    #Define derivatives of Bx
     dxiBx = - Si * (BB10dz * G0i) \
-           + 2 * Si * (x-xi)**2       * B10dz * B0z3 * G0f02i  
-    dxiBy =   2 * Si * (x-xi) * (y-yi) * B10dz * B0z3 * G0f02i  
-    dxiBz = - 2 * Si * (x-xi) *                  B0z4 * G0f02i 
-    dyiBy = - Si * (BB10dz * G0i) \
-           + 2 * Si * (y-yi)**2       * B10dz * B0z3 * G0f02i  
-    dyiBx =   2 * Si * (x-xi) * (y-yi) * B10dz * B0z3 * G0f02i  
-    dyiBz = - 2 * Si * (y-yi) *                  B0z4 * G0f02i 
+            + 2 * Si * (x-xi)**2       * B10dz * B0z3 * G0i/f0  
+    dyiBx =   2 * Si * (x-xi) * (y-yi) * B10dz * B0z3 * G0i/f0  
+    dziBx = -     Si * (x-xi) * (B0z*B20dz + (1. + 2.*fxyzi/f0)*B10dz2)*G0i 
     dxjBx = - Sj * (BB10dz * G0j) \
-           + 2 * Sj * (x-xj)**2       * B10dz * B0z3 * G0f02j  
-    dxjBy =   2 * Sj * (x-xj) * (y-yj) * B10dz * B0z3 * G0f02j  
-    dxjBz = - 2 * Sj * (x-xj) *                  B0z4 * G0f02j 
-    dyjBy = - Sj * (BB10dz * G0j) \
-           + 2 * Sj * (y-yj)**2       * B10dz * B0z3 * G0f02j  
-    dyjBx =   2 * Sj * (x-xj) * (y-yj) * B10dz * B0z3 * G0f02j  
-    dyjBz = - 2 * Sj * (y-yj) *                  B0z4 * G0f02j 
-    B2x = (Bxi * dxjBx + Byi * dxjBy + Bzi * dxjBz 
-         + Bxj * dxiBx + Byj * dxiBy + Bzj * dxiBz)/mu0
-    B2y = (Bxi * dyjBx + Byi * dyjBy + Bzi * dyjBz 
-         + Bxj * dyiBx + Byj * dyiBy + Bzj * dyiBz)/mu0
+            + 2 * Sj * (x-xj)**2       * B10dz * B0z3 * G0j/f0  
+    dyjBx =   2 * Sj * (x-xj) * (y-yj) * B10dz * B0z3 * G0j/f0  
+    dzjBx = -     Sj * (x-xj) * (B0z*B20dz + (1. + 2.*fxyzj/f0)*B10dz2)*G0j 
+    #Define derivatives By
+    dxiBy = - Si * (BB10dz * G0i) \
+            + 2 * Si * (y-yi)**2       * B10dz * B0z3 * G0i/f0  
+    dyiBy =   2 * Si * (x-xi) * (y-yi) * B10dz * B0z3 * G0i/f0  
+    dziBy = -     Si * (y-yi) * (B0z*B20dz + (1. + 2.*fxyzi/f0)*B10dz2)*G0i 
+    dxjBy = - Sj * (BB10dz * G0j) \
+            + 2 * Sj * (y-yj)**2       * B10dz * B0z3 * G0j/f0  
+    dyjBy =   2 * Sj * (x-xj) * (y-yj) * B10dz * B0z3 * G0j/f0  
+    dzjBy = -     Sj * (y-yj) * (B0z*B20dz + (1. + 2.*fxyzj/f0)*B10dz2)*G0j 
+    B2x = (Bxi * dxjBx + Byi * dyjBx + Bzi * dzjBx 
+         + Bxj * dxiBx + Byj * dyiBx + Bzj * dziBx)/mu0
+    B2y = (Bxi * dxjBy + Byi * dyjBy + Bzi * dzjBy 
+         + Bxj * dxiBy + Byj * dyiBy + Bzj * dziBy)/mu0
 
     print"pbbal.max() = ",pbbal.max()
-    return pbbal, rho_1, Fx, Fy, B2x, B2y#, Fxa, Fya
+    return pbbal, rho_1, Fx, Fy, B2x, B2y
     
