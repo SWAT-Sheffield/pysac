@@ -138,21 +138,21 @@ def get_spruit_hs(
             pdata_i = 1.1*pdata_[0]\
                          *np.exp(-4.0*Z/model_pars['chrom_scale'])
             rdata_i = 0.5*rdata_[0]\
-                         *np.exp(-4.*Z/model_pars['chrom_scale'])
-        elif logical_pars['l_sqrt']:
-            pdata_i = 1.1*pdata_[0]/(1+Z)\
                          *np.exp(-4.0*Z/model_pars['chrom_scale'])
-            rdata_i = 0.5*rdata_[0]/(1+Z)\
+        elif logical_pars['l_sqrt']:
+            pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**0.25\
+                         *np.exp(-4.0*Z/model_pars['chrom_scale'])
+            rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**0.25\
                          *np.exp(-4.*Z/model_pars['chrom_scale'])
         elif logical_pars['l_linear']:
-            pdata_i = 1.1*pdata_[0]/(1+Z**2)\
+            pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**1\
                          *np.exp(-4.0*Z/model_pars['chrom_scale'])
-            rdata_i = 0.5*rdata_[0]/(1+Z**2)\
+            rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**1\
                          *np.exp(-4.*Z/model_pars['chrom_scale'])
         elif logical_pars['l_square']:
-            pdata_i = 1.1*pdata_[0]/(1+Z**4)\
+            pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**2\
                          *np.exp(-4.0*Z/model_pars['chrom_scale'])
-            rdata_i = 0.5*rdata_[0]/(1+Z**4)\
+            rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**2\
                          *np.exp(-4.*Z/model_pars['chrom_scale'])
         else:
             import sys

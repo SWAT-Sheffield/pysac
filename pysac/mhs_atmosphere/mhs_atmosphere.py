@@ -58,8 +58,8 @@ VAL = os.path.join(cwd, 'hs_model/VALIIIC.dat')
 MTW = os.path.join(cwd, 'hs_model/mcwhirter.dat')
 
 filenames = [VAL, MTW]
-# uncomment and switch to l_sqrt/l_linear/l_square as required  
-logical_pars['l_const'] = True 
+# uncomment and switch to l_const/l_sqrt/l_linear/l_square as required  
+logical_pars['l_square'] = True 
 #interpolate the hs 1D profiles from empirical data source[s] 
 pressure_1d, temperature_1d, rho_1d, muofT_1d, [val ,mtw] = \
     atm.interpolate_atmosphere(

@@ -68,7 +68,7 @@ def get_model(model,
         phratio    = 0.0
         chratio    = 1 - coratio - phratio
         pixel_SI   = 1e5              #(HMI pixel)
-        f0_SI      = 4.4e4
+        f0_SI      = 2.5e4
         nftubes    = 1
         B_corona_SI= 0.
         pBplus_SI  = 4.250e-4
