@@ -6,6 +6,7 @@ Created on Thu Dec 11 17:45:48 2014
 """
 
 import numpy as np
+import sys
 
 def get_model(model, 
               Nxyz,
@@ -32,7 +33,7 @@ def get_model(model,
               'Z':Z,
               'Zext':Zext
              }
-    if model == 'mfe_setup':
+    if model == 'hmi_model':
         save_gdf   = model+logical_pars['suffix']
         z_phot_SI  = 6e5
         z_chrom_SI = 3.1e5
@@ -45,24 +46,53 @@ def get_model(model,
         nftubes    = 1
         B_corona_SI= 0.
         pBplus_SI  = 4.250e-4
-        if logical_pars['l_CGS']:
-            B_corona_SI, pBplus_SI = B_corona_SI*1e4, pBplus_SI*1e4
-            z_phot_SI, z_chrom_SI = z_phot_SI*1e2, z_chrom_SI*1e2
-            z_cor_SI, f0_SI, pixel_SI = z_cor_SI*1e2, f0_SI*1e2, pixel_SI*1e2
-        model_pars = {
-                      'save_gdf':save_gdf,
-                      'pixel':pixel_SI/scales['length'],
-                      'photo_scale':z_phot_SI/scales['length'], 
-                      'chrom_scale':z_chrom_SI/scales['length'], 
-                      'corona_scale':z_cor_SI/scales['length'], 
-                      'radial_scale':f0_SI/scales['length'], 
-                      'phratio':phratio,
-                      'coratio':coratio,
-                      'chratio':chratio,
-                      'B_corona':B_corona_SI/scales['magnetic'],
-                      'pBplus':pBplus_SI/scales['magnetic'],
-                      'nftubes':nftubes
-                     }
+    elif model == 'mfe_setup':
+        save_gdf   = model+logical_pars['suffix']
+        z_phot_SI  = 6e5
+        z_chrom_SI = 3.1e5
+        z_cor_SI   = 1e8                    #scale height for the corona
+        coratio    = 0.075 
+        phratio    = 0.0
+        chratio    = 1 - coratio - phratio
+        pixel_SI   = 365624.75              #(HMI pixel)
+        f0_SI      = 4.4e4
+        nftubes    = 1
+        B_corona_SI= 0.
+        pBplus_SI  = 4.250e-4
+    elif model == 'spruit':
+        save_gdf   = model+logical_pars['suffix']
+        z_phot_SI  = 1.5e6
+        z_chrom_SI = 1.5e6
+        z_cor_SI   = 1e8                    #scale height for the corona
+        coratio    = 0.0 
+        phratio    = 0.0
+        chratio    = 1 - coratio - phratio
+        pixel_SI   = 1e5              #(HMI pixel)
+        f0_SI      = 4.4e4
+        nftubes    = 1
+        B_corona_SI= 0.
+        pBplus_SI  = 4.250e-4
+    else:
+        sys.exit('in parameters.model_pars.get_model, \
+                  set model parameters for model '+model)
+    if logical_pars['l_CGS']:
+        B_corona_SI, pBplus_SI = B_corona_SI*1e4, pBplus_SI*1e4
+        z_phot_SI, z_chrom_SI = z_phot_SI*1e2, z_chrom_SI*1e2
+        z_cor_SI, f0_SI, pixel_SI = z_cor_SI*1e2, f0_SI*1e2, pixel_SI*1e2
+    model_pars = {
+                  'save_gdf':save_gdf,
+                  'pixel':pixel_SI/scales['length'],
+                  'photo_scale':z_phot_SI/scales['length'], 
+                  'chrom_scale':z_chrom_SI/scales['length'], 
+                  'corona_scale':z_cor_SI/scales['length'], 
+                  'radial_scale':f0_SI/scales['length'], 
+                  'phratio':phratio,
+                  'coratio':coratio,
+                  'chratio':chratio,
+                  'B_corona':B_corona_SI/scales['magnetic'],
+                  'pBplus':pBplus_SI/scales['magnetic'],
+                  'nftubes':nftubes
+                 }
 
 #==============================================================================             
-        return coords, model_pars             
+    return coords, model_pars             

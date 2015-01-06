@@ -27,6 +27,10 @@ def get_logical(model, l_mpi, l_SI=True, l_gdf=True):
     l_hdonly      = False  # set magnetic field to zero to check background
     l_ambB        = False  # include some ambient magnetic field b_z
     l_spruit      = False  # thin flux tube model to check Spruit
+    l_const       = False  # axial Alfven speed const  dependence on Z (Spruit)
+    l_sqrt        = False  # axial Alfven speed sqrt   dependence on Z (Spruit)
+    l_linear      = False  # axial Alfven speed linear dependence on Z (Spruit)
+    l_square      = False  # axial Alfven speed square dependence on Z (Spruit)
     l_B0_expz     = False  # vertical strength of Bz(r=0) follows exponentials
     l_B0_quadz    = False  # vertical strength of Bz(r=0) follows polynomials 
                            # + coronal exponential    
@@ -94,7 +98,11 @@ def get_logical(model, l_mpi, l_SI=True, l_gdf=True):
                     'l_CGS':            l_CGS               , 
                     'l_hdonly':         l_hdonly            , 
                     'l_ambB':           l_ambB              , 
-                    'l_spruit':         l_spruit            , 
+                    'l_spruit':         l_spruit            ,
+                    'l_const':          l_const             ,         
+                    'l_sqrt':           l_sqrt              ,         
+                    'l_linear':         l_linear            ,         
+                    'l_square':         l_square            ,          
                     'l_B0_expz':        l_B0_expz           ,   
                     'l_B0_quadz':       l_B0_quadz          ,   
                     'l_single':         l_single            ,  

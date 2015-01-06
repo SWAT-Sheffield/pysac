@@ -28,7 +28,7 @@ except ImportError:
 #==============================================================================
 #set up model parameters
 #==============================================================================
-model = 'mfe_setup'
+model = 'spruit'
 
 local_procs=1
 #standard set of logical switches
@@ -39,7 +39,7 @@ scales, physical_constants = \
     atm.get_parameters(model, l_mpi, logical_pars, size)
 
 #if 1D or 2D set unused dimensions to 0, and unrequired xyz limits to 1. 
-Nxyz = [128,128,128] # 3D grid
+Nxyz = [129,129,129] # 3D grid
 xyz_SI = [-1e6,1e6,-1e6,1e6,3.5e4,1.6e6] # xyz limits SI/CGS units    
 
 #obtain code coordinates and model parameters in code units
@@ -58,6 +58,8 @@ VAL = os.path.join(cwd, 'hs_model/VALIIIC.dat')
 MTW = os.path.join(cwd, 'hs_model/mcwhirter.dat')
 
 filenames = [VAL, MTW]
+# uncomment and switch to l_sqrt/l_linear/l_square as required  
+logical_pars['l_const'] = True 
 #interpolate the hs 1D profiles from empirical data source[s] 
 pressure_1d, temperature_1d, rho_1d, muofT_1d, [val ,mtw] = \
     atm.interpolate_atmosphere(
@@ -188,12 +190,12 @@ energy = atm.get_internal_energy(pressure,
 #============================================================================
 # set up data directory and file names 
 # may be worthwhile locating on /data if files are large                                                  
-datadir = os.path.expanduser(homedir+'/'+model+'/')
+datadir = os.path.expanduser(homedir+'/mhs_atmosphere/'+model+'/')
 filename = datadir + model + logical_pars['suffix']
-if not os.path.exists(datadir+model):
-    os.makedirs(datadir+model)
-sourcefile = datadir + model + 'sources' + logical_pars['suffix']
-auxfile = datadir + model + 'aux' + logical_pars['suffix']
+if not os.path.exists(datadir):
+    os.makedirs(datadir)
+sourcefile = datadir + model + '_sources' + logical_pars['suffix']
+auxfile = datadir + model + '_aux' + logical_pars['suffix']
 
 # save the variables for the initialisation of a SAC simulation
 atm.save_SACvariables(model, 
