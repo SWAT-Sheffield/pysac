@@ -3,8 +3,28 @@
 Created on Thu Dec 11 13:55:17 2014
 
 @author: sm1fg
-"""
 
+This is the main module to construct a magnetohydrostatic solar atmosphere, 
+given a specified magnetic network of self-similar magnetic flux tubes and 
+save the output to gdf format.
+
+To select an existing configuration set the model label, Nxyz, xyz_SI and
+any other special parameters, then execute mhs_atmopshere.
+
+To add new configurations:
+add the model label options to get_logical in parameters/logical.py; 
+add options to get_model in parameters/model_pars.py;
+add alternative empirical data sets to hs_model/; 
+add option to interpolate_atmosphere in hs_model/hs_atmosphere.py;
+add option to get_flux_tubes in mhs_model/flux_tubes.py 
+
+If an alternative formulation of the flux tube is required add options to 
+construct_magnetic_field and construct_pairwise_field in 
+mhs_model/flux_tubes.py
+
+Plotting options are included in plot/mhs_plot.py
+"""
+print'test 1'
 import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
@@ -74,6 +94,8 @@ pressure_1d, temperature_1d, rho_1d, muofT_1d, [val ,mtw] = \
 #==============================================================================
 #calculate 1d hydrostatic balance from empirical density profile
 #==============================================================================
+# the hs pressure balance is enhanced by pressure equivalent to the residual mean 
+# coronal magnetic pressure contribution once the magnetic field is applied
 magp_meanz = np.zeros(len(coords['Z']))
 magp_meanz[:] = model_pars['pBplus']**2/(2*physical_constants['mu0'])
 
@@ -93,6 +115,7 @@ pressure_Z, rho_Z, Rgas_Z = atm.vertical_profile(
 #==============================================================================
 # load flux tube footpoint parameters
 #==============================================================================                                         
+# axial location and value of Bz at each footpoint
 xi, yi, Si = atm.get_flux_tubes(
                                  model,
                                  model_pars,
@@ -118,7 +141,9 @@ if l_mpi:
     z = comm.scatter(z_chunks, root=0)
 else:
     x, y, z = ax, ay, az
+#==============================================================================                                         
 # initialize zero arrays in which to add magnetic field and mhs adjustments     
+#==============================================================================                                         
 Bx   = np.zeros(x.shape)  # magnetic x-component 
 By   = np.zeros(x.shape)  # magnetic y-component
 Bz   = np.zeros(x.shape)  # magnetic z-component
@@ -169,6 +194,11 @@ for i in range(0,model_pars['nftubes']):
             Btensx += B2x
             Btensy += B2y  
 
+# clear some memory
+del pressure_mi, rho_mi, Bxi, Byi ,Bzi, B2x, B2y
+#==============================================================================
+# Construct 3D hs arrays and then add the mhs adjustments to obtain atmosphere
+#==============================================================================
 # select the 1D array spanning the local mpi process 
 indz = np.where(coords['Z'] >= z.min()) and np.where(coords['Z'] <= z.max())
 pressure_z, rho_z, Rgas_z = pressure_Z[indz], rho_Z[indz], Rgas_Z[indz] 
@@ -229,10 +259,10 @@ temperature = pressure/rho/Rgas
 if not logical_pars['l_hdonly']:    
     inan = np.where(magp <=1e-7*pressure.min())
     magpbeta = magp
-    magpbeta[inan] = 1e-7*pressure.min()
+    magpbeta[inan] = 1e-7*pressure.min()  # low pressure floor to avoid NaN 
     pbeta  = pressure/magpbeta
 else:
-    pbeta  = magp+1.0    
+    pbeta  = magp+1.0    #dummy to avoid NaN
 alfven = np.sqrt(2.*physical_constants['mu0']*magp/rho)
 cspeed = np.sqrt(physical_constants['gamma']*pressure/rho)
 atm.save_auxilliary1D(
