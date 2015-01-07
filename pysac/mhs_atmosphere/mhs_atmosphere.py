@@ -24,7 +24,7 @@ mhs_model/flux_tubes.py
 
 Plotting options are included in plot/mhs_plot.py
 """
-print'test 1'
+
 import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
