@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This file defines a dictionary that holds the gdf parameters for a 3D MHD varible set in SAC
+This file defines a dictionary that holds the gdf parameters for a 3D MHD variable set in SAC
 """
 
 sac_gdf_output = {
