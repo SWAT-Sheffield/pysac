@@ -28,7 +28,7 @@ Plotting options are included in plot/mhs_plot.py
 import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
-
+import astropy.units as u
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -48,7 +48,7 @@ except ImportError:
 #==============================================================================
 #set up model parameters
 #==============================================================================
-model = 'spruit'
+model = 'mfe_setup'
 
 local_procs=1
 #standard set of logical switches
@@ -60,7 +60,7 @@ scales, physical_constants = \
 
 #if 1D or 2D set unused dimensions to 0, and unrequired xyz limits to 1.
 Nxyz = [129,129,129] # 3D grid
-xyz_SI = [-1e6,1e6,-1e6,1e6,3.5e4,1.6e6] # xyz limits SI/CGS units
+xyz_SI = [-1*u.Mm,1*u.Mm,-1*u.Mm,1*u.Mm,35*u.km,1.6*u.Mm] # xyz limits SI/CGS units
 
 #obtain code coordinates and model parameters in code units
 coords, model_pars = atm.get_model(
@@ -81,7 +81,7 @@ from pysac.mhs_atmosphere.hs_model import MTWcorona_data as MTW
 
 filenames = [VAL, MTW]
 # uncomment and switch to l_const/l_sqrt/l_linear/l_square as required
-logical_pars['l_square'] = True
+logical_pars['l_const'] = True
 #interpolate the hs 1D profiles from empirical data source[s]
 pressure_1d, temperature_1d, rho_1d, muofT_1d, [val ,mtw] = \
     atm.interpolate_atmosphere(

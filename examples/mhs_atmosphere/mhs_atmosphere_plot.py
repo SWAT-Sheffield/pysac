@@ -9,7 +9,7 @@ import glob
 
 import yt
 
-model = 'spruit'
+model = 'mfe_setup'
 datadir = os.path.expanduser('~/mhs_atmosphere/'+model+'/')
 
 files = glob.glob(datadir+'/*')
@@ -20,5 +20,5 @@ print(files)
 
 ds = yt.load(files[0])
 
-slc = yt.SlicePlot(ds, fields='density_bg', normal='x')
+slc = yt.SlicePlot(ds, fields='mag_field_y_bg', normal='x')
 slc.save('~/yt.png')
