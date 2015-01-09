@@ -72,10 +72,12 @@ coords, model_pars = atm.get_model(
                                   )    
 #identify location of source data files
 homedir = os.environ['HOME']
-cwd = os.path.dirname(__file__)
+#cwd = os.path.dirname(__file__)
 #cwd = homedir+'/Dropbox/multi_tube/python/allpapers/'
-VAL = os.path.join(cwd, 'hs_model/VALIIIC.dat')
-MTW = os.path.join(cwd, 'hs_model/mcwhirter.dat')
+from pysac.mhs_atmosphere.hs_model import VALIIIc_data as VAL
+from pysac.mhs_atmosphere.hs_model import MTWcorona_data as MTW
+#VAL = os.path.join(cwd, 'hs_model/VALIIIC.dat')
+#MTW = os.path.join(cwd, 'hs_model/mcwhirter.dat')
 
 filenames = [VAL, MTW]
 # uncomment and switch to l_const/l_sqrt/l_linear/l_square as required  

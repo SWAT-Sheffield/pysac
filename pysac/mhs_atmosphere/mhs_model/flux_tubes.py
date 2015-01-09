@@ -29,23 +29,23 @@ def get_flux_tubes(
     if logical_pars['l_mfe']:
         Si = np.array([0.15]) # 150mT SI units     
     # parameters for matching Gent,Fedun,Mumford,Erdelyi 2014
-    elif logical_pars['l_single']
+    elif logical_pars['l_single']:
         Si = np.array([0.1]) # 100mT SI units     
     # parameters for matching Gent,Fedun,Erdelyi 2014 flux tube pair
-    elif logical_pars['l_tube_pair']
+    elif logical_pars['l_tube_pair']:
         xi, yi, Si = \
                       np.array([
                                 [ 0.00e6],
                                 [ 0.00e6],
                                 [  .15e6],
                                 [-0.15e6]
-                               ])\
+                               ]),\
                       np.array([
                                 [  1.2e6],
                                 [  1.2e6],
                                 [-1.15e6],
                                 [-1.25e6]
-                               ])\
+                               ]),\
                       np.array([
                                 [  50e-3],
                                 [  50e-3],
