@@ -61,10 +61,10 @@ scales, physical_constants = \
 
 #if 1D or 2D set unused dimensions to 0, and unrequired xyz limits to 1.
 Nxyz = [129,129,129] # 3D grid
-xyz_SI = [-1*u.Mm,1*u.Mm,-1*u.Mm,1*u.Mm,35*u.km,1.6*u.Mm] # xyz limits SI/CGS units
+xyz = [-1*u.Mm,1*u.Mm,-1*u.Mm,1*u.Mm,35*u.km,1.6*u.Mm] # xyz limits SI/CGS units
 
 #obtain code coordinates and model parameters in code units
-coords = atm.get_coords(Nxyz, xyz_SI, scales)
+coords = atm.get_coords(Nxyz, xyz)
 
 from pysac.mhs_atmosphere.hs_model import VALIIIc_data as VAL
 from pysac.mhs_atmosphere.hs_model import MTWcorona_data as MTW
@@ -101,7 +101,6 @@ pressure_Z, rho_Z, Rgas_Z = atm.vertical_profile(
                                                  magp_meanz,
                                                  physical_constants,
                                                  coords['dz'],
-                                                 scales
                                                  )
 
 #==============================================================================
@@ -112,7 +111,6 @@ xi, yi, Si = atm.get_flux_tubes(
                                 model,
                                 model_pars,
                                 coords,
-                                scales,
                                 logical_pars
                                )
 #==============================================================================
@@ -212,7 +210,7 @@ energy = atm.get_internal_energy(pressure,
 #============================================================================
 # set up data directory and file names
 # may be worthwhile locating on /data if files are large
-datadir = os.path.expanduser(homedir+'/mhs_atmosphere/'+model+'/')
+datadir = os.path.expanduser('~/mhs_atmosphere/'+model+'/')
 filename = datadir + model + logical_pars['suffix']
 if not os.path.exists(datadir):
     os.makedirs(datadir)

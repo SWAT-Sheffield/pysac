@@ -17,51 +17,44 @@ def get_flux_tubes(
                    model,
                    model_pars,
                    coords,
-                   scales,
                    logical_pars
                   ):
     """ Obtain an array of x,y coordinates and corresponding vertical 
     component value for the photospheric magnetic field  """
 
-    xi, yi, Si = np.array([0.]),  np.array([0.]),  np.array([0.1])  # x,y,Bz(r=0,z=0)
+    xi, yi, Si = np.array([0.*u.Mm]),  np.array([0.*u.Mm]),  np.array([0.1*u.T])  # x,y,Bz(r=0,z=0)
 
     # parameters for matching Mumford,Fedun,Erdelyi 2014
     if logical_pars['l_mfe']:
-        Si = np.array([0.15]) # 150mT SI units     
+        Si = np.array([0.15*u.T]) # 150mT SI units     
     # parameters for matching Gent,Fedun,Mumford,Erdelyi 2014
     elif logical_pars['l_single']:
-        Si = np.array([0.1]) # 100mT SI units     
+        Si = np.array([0.1*u.T]) # 100mT SI units     
     # parameters for matching Gent,Fedun,Erdelyi 2014 flux tube pair
     elif logical_pars['l_tube_pair']:
         xi, yi, Si = \
                       np.array([
-                                [ 0.00e6],
-                                [ 0.00e6],
-                                [  .15e6],
-                                [-0.15e6]
+                                [ 0.00*u.Mm],
+                                [ 0.00*u.Mm],
+                                [  .15*u.Mm],
+                                [-0.15*u.Mm]
                                ]),\
                       np.array([
-                                [  1.2e6],
-                                [  1.2e6],
-                                [-1.15e6],
-                                [-1.25e6]
+                                [  1.2*u.Mm],
+                                [  1.2*u.Mm],
+                                [-1.15*u.Mm],
+                                [-1.25*u.Mm]
                                ]),\
                       np.array([
-                                [  50e-3],
-                                [  50e-3],
-                                [  50e-3],
-                                [  50e-3]
+                                [  50e-3*u.T],
+                                [  50e-3*u.T],
+                                [  50e-3*u.T],
+                                [  50e-3*u.T]
                                ])# 50mT SI
     else:
         import sys
         sys.exit('in get_flux_tubes axial parameters need to be defined')         
     print Si 
-    if logical_pars['l_SI']:
-        Si[:] = Si[:]/scales['magnetic']
-    if logical_pars['l_CGS']:
-        Si[:] = Si[:]*1e4/scales['magnetic']
-    xi[:] = xi[:]/scales['length']
-    yi[:] = yi[:]/scales['length']
 
     return xi, yi, Si
 

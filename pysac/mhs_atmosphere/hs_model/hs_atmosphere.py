@@ -17,7 +17,7 @@ from scipy.interpolate import UnivariateSpline
 #============================================================================
 def interpolate_atmosphere(filenames, 
                            Z, 
-                           scales, 
+                           scales,
                            model_pars, 
                            physicalconstants, 
                            logical_pars, 
@@ -187,7 +187,6 @@ def vertical_profile(Zint, Z,
                      pdata_i, rdata_i, Tdata_i, muofT_i, 
                      magp,  
                      physical_constants, dz,
-                     scales
                     ):
     """Return the vertical profiles for thermal pressure and density in 1D.
        Integrate in reverse from the corona to the photosphere to remove
