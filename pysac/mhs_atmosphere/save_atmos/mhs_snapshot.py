@@ -11,7 +11,7 @@ import astropy.units as u
 ##============================================================================
 ## Save a file!!!
 ##============================================================================
-""" For large data arrays this has been producing overfull memory so moved to 
+""" For large data arrays this has been producing overfull memory so moved to
 dedicated serial function, which should be parallel and moved ahead of gather
 for plotting -- maybe handle plotting from hdf5 also
 
@@ -47,22 +47,22 @@ def save_SACvariables(
         concat_vars = []
         for var in gather_vars:
             concat_vars.append(comm.gather(var, root=0))
-    
+
         if rank == 0:
             out_vars = []
             for cvar in concat_vars:
                 out_vars.append(np.concatenate(cvar, axis=0))
-    
+
             rho,Bx,By,Bz,energy = out_vars
     if rank == 0:
-    
-        grid_dimensions = [[Nxyz[0], Nxyz[1], Nxyz[2]]]
-        left_edge =  coords['xmin']*scales['length'],\
-                     coords['ymin']*scales['length'],\
-                     coords['zmin']*scales['length']
-        right_edge = coords['xmax']*scales['length'],\
-                     coords['ymax']*scales['length'],\
-                     coords['zmax']*scales['length']
+
+        grid_dimensions = [Nxyz[0], Nxyz[1], Nxyz[2]]
+        left_edge =  np.array([coords['xmin']*scales['length'],
+                               coords['ymin']*scales['length'],
+                               coords['zmin']*scales['length']])
+        right_edge = np.array([coords['xmax']*scales['length'],
+                               coords['ymax']*scales['length'],
+                               coords['zmax']*scales['length']])
         g0_SI = physical_constants['gravity']*scales['velocity']/scales['time']
 
         dummy = np.zeros(rho.shape)
@@ -86,63 +86,63 @@ def save_SACvariables(
                             ['refine_by', 0                        ],
                             ['unique_identifier', 'sacgdf2014'     ]
                             ])
-    
+        print(simulation_parameters['domain_left_edge'])
         gdf_file = gdf.create_file(h5py.File(filename,'w'), simulation_parameters, grid_dimensions)
-    
+
         gdf.write_field_u(gdf_file, rho*scales['density']*u.Unit('kg/m^3'),
                               'density_bg',
-                              'Background Density' 
+                              'Background Density'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('kg/m^3'), 
+        gdf.write_field_u(gdf_file, dummy*u.Unit('kg/m^3'),
                               'density_pert',
-                              'Perturbation Density' 
+                              'Perturbation Density'
                               )
-        gdf.write_field_u(gdf_file, 
-                              energy*scales['energy density']*u.Unit('Pa'), 
+        gdf.write_field_u(gdf_file,
+                              energy*scales['energy density']*u.Unit('Pa'),
                               'internal_energy_bg',
-                              'Background Internal Energy' 
+                              'Background Internal Energy'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('Pa'), 
+        gdf.write_field_u(gdf_file, dummy*u.Unit('Pa'),
                               'internal_energy_pert',
-                              'Perturbation Internal Energy' 
+                              'Perturbation Internal Energy'
                               )
-        gdf.write_field_u(gdf_file, Bx*scales['magnetic']*u.Unit('Tesla'), 
+        gdf.write_field_u(gdf_file, Bx*scales['magnetic']*u.Unit('Tesla'),
                               'mag_field_x_bg',
-                              'x Component of Background Magnetic Field' 
+                              'x Component of Background Magnetic Field'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'), 
+        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'),
                               'mag_field_x_pert',
-                              'x Component of Pertubation Magnetic Field' 
+                              'x Component of Pertubation Magnetic Field'
                               )
-        gdf.write_field_u(gdf_file, By*scales['magnetic']*u.Unit('Tesla'), 
+        gdf.write_field_u(gdf_file, By*scales['magnetic']*u.Unit('Tesla'),
                               'mag_field_y_bg',
-                              'y Component of Background Magnetic Field' 
+                              'y Component of Background Magnetic Field'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'), 
+        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'),
                               'mag_field_y_pert',
-                              'y Component of Pertubation Magnetic Field' 
+                              'y Component of Pertubation Magnetic Field'
                               )
-        gdf.write_field_u(gdf_file, Bz*scales['magnetic']*u.Unit('Tesla'), 
+        gdf.write_field_u(gdf_file, Bz*scales['magnetic']*u.Unit('Tesla'),
                               'mag_field_z_bg',
-                              'z Component of Background Magnetic Field' 
+                              'z Component of Background Magnetic Field'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'), 
+        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'),
                               'mag_field_z_pert',
-                              'z Component of Pertubation Magnetic Field' 
+                              'z Component of Pertubation Magnetic Field'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'), 
+        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'),
                               'velocity_x',
-                              'x Component of Velocity' 
+                              'x Component of Velocity'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'), 
+        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'),
                               'velocity_y',
-                              'y Component of Velocity' 
+                              'y Component of Velocity'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'), 
+        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'),
                                 'velocity_z',
-                                'z Component of Velocity' 
+                                'z Component of Velocity'
                               )
-    
+
         gdf_file.close()
 #============================================================================
 
@@ -172,15 +172,15 @@ def save_SACsources(
         concat_vars = []
         for var in gather_vars:
             concat_vars.append(comm.gather(var, root=0))
-    
+
         if rank == 0:
             out_vars = []
             for cvar in concat_vars:
                 out_vars.append(np.concatenate(cvar, axis=0))
-    
+
             Fx,Fy = out_vars
     if rank == 0:
-    
+
         grid_dimensions = [[Nxyz[0], Nxyz[1], Nxyz[2]]]
         left_edge =  coords['xmin']*scales['length'],\
                      coords['ymin']*scales['length'],\
@@ -211,72 +211,72 @@ def save_SACsources(
                             ['refine_by', 0                        ],
                             ['unique_identifier', 'sacgdf2014'     ]
                             ])
-    
+
         gdf_file = gdf.create_file(h5py.File(sourcesfile,'w'), simulation_parameters, grid_dimensions)
-    
-        gdf.write_field_u(gdf_file, 
-                              Fx*scales['force density']*u.Unit('Newton/m^3'), 
+
+        gdf.write_field_u(gdf_file,
+                              Fx*scales['force density']*u.Unit('Newton/m^3'),
                               'balancing_force_x_bg',
-                              'x Component of Background Balancing Force' 
+                              'x Component of Background Balancing Force'
                               )
-        gdf.write_field_u(gdf_file, 
-                              Fy*scales['force density']*u.Unit('Newton/m^3'), 
+        gdf.write_field_u(gdf_file,
+                              Fy*scales['force density']*u.Unit('Newton/m^3'),
                               'balancing_force_y_bg',
-                              'y Component of Background Balancing Force' 
+                              'y Component of Background Balancing Force'
                               )
 #        gdf.write_field_u(gdf_file, rho*scales['density']*u.Unit('kg/m^3'),
 #                              'density_bg',
-#                              'Background Density' 
+#                              'Background Density'
 #                              )
-#        gdf.write_field_u(gdf_file, dummy*u.Unit('kg/m^3'), 
+#        gdf.write_field_u(gdf_file, dummy*u.Unit('kg/m^3'),
 #                              'density_pert',
-#                              'Perturbation Density' 
+#                              'Perturbation Density'
 #                              )
-#        gdf.write_field_u(gdf_file, energy*scales['energy density']*u.Unit('Pa'), 
+#        gdf.write_field_u(gdf_file, energy*scales['energy density']*u.Unit('Pa'),
 #                              'internal_energy_bg',
-#                              'Background Internal Energy' 
+#                              'Background Internal Energy'
 #                              )
-#        gdf.write_field_u(gdf_file, dummy*u.Unit('Pa'), 
+#        gdf.write_field_u(gdf_file, dummy*u.Unit('Pa'),
 #                              'internal_energy_pert',
-#                              'Perturbation Internal Energy' 
+#                              'Perturbation Internal Energy'
 #                              )
-#        gdf.write_field_u(gdf_file, Bx*scales['magnetic']*u.Unit('Tesla'), 
+#        gdf.write_field_u(gdf_file, Bx*scales['magnetic']*u.Unit('Tesla'),
 #                              'mag_field_x_bg',
-#                              'x Component of Background Magnetic Field' 
+#                              'x Component of Background Magnetic Field'
 #                              )
-#        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'), 
+#        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'),
 #                              'mag_field_x_pert',
-#                              'x Component of Pertubation Magnetic Field' 
+#                              'x Component of Pertubation Magnetic Field'
 #                              )
-#        gdf.write_field_u(gdf_file, By*scales['magnetic']*u.Unit('Tesla'), 
+#        gdf.write_field_u(gdf_file, By*scales['magnetic']*u.Unit('Tesla'),
 #                              'mag_field_y_bg',
-#                              'y Component of Background Magnetic Field' 
+#                              'y Component of Background Magnetic Field'
 #                              )
-#        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'), 
+#        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'),
 #                              'mag_field_y_pert',
-#                              'y Component of Pertubation Magnetic Field' 
+#                              'y Component of Pertubation Magnetic Field'
 #                              )
-#        gdf.write_field_u(gdf_file, Bz*scales['magnetic']*u.Unit('Tesla'), 
+#        gdf.write_field_u(gdf_file, Bz*scales['magnetic']*u.Unit('Tesla'),
 #                              'mag_field_z_bg',
-#                              'z Component of Background Magnetic Field' 
+#                              'z Component of Background Magnetic Field'
 #                              )
-#        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'), 
+#        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'),
 #                              'mag_field_z_pert',
-#                              'z Component of Pertubation Magnetic Field' 
+#                              'z Component of Pertubation Magnetic Field'
 #                              )
-#        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'), 
+#        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'),
 #                              'velocity_x',
-#                              'x Component of Velocity' 
+#                              'x Component of Velocity'
 #                              )
-#        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'), 
+#        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'),
 #                              'velocity_y',
-#                              'y Component of Velocity' 
+#                              'y Component of Velocity'
 #                              )
-#        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'), 
+#        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'),
 #                                'velocity_z',
-#                                'z Component of Velocity' 
+#                                'z Component of Velocity'
 #                                )
-    
+
         gdf_file.close()
 #============================================================================
 
@@ -324,16 +324,16 @@ def save_auxilliary1D(
         concat_vars = []
         for var in gather_vars:
             concat_vars.append(comm.gather(var, root=0))
-    
+
         if rank == 0:
             out_vars = []
             for cvar in concat_vars:
                 out_vars.append(np.concatenate(cvar, axis=0))
-    
+
             pressure_m, rho_m, temperature, pbeta,\
                 alfven, cspeed, dxB2, dyB2 = out_vars
     if rank == 0:
-#    
+#
         grid_dimensions = [[Nxyz[0], Nxyz[1], Nxyz[2]]]
         left_edge =  coords['xmin']*scales['length'],\
                      coords['ymin']*scales['length'],\
@@ -365,100 +365,100 @@ def save_auxilliary1D(
                             ['refine_by', 0                        ],
                             ['unique_identifier', 'sacgdf2014'     ]
                             ])
-    
+
         gdf_file = gdf.create_file(h5py.File(auxfile,'w'), simulation_parameters, grid_dimensions)
-    
-        gdf.write_field_u(gdf_file, 
-                              pressure_Z*scales['energy density']*u.Unit('Pa'), 
+
+        gdf.write_field_u(gdf_file,
+                              pressure_Z*scales['energy density']*u.Unit('Pa'),
                               '1D_plasma_pressure',
-                              'Background pressure Z-profile' 
+                              'Background pressure Z-profile'
                               )
         gdf.write_field_u(gdf_file,
-                              rho_Z*scales['density']*u.Unit('kg/m^3'), 
+                              rho_Z*scales['density']*u.Unit('kg/m^3'),
                               '1D_plasma_density',
-                              'Background density Z-profile' 
+                              'Background density Z-profile'
                               )
         gdf.write_field_u(gdf_file,
                               Rgas_Z*scales['velocity']**2/
-                                     scales['temperature']*u.Unit('J/(kg*K)'), 
+                                     scales['temperature']*u.Unit('J/(kg*K)'),
                               '1D_ideal_gas_constant',
-                              'Background R_gas Z-profile' 
+                              'Background R_gas Z-profile'
                               )
-        gdf.write_field_u(gdf_file, 
-                              pressure_m*scales['energy density']*u.Unit('Pa'), 
+        gdf.write_field_u(gdf_file,
+                              pressure_m*scales['energy density']*u.Unit('Pa'),
                               '3D_plasma_pressure_balance',
-                              'Background magneto-pressure balance' 
+                              'Background magneto-pressure balance'
                               )
         gdf.write_field_u(gdf_file,
-                              rho_m*scales['density']*u.Unit('kg/m^3'), 
+                              rho_m*scales['density']*u.Unit('kg/m^3'),
                               '3D_plasma_density_balance',
-                              'Background magneto-density balance' 
+                              'Background magneto-density balance'
                               )
-        gdf.write_field_u(gdf_file, 
-                              temperature*scales['temperature']*u.Unit('K'), 
+        gdf.write_field_u(gdf_file,
+                              temperature*scales['temperature']*u.Unit('K'),
                               '3D_temperature',
-                              'Background temperature' 
+                              'Background temperature'
                               )
         gdf.write_field_u(gdf_file,
-                              pbeta*u.Unit(''), 
+                              pbeta*u.Unit(''),
                               '3D_plasma_beta',
-                              'Background plasma beta' 
+                              'Background plasma beta'
                               )
-        gdf.write_field_u(gdf_file, 
-                              alfven*scales['velocity']*u.Unit('m/s'), 
+        gdf.write_field_u(gdf_file,
+                              alfven*scales['velocity']*u.Unit('m/s'),
                               '3D_Alfven_speed',
-                              'Background Alfven speed' 
+                              'Background Alfven speed'
                               )
         gdf.write_field_u(gdf_file,
-                              cspeed*scales['velocity']*u.Unit('m/s'), 
+                              cspeed*scales['velocity']*u.Unit('m/s'),
                               '3D_sound_speed',
-                              'Background sound speed' 
+                              'Background sound speed'
                               )
-        gdf.write_field_u(gdf_file, 
-                              dxB2*scales['energy density']*u.Unit('Pa'), 
+        gdf.write_field_u(gdf_file,
+                              dxB2*scales['energy density']*u.Unit('Pa'),
                               '3D_mag_tension_x',
-                              'x-component bg magnetic tension' 
+                              'x-component bg magnetic tension'
                               )
         gdf.write_field_u(gdf_file,
-                              dyB2*scales['energy density']*u.Unit('Pa'), 
+                              dyB2*scales['energy density']*u.Unit('Pa'),
                               '3D_mag_tension_y',
-                              'y-component bg magnetic tension' 
+                              'y-component bg magnetic tension'
                               )
         gdf.write_field_u(gdf_file,
-                              val[:,0]*u.Unit('m'), 
+                              val[:,0]*u.Unit('m'),
                               'val3c_z',
-                              'Height of VAL data' 
+                              'Height of VAL data'
                               )
         gdf.write_field_u(gdf_file,
-                              val[:,1]*u.Unit('kg/m^3'), 
+                              val[:,1]*u.Unit('kg/m^3'),
                               'val3c_density',
-                              'VAL plasma density data' 
+                              'VAL plasma density data'
                               )
         gdf.write_field_u(gdf_file,
-                              val[:,2]*u.Unit('Pa'), 
+                              val[:,2]*u.Unit('Pa'),
                               'val3c_pressure',
-                              'VAL plasma pressure data' 
+                              'VAL plasma pressure data'
                               )
         gdf.write_field_u(gdf_file,
-                              val[:,3]*u.Unit('K'), 
+                              val[:,3]*u.Unit('K'),
                               'val3c_temperature',
-                              'VAL temperature data' 
+                              'VAL temperature data'
                               )
         gdf.write_field_u(gdf_file,
-                              mtw[:,0]*u.Unit('m'), 
+                              mtw[:,0]*u.Unit('m'),
                               'mtw_z',
-                              'Height of MTW data' 
+                              'Height of MTW data'
                               )
         gdf.write_field_u(gdf_file,
-                              mtw[:,2]*u.Unit('Pa'), 
+                              mtw[:,2]*u.Unit('Pa'),
                               'mtw_pressure',
-                              'MTW plasma pressure data' 
+                              'MTW plasma pressure data'
                               )
         gdf.write_field_u(gdf_file,
-                              mtw[:,1]*u.Unit('K'), 
+                              mtw[:,1]*u.Unit('K'),
                               'mtw_temperature',
-                              'MTW temperature data' 
+                              'MTW temperature data'
                               )
-       
-    
+
+
         gdf_file.close()
