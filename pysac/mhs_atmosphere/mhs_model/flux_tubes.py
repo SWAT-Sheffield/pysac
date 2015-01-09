@@ -25,8 +25,36 @@ def get_flux_tubes(
 
     xi, yi, Si = np.array([0.]),  np.array([0.]),  np.array([0.1])  # x,y,Bz(r=0,z=0)
 
+    # parameters for matching Mumford,Fedun,Erdelyi 2014
     if logical_pars['l_mfe']:
         Si = np.array([0.15]) # 150mT SI units     
+    # parameters for matching Gent,Fedun,Mumford,Erdelyi 2014
+    elif logical_pars['l_single']
+        Si = np.array([0.1]) # 100mT SI units     
+    # parameters for matching Gent,Fedun,Erdelyi 2014 flux tube pair
+    elif logical_pars['l_tube_pair']
+        xi, yi, Si = \
+                      np.array([
+                                [ 0.00e6],
+                                [ 0.00e6],
+                                [  .15e6],
+                                [-0.15e6]
+                               ])\
+                      np.array([
+                                [  1.2e6],
+                                [  1.2e6],
+                                [-1.15e6],
+                                [-1.25e6]
+                               ])\
+                      np.array([
+                                [  50e-3],
+                                [  50e-3],
+                                [  50e-3],
+                                [  50e-3]
+                               ])# 50mT SI
+    else:
+        import sys
+        sys.exit('in get_flux_tubes axial parameters need to be defined')         
     print Si 
     if logical_pars['l_SI']:
         Si[:] = Si[:]/scales['magnetic']
@@ -37,7 +65,7 @@ def get_flux_tubes(
 
     return xi, yi, Si
 
-#=========================Vernazza===========================================
+#============================================================================
 # Magnetic Field Construction (See. Fedun et.al 2011)
 #============================================================================
 def construct_magnetic_field(

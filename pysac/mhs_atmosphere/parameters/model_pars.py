@@ -72,6 +72,19 @@ def get_model(model,
         nftubes    = 1
         B_corona_SI= 0.
         pBplus_SI  = 4.250e-4
+    elif model == 'paper1':
+        save_gdf   = model+logical_pars['suffix']
+        z_phot_SI  = 6e5
+        z_chrom_SI = 4.2e5
+        z_cor_SI   = 1.75e8                    #scale height for the corona
+        coratio    = 0.0225 
+        phratio    = 0.0
+        chratio    = 1 - coratio - phratio
+        pixel_SI   = 365624.75              #(HMI pixel)
+        f0_SI      = 4.4e4
+        nftubes    = 1
+        B_corona_SI= 2.00875e-4
+        pBplus_SI  = 4.250e-4
     else:
         sys.exit('in parameters.model_pars.get_model, \
                   set model parameters for model '+model)

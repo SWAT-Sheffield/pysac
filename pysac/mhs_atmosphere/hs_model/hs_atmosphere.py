@@ -93,6 +93,8 @@ def interpolate_atmosphere(filenames,
         else:        
             return pdata_i, Tdata_i, rdata_i, muofT_i
 #----------------------------------------------------------------------------
+# a simpler exponential atmosphere to test Spruit's analytical result
+#----------------------------------------------------------------------------
     if logical_pars['l_spruit']:
         pdata_i, Tdata_i, rdata_i, muofT_i, VAL3c, MTW\
                = get_spruit_hs(
@@ -113,6 +115,8 @@ def interpolate_atmosphere(filenames,
 
 
 #----------------------------------------------------------------------------
+# a simpler exponential atmosphere to test Spruit's analytical result
+#----------------------------------------------------------------------------
 def get_spruit_hs(
                    filenames, 
                    Z, 
@@ -122,50 +126,59 @@ def get_spruit_hs(
                    logical_pars,
                    plot
                  ):
-        logical_pars['l_atmos_val3c_mtw'] = True
-        logical_pars['l_spruit'] = False
-        pdata_, Tdata_i, rdata_, muofT_i, [val ,mtw] = \
-            interpolate_atmosphere(
-                               filenames, 
-                               Z, 
-                               scales, 
-                               model_pars,
-                               physical_constants,
-                               logical_pars,
-                               plot=True
-                              )         
-        if logical_pars['l_const']:
-            pdata_i = 1.1*pdata_[0]\
-                         *np.exp(-4.0*Z/model_pars['chrom_scale'])
-            rdata_i = 0.5*rdata_[0]\
-                         *np.exp(-4.0*Z/model_pars['chrom_scale'])
-        elif logical_pars['l_sqrt']:
-            pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**0.25\
-                         *np.exp(-4.0*Z/model_pars['chrom_scale'])
-            rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**0.25\
-                         *np.exp(-4.*Z/model_pars['chrom_scale'])
-        elif logical_pars['l_linear']:
-            pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**1\
-                         *np.exp(-4.0*Z/model_pars['chrom_scale'])
-            rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**1\
-                         *np.exp(-4.*Z/model_pars['chrom_scale'])
-        elif logical_pars['l_square']:
-            pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**2\
-                         *np.exp(-4.0*Z/model_pars['chrom_scale'])
-            rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**2\
-                         *np.exp(-4.*Z/model_pars['chrom_scale'])
-        else:
-            import sys
-            sys.exit('in hs_model.hs_atmosphere.get_spruit_hs set \
-                      logical_pars True for axial Alfven speed Z dependence')
-        muofT_i[:] = physical_constants['mu']
-        Tdata_i = pdata_i/rdata_i*physical_constants['mu']\
-                                 *physical_constants['proton_mass']\
-                                 /physical_constants['boltzmann'] 
-        logical_pars['l_atmos_val3c_mtw'] = False
-        logical_pars['l_spruit'] = True
+    """ Reference data is collected to satisfy the global call for source data,
+        but only the photospheric values of pressure and density are required 
+        for Spruit. 
+        Four options are available to select Alfven speed along the flux tube
+        axis to be: 
+        constant, increase as the square root of Z, increase linearly and 
+        increase as the square 0f Z. These are approximate due to the effect on 
+        density of the non-zero magnetic tension force.
+    """         
+    logical_pars['l_atmos_val3c_mtw'] = True
+    logical_pars['l_spruit'] = False
+    pdata_, Tdata_i, rdata_, muofT_i, [val ,mtw] = \
+        interpolate_atmosphere(
+                           filenames, 
+                           Z, 
+                           scales, 
+                           model_pars,
+                           physical_constants,
+                           logical_pars,
+                           plot=True
+                          )         
+    if logical_pars['l_const']:
+        pdata_i = 1.1*pdata_[0]\
+                     *np.exp(-4.0*Z/model_pars['chrom_scale'])
+        rdata_i = 0.5*rdata_[0]\
+                     *np.exp(-4.0*Z/model_pars['chrom_scale'])
+    elif logical_pars['l_sqrt']:
+        pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**0.25\
+                     *np.exp(-4.0*Z/model_pars['chrom_scale'])
+        rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**0.25\
+                     *np.exp(-4.*Z/model_pars['chrom_scale'])
+    elif logical_pars['l_linear']:
+        pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**1\
+                     *np.exp(-4.0*Z/model_pars['chrom_scale'])
+        rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**1\
+                     *np.exp(-4.*Z/model_pars['chrom_scale'])
+    elif logical_pars['l_square']:
+        pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**2\
+                     *np.exp(-4.0*Z/model_pars['chrom_scale'])
+        rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**2\
+                     *np.exp(-4.*Z/model_pars['chrom_scale'])
+    else:
+        import sys
+        sys.exit('in hs_model.hs_atmosphere.get_spruit_hs set \
+                  logical_pars True for axial Alfven speed Z dependence')
+    muofT_i[:] = physical_constants['mu']
+    Tdata_i = pdata_i/rdata_i*physical_constants['mu']\
+                             *physical_constants['proton_mass']\
+                             /physical_constants['boltzmann'] 
+    logical_pars['l_atmos_val3c_mtw'] = False
+    logical_pars['l_spruit'] = True
 
-        return pdata_i, Tdata_i, rdata_i, muofT_i, val, mtw
+    return pdata_i, Tdata_i, rdata_i, muofT_i, val, mtw
 
 #============================================================================
 # Construct 3D hydrostatic profiles and include the magneto adjustments
