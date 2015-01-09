@@ -48,7 +48,7 @@ except ImportError:
 #==============================================================================
 #set up model parameters
 #==============================================================================
-model = 'spruit'
+model = 'mfe_setup'
 from pysac.mhs_atmosphere.parameters.model_pars import spruit as model_pars
 
 local_procs=1
@@ -66,23 +66,21 @@ xyz = [-1*u.Mm,1*u.Mm,-1*u.Mm,1*u.Mm,35*u.km,1.6*u.Mm] # xyz limits SI/CGS units
 #obtain code coordinates and model parameters in code units
 coords = atm.get_coords(Nxyz, xyz)
 
-from pysac.mhs_atmosphere.hs_model import VALIIIc_data as VAL
-from pysac.mhs_atmosphere.hs_model import MTWcorona_data as MTW
+#from pysac.mhs_atmosphere.hs_model import VALIIIc_data as VAL
+#from pysac.mhs_atmosphere.hs_model import MTWcorona_data as MTW
 
-filenames = [VAL, MTW]
+#filenames = [VAL, MTW]
 # uncomment and switch to l_const/l_sqrt/l_linear/l_square as required
 logical_pars['l_const'] = True
 #interpolate the hs 1D profiles from empirical data source[s]
-pressure_1d, temperature_1d, rho_1d, muofT_1d, [val ,mtw] = \
-    atm.interpolate_atmosphere(
-                               filenames,
+empirical_data = atm.read_VAL3c_MTW(mu=physical_constants['mu'])
+
+table = \
+    atm.interpolate_atmosphere(empirical_data
                                coords['Zext'],
-                               scales,
-                               model_pars,
-                               physical_constants,
-                               logical_pars,
-                               plot=True
                               )
+pressure_1d, temperature_1d, rho_1d, muofT_1d = \
+    table['p'], table['T'], table['rho'], table['mu']
 #==============================================================================
 #calculate 1d hydrostatic balance from empirical density profile
 #==============================================================================
