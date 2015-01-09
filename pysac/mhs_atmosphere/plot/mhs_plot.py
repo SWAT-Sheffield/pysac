@@ -37,11 +37,11 @@ except ImportError:
 # Read in saved data for plotting
 #==============================================================================
 # Set path and file names to read
-model = 'mfe_setup'
+model = 'spruit'
 homedir = os.environ['HOME']
 #standard set of logical switches
 logical_pars = atm.get_logical(model, l_mpi, l_SI=True, l_gdf=True)
-datadir = os.path.expanduser(homedir+'/'+model+'/')
+datadir = os.path.expanduser(homedir+'/mhs_amosphere/'+model+'/')
 filename = datadir + model + logical_pars['suffix']
 if not os.path.exists(datadir+model):
     os.makedirs(datadir+model)
