@@ -86,7 +86,7 @@ def save_SACvariables(
                             ['refine_by', 0                        ],
                             ['unique_identifier', 'sacgdf2014'     ]
                             ])
-        print(simulation_parameters['domain_left_edge'])
+
         gdf_file = gdf.create_file(h5py.File(filename,'w'), simulation_parameters, grid_dimensions)
 
         gdf.write_field_u(gdf_file, rho*scales['density']*u.Unit('kg/m^3'),
