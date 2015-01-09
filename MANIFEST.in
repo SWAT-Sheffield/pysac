@@ -18,3 +18,5 @@ exclude astropy_helpers/.gitignore
 
 exclude *.pyc *.o
 prune docs/api
+
+include pysac/mhs_atmosphere/hs_model/*.dat
