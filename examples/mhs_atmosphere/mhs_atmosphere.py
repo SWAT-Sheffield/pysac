@@ -49,6 +49,7 @@ except ImportError:
 #set up model parameters
 #==============================================================================
 model = 'spruit'
+from pysac.mhs_atmosphere.parameters.model_pars import spruit as model_pars
 
 local_procs=1
 #standard set of logical switches
@@ -63,21 +64,10 @@ Nxyz = [129,129,129] # 3D grid
 xyz_SI = [-1e6,1e6,-1e6,1e6,3.5e4,1.6e6] # xyz limits SI/CGS units
 
 #obtain code coordinates and model parameters in code units
-coords, model_pars = atm.get_model(
-                                   model,
-                                   Nxyz,
-                                   xyz_SI,
-                                   scales,
-                                   logical_pars
-                                  )
-#identify location of source data files
-homedir = os.environ['HOME']
-#cwd = os.path.dirname(__file__)
-#cwd = homedir+'/Dropbox/multi_tube/python/allpapers/'
+coords = atm.get_coords(Nxyz, xyz_SI, scales)
+
 from pysac.mhs_atmosphere.hs_model import VALIIIc_data as VAL
 from pysac.mhs_atmosphere.hs_model import MTWcorona_data as MTW
-#VAL = os.path.join(cwd, 'hs_model/VALIIIC.dat')
-#MTW = os.path.join(cwd, 'hs_model/mcwhirter.dat')
 
 filenames = [VAL, MTW]
 # uncomment and switch to l_const/l_sqrt/l_linear/l_square as required
@@ -102,28 +92,28 @@ magp_meanz = np.zeros(len(coords['Z']))
 magp_meanz[:] = model_pars['pBplus']**2/(2*physical_constants['mu0'])
 
 pressure_Z, rho_Z, Rgas_Z = atm.vertical_profile(
-                                             coords['Zext'],
-                                             coords['Z'],
-                                             pressure_1d,
-                                             rho_1d,
-                                             temperature_1d,
-                                             muofT_1d,
-                                             magp_meanz,
-                                             physical_constants,
-                                             coords['dz'],
-                                             scales
-                                             )
+                                                 coords['Zext'],
+                                                 coords['Z'],
+                                                 pressure_1d,
+                                                 rho_1d,
+                                                 temperature_1d,
+                                                 muofT_1d,
+                                                 magp_meanz,
+                                                 physical_constants,
+                                                 coords['dz'],
+                                                 scales
+                                                 )
 
 #==============================================================================
 # load flux tube footpoint parameters
 #==============================================================================
 # axial location and value of Bz at each footpoint
 xi, yi, Si = atm.get_flux_tubes(
-                                 model,
-                                 model_pars,
-                                 coords,
-                                 scales,
-                                 logical_pars
+                                model,
+                                model_pars,
+                                coords,
+                                scales,
+                                logical_pars
                                )
 #==============================================================================
 # split domain into processes if mpi
