@@ -8,7 +8,7 @@ Created on Mon Dec 14 11:37:39 2014
 ##============================================================================
 ##logical parameters
 ##============================================================================
-def get_logical(model, l_mpi, l_SI=True, l_gdf=True):
+def set_options(model, l_mpi, l_SI=True, l_gdf=True):
 
     """This module assigns the logical options for the model. If adding 
     new models with additional logical arguments add it to the default 
@@ -45,47 +45,47 @@ def get_logical(model, l_mpi, l_SI=True, l_gdf=True):
 
     l_atmos_val3c_mtw = False # interpolate composite VAL3c+MTW atmosphere
 
-    if model == 'mfe_setup':
+    if model['model'] == 'mfe_setup':
         l_single      = True # only one flux tube
         l_mfe         = True # model Viktors model from MFE (2014)
         l_B0_expz     = True # vertical strength of Bz(r=0) follows exponentials
         l_atmos_val3c_mtw = True # interpolate composite VAL3c+MTW atmosphere
-    if model == 'spruit':    
+    if model['model'] == 'spruit':    
         l_single      = True # only one flux tube
         l_spruit      = True  # thin flux tube model to check Spruit
         l_B0_expz     = True # vertical strength of Bz(r=0) follows exponentials
-    if model == 'paper1':
+    if model['model'] == 'paper1':
         l_ambB        = True # include some ambient magnetic field b_z
         l_B0_expz     = True # vertical strength of Bz(r=0) follows exponentials
         l_single      = True # only one flux tube
         l_atmos_val3c_mtw = True # interpolate composite VAL3c+MTW atmosphere
-    if model == 'paper2a':
+    if model['model'] == 'paper2a':
         l_ambB        = True # include some ambient magnetic field b_z
         l_B0_expz     = True # vertical strength of Bz(r=0) follows exponentials
         l_tube_pair   = True # pair of flux tubes
         l_atmos_val3c_mtw = True # interpolate composite VAL3c+MTW atmosphere
-    if model == 'paper2b':
+    if model['model'] == 'paper2b':
         l_ambB        = True # include some ambient magnetic field b_z
         l_B0_expz     = True # vertical strength of Bz(r=0) follows exponentials
         l_multi_twist = True # multiple flux tubes as described in GFE (2014)
         l_atmos_val3c_mtw = True # interpolate composite VAL3c+MTW atmosphere
-    if model == 'paper2c':
+    if model['model'] == 'paper2c':
         l_ambB        = True # include some ambient magnetic field b_z
         l_B0_expz     = True # vertical strength of Bz(r=0) follows exponentials
         l_multi_bps   = True # multiple flux tubes as described in GFE (2014)
         l_atmos_val3c_mtw = True # interpolate composite VAL3c+MTW atmosphere
-    if model == 'paper2d':
+    if model['model'] == 'paper2d':
         l_ambB        = True # include some ambient magnetic field b_z
         l_B0_expz     = True # vertical strength of Bz(r=0) follows exponentials
         l_multi_lanes = True # multiple flux tubes as described in GFE (2014)
         l_atmos_val3c_mtw = True # interpolate composite VAL3c+MTW atmosphere
-    if model == 'hmi_model':
+    if model['model'] == 'hmi_model':
         l_B0_quadz    = True # vertical strength of Bz(r=0) follows polynomials 
                            # + coronal exponential    
         l_single      = True  # only one flux tube
         l_hmi         = True  # construct photopheric map of Bz from HMI/SDI
         l_atmos_val3c_mtw = True # interpolate composite VAL3c+MTW atmosphere
-    if model == 'loop_model':
+    if model['model'] == 'loop_model':
         l_B0_quadz    = True # vertical strength of Bz(r=0) follows polynomials 
                            # + coronal exponential    
         l_single      = True  # only one flux tube

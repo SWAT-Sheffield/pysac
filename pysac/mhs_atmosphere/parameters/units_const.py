@@ -68,5 +68,5 @@ def get_parameters(model, l_mpi, logical_pars, size):
                           'gravity':    -274.0*u.km/u.s/u.s
                          }
 
-    print"parameters for model "+model                            
+    print"parameters for model "+model['model']
     return scales, physical_constants

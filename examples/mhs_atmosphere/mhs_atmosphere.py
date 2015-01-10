@@ -29,6 +29,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
+from pysac.mhs_atmosphere.parameters.model_pars import mfe_setup as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -48,16 +49,14 @@ except ImportError:
 #==============================================================================
 #set up model parameters
 #==============================================================================
-from pysac.mhs_atmosphere.parameters.model_pars import mfe_setup as model_pars
-model = model_pars['model']
 
 local_procs=1
 #standard set of logical switches
-logical_pars = atm.get_logical(model, l_mpi, l_SI=True, l_gdf=True)
+logical_pars = atm.set_options(model_pars, l_mpi, l_SI=True, l_gdf=True)
 
 #standard conversion to dimensionless units and physical constants
 scales, physical_constants = \
-    atm.get_parameters(model, l_mpi, logical_pars, size)
+    atm.get_parameters(model_pars, l_mpi, logical_pars, size)
 
 #if 1D or 2D set unused dimensions to 0, and unrequired xyz limits to 1.
 Nxyz = [128,128,128] # 3D grid
@@ -79,8 +78,7 @@ table = \
     atm.interpolate_atmosphere(empirical_data,
                                coords['Zext']
                               )
-pressure_1d, temperature_1d, rho_1d, muofT_1d = \
-    table['p'], table['T'], table['rho'], table['mu']
+
 #==============================================================================
 #calculate 1d hydrostatic balance from empirical density profile
 #==============================================================================
@@ -103,7 +101,6 @@ pressure_Z, rho_Z, Rgas_Z = atm.vertical_profile(
 #==============================================================================
 # axial location and value of Bz at each footpoint
 xi, yi, Si = atm.get_flux_tubes(
-                                model,
                                 model_pars,
                                 coords,
                                 logical_pars
@@ -209,15 +206,15 @@ energy = atm.get_internal_energy(pressure,
 #============================================================================
 # set up data directory and file names
 # may be worthwhile locating on /data if files are large
-datadir = os.path.expanduser('~/mhs_atmosphere/'+model+'/')
-filename = datadir + model + logical_pars['suffix']
+datadir = os.path.expanduser('~/mhs_atmosphere/'+model_pars['model']+'/')
+filename = datadir + model_pars['model'] + logical_pars['suffix']
 if not os.path.exists(datadir):
     os.makedirs(datadir)
-sourcefile = datadir + model + '_sources' + logical_pars['suffix']
-auxfile = datadir + model + '_aux' + logical_pars['suffix']
+sourcefile = datadir + model_pars['model'] + '_sources' + logical_pars['suffix']
+auxfile = datadir + model_pars['model'] + '_aux' + logical_pars['suffix']
 
 # save the variables for the initialisation of a SAC simulation
-atm.save_SACvariables(model,
+atm.save_SACvariables(
               filename,
               rho,
               Bx,
@@ -230,7 +227,7 @@ atm.save_SACvariables(model,
               Nxyz
              )
 # save the balancing forces as the background source terms for SAC simulation
-atm.save_SACsources(model,
+atm.save_SACsources(
               sourcefile,
               Fx,
               Fy,
@@ -253,7 +250,6 @@ else:
 alfven = np.sqrt(2.*physical_constants['mu0']*magp/rho)
 cspeed = np.sqrt(physical_constants['gamma']*pressure/rho)
 atm.save_auxilliary1D(
-              model,
               auxfile,
               pressure_m,
               rho_m,

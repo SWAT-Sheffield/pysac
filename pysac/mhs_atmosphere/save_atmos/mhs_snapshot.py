@@ -19,7 +19,6 @@ This file is potentially large - recommended to mkdir hdf5 in /data/${USER}
 and add symlink to ${HOME} to avoid exceeding quota.
 """
 def save_SACvariables(
-              model,
               filename,
               rho,
               Bx,
@@ -146,7 +145,6 @@ def save_SACvariables(
 #============================================================================
 
 def save_SACsources(
-                    model,
                     sourcesfile,
                     Fx,
                     Fy,
@@ -226,7 +224,6 @@ def save_SACsources(
 #============================================================================
 
 def save_auxilliary1D(
-                    model,
                     auxfile,
                     pressure_m,
                     rho_m,

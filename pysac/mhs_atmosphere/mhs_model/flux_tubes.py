@@ -15,7 +15,6 @@ import astropy.units as u
 # locate flux tubes and footpoint strength
 #============================================================================
 def get_flux_tubes(
-                   model,
                    model_pars,
                    coords,
                    logical_pars
