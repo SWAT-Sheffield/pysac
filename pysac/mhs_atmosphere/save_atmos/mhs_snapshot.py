@@ -311,17 +311,17 @@ def save_auxilliary1D(
         gdf_file = gdf.create_file(h5py.File(auxfile,'w'), simulation_parameters, grid_dimensions)
 
         gdf.write_field_u(gdf_file,
-                              pressure_Z,
+                              pressure_Z.reshape([1,1,pressure_Z.size]),
                               '1D_plasma_pressure',
                               'Background pressure Z-profile'
                               )
         gdf.write_field_u(gdf_file,
-                              rho_Z,
+                              rho_Z.reshape([1,1,rho_Z.size]),
                               '1D_plasma_density',
                               'Background density Z-profile'
                               )
         gdf.write_field_u(gdf_file,
-                              Rgas_Z,
+                              Rgas_Z.reshape([1,1,Rgas_Z.size]),
                               '1D_ideal_gas_constant',
                               'Background R_gas Z-profile'
                               )
