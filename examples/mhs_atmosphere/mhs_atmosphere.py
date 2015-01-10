@@ -48,8 +48,8 @@ except ImportError:
 #==============================================================================
 #set up model parameters
 #==============================================================================
-model = 'mfe_setup'
 from pysac.mhs_atmosphere.parameters.model_pars import mfe_setup as model_pars
+model = model_pars['model']
 
 local_procs=1
 #standard set of logical switches
@@ -60,7 +60,7 @@ scales, physical_constants = \
     atm.get_parameters(model, l_mpi, logical_pars, size)
 
 #if 1D or 2D set unused dimensions to 0, and unrequired xyz limits to 1.
-Nxyz = [129,129,129] # 3D grid
+Nxyz = [128,128,128] # 3D grid
 xyz = [-1*u.Mm,1*u.Mm,-1*u.Mm,1*u.Mm,35*u.km,1.6*u.Mm] # xyz limits SI/CGS units
 
 #obtain code coordinates and model parameters in code units

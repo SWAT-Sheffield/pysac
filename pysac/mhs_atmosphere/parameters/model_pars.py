@@ -7,11 +7,11 @@ Created on Thu Dec 11 17:45:48 2014
 
 import numpy as np
 import astropy.units as u
-
 hmi_model = {'photo_scale': 0.6*u.Mm,
              'chrom_scale': 0.31*u.Mm,
              'corona_scale': 100*u.Mm,                    #scale height for the corona
              'coratio': 0.06*u.one,
+             'model': 'hmi_model',
              'phratio': 0.15*u.one,
              'pixel': 0.36562475*u.Mm,              #(HMI pixel)
              'radial_scale': 0.044*u.Mm,
@@ -24,6 +24,7 @@ mfe_setup = {'photo_scale': 0.6*u.Mm,
              'chrom_scale': 0.31*u.Mm,
              'corona_scale': 100*u.Mm,                    #scale height for the corona
              'coratio': 0.075*u.one,
+             'model': 'mfe_setup',
              'phratio': 0.0*u.one,
              'pixel': 0.36562475*u.Mm,              #(HMI pixel)
              'radial_scale': 0.044*u.Mm,
@@ -36,6 +37,7 @@ spruit = {'photo_scale': 1.5*u.Mm,
           'chrom_scale': 1.5*u.Mm,
           'corona_scale': 100*u.Mm,                    #scale height for the corona
           'coratio': 0.0*u.one,
+             'model': 'spruit',
           'phratio': 0.0*u.one,
           'pixel': 0.1*u.Mm,              #(HMI pixel)
           'radial_scale': 0.025*u.Mm,
@@ -48,6 +50,7 @@ paper1 = {'photo_scale': 0.6*u.Mm,
           'chrom_scale': 0.42*u.Mm,
           'corona_scale': 175*u.Mm,         #scale height for the corona
           'coratio': 0.0225*u.one,
+          'model': 'paper1',
           'phratio': 0.0*u.one,
           'pixel': 0.36562475*u.Mm,              #(HMI pixel)
           'radial_scale': 0.044*u.Mm,
