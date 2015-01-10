@@ -61,7 +61,8 @@ def read_VAL3c_MTW(VAL_file=None, MTW_file=None, mu=0.6):
     VAL3c['n_e'].unit = u.one/u.cm**3
 
     # Calculate the mean molecular weight ratio
-    VAL3c['mu'] = 4.0/(3*0.74+1+VAL3c['n_e'].quantity/VAL3c['n_i'].quantity)
+    VAL3c['mu'] = 4.0/(3*0.74+1+VAL3c['n_e']/VAL3c['n_i'])
+#    VAL3c['mu'] = 4.0/(3*0.74+1+VAL3c['n_e'].quantity/VAL3c['n_i'].quantity)
 
     MTW = Table.read(MTW_file, format='ascii', comment='#')
     MTW['Z'].unit = u.km
@@ -72,6 +73,7 @@ def read_VAL3c_MTW(VAL_file=None, MTW_file=None, mu=0.6):
     MTW['mu'] = mu
 
     data = astropy.table.vstack([VAL3c, MTW], join_type='inner')
+#    data = astropy.table.vstack([VAL3c, MTW], join_type='inner')
     data.sort('Z')
 
     return data
@@ -81,20 +83,20 @@ def interpolate_atmosphere(data, Z):
     density, temperature and mean molecular weight.
     """
 
-    hdata = data['Z'].quantity.value
+    hdata = np.array(data['Z'])
     # interpolate total pressure, temperature and density profiles
-    pdata_f = UnivariateSpline(hdata,np.array(np.log(data['p'])),k=1, s=0.25) * data['p'].unit
-    Tdata_f = UnivariateSpline(hdata,np.array(np.log(data['T'])),k=1, s=0.25) * data['T'].unit
-    rdata_f = UnivariateSpline(hdata,np.array(np.log(data['rho'])),k=1, s=0.25) * data['rho'].unit
+    pdata_f = UnivariateSpline(hdata,np.array(np.log(data['p'])),k=1, s=0.25)
+    Tdata_f = UnivariateSpline(hdata,np.array(np.log(data['T'])),k=1, s=0.25)
+    rdata_f = UnivariateSpline(hdata,np.array(np.log(data['rho'])),k=1, s=0.25)
     #s=0.0 to ensure all points are strictly used for ionisation state
-    muofT_f = UnivariateSpline(hdata,np.array(np.log(data['mu'])),k=1, s=0.0) * u.one
+    muofT_f = UnivariateSpline(hdata,np.array(np.log(data['mu'])),k=1, s=0.0)
 
     outdata = Table()
     outdata['Z'] = Z
-    outdata['p'] = np.exp(pdata_f(Z))
-    outdata['T'] = np.exp(Tdata_f(Z))
-    outdata['rho'] = np.exp(rdata_f(Z))
-    outdata['mu'] = np.exp(muofT_f(Z))
+    outdata['p'] = np.exp(pdata_f(Z)) * data['p'].unit
+    outdata['T'] = np.exp(Tdata_f(Z)) * data['T'].unit
+    outdata['rho'] = np.exp(rdata_f(Z)) * data['rho'].unit
+    outdata['mu'] = np.exp(muofT_f(Z)) * u.one
 
 
     return outdata
@@ -170,7 +172,7 @@ def get_spruit_hs(
 # Construct 3D hydrostatic profiles and include the magneto adjustments
 #============================================================================
 def vertical_profile(Zint, Z,
-                     pdata_i, rdata_i, Tdata_i, muofT_i,
+                     table,
                      magp,
                      physical_constants, dz,
                     ):
@@ -179,27 +181,23 @@ def vertical_profile(Zint, Z,
        sensitivity to larger chromospheric gradients."""
 
     g0 = physical_constants['gravity']
-    Rgas_v =np.zeros(Z.size)
-    Rgas_v[:] = physical_constants['boltzmann']/\
-                physical_constants['proton_mass']/muofT_i[4:-4]
-    rdata_v = np.zeros(Z.size)
-    rdata   = np.zeros(Zint.size)
-    rdata[:] = rdata_i[:]
+    Rgas_v = u.Quantity(np.ones(Z.size), u.one)
+    Rgas_v *= physical_constants['boltzmann']/\
+                physical_constants['proton_mass']/table['mu'][4:-4]
+    rdata   = u.Quantity(table['rho'], copy=True)
     #it may be necessary to enhance the density near the footpoint emprically
 #    rdata[:] = rdata_i[:]*(1. + 1.5 * np.exp(-Zint[:]/0.00005)) #+ 1.*rdata_i.min()#+ 0.1*rdata_i[4]*np.exp(-Zint/Z[50])
-    rdata_v[:] = rdata[4:-4]
+    rdata_v = rdata[4:-4].copy()
     # inverted SAC 4th order derivative scheme to minimise numerical error
-    linp=np.zeros(Z.size)
     """evaluate upper boundary pressure from equation of state + enhancement,
        magp, which will be replaced by the mean magnetic pressure in the
        corona, then integrate from inner next pressure
     """
-    linp[-1] = Tdata_i[-5]*rdata_v[-1]*Rgas_v[-1] + magp[-1]
-    linp[-2] = linp[-1] + magp[-2] - magp[-1] - ( 9.*g0*rdata[-1]*dz
-                                                +19.*g0*rdata[-2]*dz
-                                                - 5.*g0*rdata[-3]*dz
-                                                +    g0*rdata[-4]*dz
-                                            )/24.
+    table_T = u.Quantity(table['T'])
+    linp_1 = table_T[-5]*rdata_v[-1]*Rgas_v[-1] + magp[-1]
+    linp = u.Quantity(np.ones(len(Z)), unit=linp_1.unit)
+    linp[-1] = linp_1
+    linp[-2] = linp[-1] + magp[-2] - magp[-1] - ( 9.*g0*rdata[-1]*dz+19.*g0*rdata[-2]*dz- 5.*g0*rdata[-3]*dz+g0*rdata[-4]*dz)/24.
 
     for i in range(2,Z.size):
         linp[-i-1] = (144.*linp[-i]+18.*linp[-i+1]

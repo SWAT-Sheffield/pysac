@@ -65,7 +65,7 @@ def get_parameters(model, l_mpi, logical_pars, size):
                           'mu0':        asc.mu0         , 
                           'boltzmann':  asc.k_B         ,
                           'proton_mass':asc.m_p         ,
-                          'gravity':    -274.0*u.km/u.s 
+                          'gravity':    -274.0*u.km/u.s/u.s
                          }
 
     print"parameters for model "+model                            

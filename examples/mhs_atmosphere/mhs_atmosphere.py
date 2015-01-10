@@ -49,7 +49,7 @@ except ImportError:
 #set up model parameters
 #==============================================================================
 model = 'mfe_setup'
-from pysac.mhs_atmosphere.parameters.model_pars import spruit as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import mfe_setup as model_pars
 
 local_procs=1
 #standard set of logical switches
@@ -64,7 +64,7 @@ Nxyz = [129,129,129] # 3D grid
 xyz = [-1*u.Mm,1*u.Mm,-1*u.Mm,1*u.Mm,35*u.km,1.6*u.Mm] # xyz limits SI/CGS units
 
 #obtain code coordinates and model parameters in code units
-coords = atm.get_coords(Nxyz, xyz)
+coords = atm.get_coords(Nxyz, u.Quantity(xyz))
 
 #from pysac.mhs_atmosphere.hs_model import VALIIIc_data as VAL
 #from pysac.mhs_atmosphere.hs_model import MTWcorona_data as MTW
@@ -76,8 +76,8 @@ logical_pars['l_const'] = True
 empirical_data = atm.read_VAL3c_MTW(mu=physical_constants['mu'])
 
 table = \
-    atm.interpolate_atmosphere(empirical_data
-                               coords['Zext'],
+    atm.interpolate_atmosphere(empirical_data,
+                               coords['Zext']
                               )
 pressure_1d, temperature_1d, rho_1d, muofT_1d = \
     table['p'], table['T'], table['rho'], table['mu']
@@ -86,16 +86,13 @@ pressure_1d, temperature_1d, rho_1d, muofT_1d = \
 #==============================================================================
 # the hs pressure balance is enhanced by pressure equivalent to the residual mean
 # coronal magnetic pressure contribution once the magnetic field is applied
-magp_meanz = np.zeros(len(coords['Z']))
-magp_meanz[:] = model_pars['pBplus']**2/(2*physical_constants['mu0'])
+magp_meanz = np.ones(len(coords['Z'])) * u.one
+magp_meanz *= model_pars['pBplus']**2/(2*physical_constants['mu0'])
 
 pressure_Z, rho_Z, Rgas_Z = atm.vertical_profile(
                                                  coords['Zext'],
                                                  coords['Z'],
-                                                 pressure_1d,
-                                                 rho_1d,
-                                                 temperature_1d,
-                                                 muofT_1d,
+                                                 table,
                                                  magp_meanz,
                                                  physical_constants,
                                                  coords['dz'],
@@ -129,20 +126,24 @@ if l_mpi:
     z = comm.scatter(z_chunks, root=0)
 else:
     x, y, z = ax, ay, az
+
+x = u.Quantity(x, unit=coords['xmin'].unit)
+y = u.Quantity(y, unit=coords['ymin'].unit)
+z = u.Quantity(z, unit=coords['zmin'].unit)
 #==============================================================================
 # initialize zero arrays in which to add magnetic field and mhs adjustments
 #==============================================================================
-Bx   = np.zeros(x.shape)  # magnetic x-component
-By   = np.zeros(x.shape)  # magnetic y-component
-Bz   = np.zeros(x.shape)  # magnetic z-component
-pressure_m = np.zeros(x.shape) # magneto-hydrostatic adjustment to pressure
-rho_m = np.zeros(x.shape)      # magneto-hydrostatic adjustment to density
+Bx   = u.Quantity(np.zeros(x.shape), unit=u.T)  # magnetic x-component
+By   = u.Quantity(np.zeros(x.shape), unit=u.T)  # magnetic y-component
+Bz   = u.Quantity(np.zeros(x.shape), unit=u.T)  # magnetic z-component
+pressure_m = u.Quantity(np.zeros(x.shape), unit=u.Pa) # magneto-hydrostatic adjustment to pressure
+rho_m = u.Quantity(np.zeros(x.shape), unit=u.kg/u.m**3)      # magneto-hydrostatic adjustment to density
 # initialize zero arrays in which to add balancing forces and magnetic tension
-Fx   = np.zeros(x.shape)  # balancing force x-component
-Fy   = np.zeros(x.shape)  # balancing force y-component
+Fx   = u.Quantity(np.zeros(x.shape), unit=u.N/u.m**3)  # balancing force x-component
+Fy   = u.Quantity(np.zeros(x.shape), unit=u.N/u.m**3)  # balancing force y-component
 # total tension force for comparison with residual balancing force
-Btensx  = np.zeros(x.shape)
-Btensy  = np.zeros(x.shape)
+Btensx  = u.Quantity(np.zeros(x.shape), unit=u.N/u.m**3)
+Btensy  = u.Quantity(np.zeros(x.shape), unit=u.N/u.m**3)
 #==============================================================================
 #calculate the magnetic field and pressure/density balancing expressions
 #==============================================================================
@@ -199,7 +200,7 @@ pressure, rho = atm.mhs_3D_profile(z,
                                   )
 magp = (Bx**2 + By**2 + Bz**2)/(2.*physical_constants['mu0'])
 if rank ==0:
-    print'max B corona = ',magp[:,:,-1].max()*scales['energy density']
+    print'max B corona = ',magp[:,:,-1].max().decompose()
 energy = atm.get_internal_energy(pressure,
                                                   magp,
                                                   physical_constants)
@@ -225,7 +226,6 @@ atm.save_SACvariables(model,
               energy,
               logical_pars,
               physical_constants,
-              scales,
               coords,
               Nxyz
              )
@@ -236,7 +236,6 @@ atm.save_SACsources(model,
               Fy,
               logical_pars,
               physical_constants,
-              scales,
               coords,
               Nxyz
              )
@@ -264,14 +263,11 @@ atm.save_auxilliary1D(
               cspeed,
               Btensx,
               Btensy,
-              val,
-              mtw,
               pressure_Z,
               rho_Z,
               Rgas_Z,
               logical_pars,
               physical_constants,
-              scales,
               coords,
               Nxyz
              )

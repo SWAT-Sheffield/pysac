@@ -56,12 +56,12 @@ def save_SACvariables(
     if rank == 0:
 
         grid_dimensions = [Nxyz[0], Nxyz[1], Nxyz[2]]
-        left_edge =  np.array([coords['xmin'],
-                               coords['ymin'],
-                               coords['zmin']])
-        right_edge = np.array([coords['xmax'],
-                               coords['ymax'],
-                               coords['zmax']])
+        left_edge =  u.Quantity([coords['xmin'],
+                                 coords['ymin'],
+                                 coords['zmin']])
+        right_edge = u.Quantity([coords['xmax'],
+                                 coords['ymax'],
+                                 coords['zmax']])
         g0 = physical_constants['gravity']
 
         dummy = np.zeros(rho.shape)
@@ -180,12 +180,12 @@ def save_SACsources(
     if rank == 0:
 
         grid_dimensions = [Nxyz[0], Nxyz[1], Nxyz[2]]
-        left_edge =  np.array([coords['xmin'],
-                               coords['ymin'],
-                               coords['zmin']])
-        right_edge = np.array([coords['xmax'],
-                               coords['ymax'],
-                               coords['zmax']])
+        left_edge =  u.Quantity([coords['xmin'],
+                                 coords['ymin'],
+                                 coords['zmin']])
+        right_edge = u.Quantity([coords['xmax'],
+                                 coords['ymax'],
+                                 coords['zmax']])
         g0 = physical_constants['gravity']
 
         dummy = np.zeros(Fx.shape)
@@ -236,8 +236,6 @@ def save_auxilliary1D(
                     cspeed,
                     dxB2,
                     dyB2,
-                    val,
-                    mtw,
                     pressure_Z,
                     rho_Z,
                     Rgas_Z,
@@ -279,12 +277,12 @@ def save_auxilliary1D(
     if rank == 0:
 #
         grid_dimensions = [Nxyz[0], Nxyz[1], Nxyz[2]]
-        left_edge =  np.array([coords['xmin'],
-                               coords['ymin'],
-                               coords['zmin']])
-        right_edge = np.array([coords['xmax'],
-                               coords['ymax'],
-                               coords['zmax']])
+        left_edge =  u.Quantity([coords['xmin'],
+                                 coords['ymin'],
+                                 coords['zmin']])
+        right_edge = u.Quantity([coords['xmax'],
+                                 coords['ymax'],
+                                 coords['zmax']])
         g0 = physical_constants['gravity']
 
         dummy3D = np.zeros(pressure_m.shape)

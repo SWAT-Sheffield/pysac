@@ -62,7 +62,6 @@ def get_coords(Nxyz, xyz):
     get_coords returns a non-dimensional dictionary describing the domain
     coordinates.
     """
-
     dz=(xyz[5]-xyz[4])/(Nxyz[2]-1)
     Z    = np.linspace(xyz[4],
                         xyz[5],Nxyz[2])
