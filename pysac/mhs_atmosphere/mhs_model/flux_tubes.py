@@ -125,13 +125,14 @@ def construct_magnetic_field(
     dzBy = - 2 * S * (y-y0) * (B0z*B20dz + (1. + 2.*fxyz/f02)*B10dz2)*G0
     #Magnetic Pressure and horizontal thermal pressure balance term
     pbbal= 0.5/mu0 * S**2 * G02 * (
-           f02*B0z*B20dz + 2*fxyz*B10dz**2 - B0z4 )
+           f02 * B0z * B20dz + 2 * fxyz * B10dz**2 - B0z4 ) + S * Bbz * G0 * (
+           f02 * B20dz / B0z + (2 * fxyz - f02) * B10dz2 / B0z2)/mu0
     #density balancing B
     rho_1 = \
             S**2 * G02 / mu0 /g0 * (
             (0.5*f02 + 2*fxyz) * B10dz*B20dz + 0.5*f02 * B0z*B30dz
              - 2. * B0z3*B10dz
-            )
+            ) 
     B2x = (Bx * dxBx + By * dyBx + Bz * dzBx)/mu0
     B2y = (Bx * dxBy + By * dyBy + Bz * dzBy)/mu0
 
