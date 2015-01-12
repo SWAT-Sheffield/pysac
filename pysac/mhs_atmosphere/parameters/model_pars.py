@@ -59,18 +59,18 @@ paper1 = {'photo_scale': 0.6*u.Mm,
           'pBplus': 4.250e-4*u.T}
 paper1['chratio'] = 1*u.one - paper1['coratio'] - paper1['phratio']
 
-paper2 = {'photo_scale': 0.6*u.Mm,
+paper2a = {'photo_scale': 0.6*u.Mm,
           'chrom_scale': 0.42*u.Mm,
           'corona_scale': 175*u.Mm,         #scale height for the corona
           'coratio': 0.0225*u.one,
-          'model': 'paper2',
+          'model': 'paper2a',
           'phratio': 0.0*u.one,
           'pixel': 0.36562475*u.Mm,              #(HMI pixel)
           'radial_scale': 0.044*u.Mm,
-          'nftubes': 1,
+          'nftubes': 4,
           'B_corona': 2.00875e-4*u.T,
           'pBplus': 4.250e-4*u.T}
-paper2['chratio'] = 1*u.one - paper2['coratio'] - paper2['phratio']
+paper2a['chratio'] = 1*u.one - paper2a['coratio'] - paper2a['phratio']
 
 
 def get_coords(Nxyz, xyz):

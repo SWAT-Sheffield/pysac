@@ -29,7 +29,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
-from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import paper2a as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -49,7 +49,7 @@ except ImportError:
 #==============================================================================
 #set up model parameters
 #==============================================================================
-
+#model_pars['B_corona'] *= 0.
 local_procs=1
 #standard set of logical switches
 logical_pars = atm.set_options(model_pars, l_mpi, l_SI=True, l_gdf=True)
