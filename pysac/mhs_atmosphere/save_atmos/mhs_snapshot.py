@@ -25,7 +25,7 @@ def save_SACvariables(
               By,
               Bz,
               energy,
-              logical_pars,
+              option_pars,
               physical_constants,
               coords,
               Nxyz
@@ -35,7 +35,7 @@ def save_SACvariables(
     format after collating the data from mpi sub processes if necessary.
     """
     rank = 0
-    if logical_pars['l_mpi']:
+    if option_pars['l_mpi']:
         from mpi4py import MPI
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
@@ -148,7 +148,7 @@ def save_SACsources(
                     sourcesfile,
                     Fx,
                     Fy,
-                    logical_pars,
+                    option_pars,
                     physical_constants,
                     coords,
                     Nxyz
@@ -158,7 +158,7 @@ def save_SACsources(
     if necessary.
     """
     rank = 0
-    if logical_pars['l_mpi']:
+    if option_pars['l_mpi']:
         from mpi4py import MPI
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
@@ -236,7 +236,7 @@ def save_auxilliary1D(
                     pressure_Z,
                     rho_Z,
                     Rgas_Z,
-                    logical_pars,
+                    option_pars,
                     physical_constants,
                     coords,
                     Nxyz
@@ -246,7 +246,7 @@ def save_auxilliary1D(
     if necessary.
     """
     rank = 0
-    if logical_pars['l_mpi']:
+    if option_pars['l_mpi']:
         from mpi4py import MPI
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()

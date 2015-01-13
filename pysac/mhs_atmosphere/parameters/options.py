@@ -6,14 +6,14 @@ Created on Mon Dec 14 11:37:39 2014
 
 """
 ##============================================================================
-##logical parameters
+##option parameters
 ##============================================================================
 def set_options(model, l_mpi, l_gdf=True):
 
     """This module assigns the logical options for the model. If adding 
     new models with additional logical arguments add it to the default 
     list as false, include an if statement for True update the
-    dictionary logical_pars 
+    dictionary option_pars 
     
     """    
     #default arguments

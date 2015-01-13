@@ -17,7 +17,7 @@ import astropy.units as u
 def get_flux_tubes(
                    model_pars,
                    coords,
-                   logical_pars
+                   option_pars
                   ):
     """ Obtain an array of x,y coordinates and corresponding vertical
     component value for the photospheric magnetic field  """
@@ -25,13 +25,13 @@ def get_flux_tubes(
     xi, yi, Si = [0.]*u.Mm,  [0.]*u.Mm,  [0.1]*u.T  # x,y,Bz(r=0,z=0)
 
     # parameters for matching Mumford,Fedun,Erdelyi 2014
-    if logical_pars['l_mfe']:
+    if option_pars['l_mfe']:
         Si = [0.15]*u.T # 150mT SI units
     # parameters for matching Gent,Fedun,Mumford,Erdelyi 2014
-    elif logical_pars['l_single']:
+    elif option_pars['l_single']:
         Si = [0.1]*u.T # 100mT SI units
     # parameters for matching Gent,Fedun,Erdelyi 2014 flux tube pair
-    elif logical_pars['l_tube_pair']:
+    elif option_pars['l_tube_pair']:
         xi, yi, Si = (
                       u.Quantity([
                                 [ 0.00],
@@ -64,7 +64,7 @@ def construct_magnetic_field(
                              x, y, z,
                              x0, y0, S,
                              model_pars,
-                             logical_pars,
+                             option_pars,
                              physical_constants,
                              scales):
     """ Construct self similar magnetic field configuration
@@ -83,7 +83,7 @@ def construct_magnetic_field(
     Bf3 = model_pars['coratio']
     Bbz = (model_pars['B_corona'])
     #define exponentials and derivatives, basis functions
-    if logical_pars['l_B0_expz']:
+    if option_pars['l_B0_expz']:
         B1z = Bf1 * np.exp(-z**2/z1**2)
         B2z = Bf2 * np.exp(-z/z2)
         B3z = Bf3 * np.exp(-z/z3)
@@ -92,7 +92,7 @@ def construct_magnetic_field(
         B20dz= -2*  B1z/z1**2 + 4*z**2*B1z/z1**4 + B2z/z2**2 + B3z/z3**2
         B30dz= 12*z*B1z/z1**4 - 8*z**3*B1z/z1**6 - B2z/z2**3 - B3z/z3**3
     else:
-        #if logical_pars['l_BO_quadz']:
+        #if option_pars['l_BO_quadz']:
         B1z = Bf1 * z1**2 / (z**2 + z1**2)
         B2z = Bf2 * z2 /(z + z2)
         B3z = Bf3 * np.exp(-z/z3)#       B3z = Bf3 * z3 /(z + z3)
@@ -151,7 +151,7 @@ def construct_pairwise_field(x, y, z,
                              xj, yj,
                              Si, Sj,
                              model_pars,
-                             logical_pars,
+                             option_pars,
                              physical_constants,
                              scales
                             ):
@@ -169,7 +169,7 @@ def construct_pairwise_field(x, y, z,
     Bf3 = model_pars['coratio']
     Bbz = (model_pars['B_corona'])
     #define exponentials and derivatives, basis functions
-    if logical_pars['l_B0_expz']:
+    if option_pars['l_B0_expz']:
         B1z = Bf1 * np.exp(-z**2/z1**2)
         B2z = Bf2 * np.exp(-z/z2)
         B3z = Bf3 * np.exp(-z/z3)
@@ -178,7 +178,7 @@ def construct_pairwise_field(x, y, z,
         B20dz= -2*  B1z/z1**2 + 4*z**2*B1z/z1**4 + B2z/z2**2 + B3z/z3**2
         B30dz= 12*z*B1z/z1**4 - 8*z**3*B1z/z1**6 - B2z/z2**3 - B3z/z3**3
     else:
-        #if logical_pars['l_BO_quadz']:
+        #if option_pars['l_BO_quadz']:
         B1z = Bf1 * z1**2 / (z**2 + z1**2)
         B2z = Bf2 * z2 /(z + z2)
         B3z = Bf3 * np.exp(-z/z3)

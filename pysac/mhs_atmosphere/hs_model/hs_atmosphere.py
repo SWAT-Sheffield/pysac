@@ -111,7 +111,7 @@ def get_spruit_hs(
                    scales,
                    model_pars,
                    physical_constants,
-                   logical_pars,
+                   option_pars,
                    plot
                  ):
     """ Reference data is collected to satisfy the global call for source data,
@@ -123,8 +123,8 @@ def get_spruit_hs(
         increase as the square 0f Z. These are approximate due to the effect on
         density of the non-zero magnetic tension force.
     """
-    logical_pars['l_atmos_val3c_mtw'] = True
-    logical_pars['l_spruit'] = False
+    option_pars['l_atmos_val3c_mtw'] = True
+    option_pars['l_spruit'] = False
     pdata_, Tdata_i, rdata_, muofT_i, [val ,mtw] = \
         interpolate_atmosphere(
                            filenames,
@@ -132,25 +132,25 @@ def get_spruit_hs(
                            scales,
                            model_pars,
                            physical_constants,
-                           logical_pars,
+                           option_pars,
                            plot=True
                           )
-    if logical_pars['l_const']:
+    if option_pars['l_const']:
         pdata_i = 1.1*pdata_[0]\
                      *np.exp(-4.0*Z/model_pars['chrom_scale'])
         rdata_i = 0.5*rdata_[0]\
                      *np.exp(-4.0*Z/model_pars['chrom_scale'])
-    elif logical_pars['l_sqrt']:
+    elif option_pars['l_sqrt']:
         pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**0.25\
                      *np.exp(-4.0*Z/model_pars['chrom_scale'])
         rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**0.25\
                      *np.exp(-4.*Z/model_pars['chrom_scale'])
-    elif logical_pars['l_linear']:
+    elif option_pars['l_linear']:
         pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**1\
                      *np.exp(-4.0*Z/model_pars['chrom_scale'])
         rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**1\
                      *np.exp(-4.*Z/model_pars['chrom_scale'])
-    elif logical_pars['l_square']:
+    elif option_pars['l_square']:
         pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**2\
                      *np.exp(-4.0*Z/model_pars['chrom_scale'])
         rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**2\
@@ -158,13 +158,13 @@ def get_spruit_hs(
     else:
         import sys
         sys.exit('in hs_model.hs_atmosphere.get_spruit_hs set \
-                  logical_pars True for axial Alfven speed Z dependence')
+                  option_pars True for axial Alfven speed Z dependence')
     muofT_i[:] = physical_constants['mu']
     Tdata_i = pdata_i/rdata_i*physical_constants['mu']\
                              *physical_constants['proton_mass']\
                              /physical_constants['boltzmann']
-    logical_pars['l_atmos_val3c_mtw'] = False
-    logical_pars['l_spruit'] = True
+    option_pars['l_atmos_val3c_mtw'] = False
+    option_pars['l_spruit'] = True
 
     return pdata_i, Tdata_i, rdata_i, muofT_i, val, mtw
 

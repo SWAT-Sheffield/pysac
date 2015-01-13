@@ -40,11 +40,11 @@ except ImportError:
 model = 'spruit'
 homedir = os.environ['HOME']
 #standard set of logical switches
-logical_pars = atm.set_options(model, l_mpi, l_gdf=True)
+option_pars = atm.set_options(model, l_mpi, l_gdf=True)
 datadir = os.path.expanduser(homedir+'/mhs_atmosphere/'+model+'/')
-filename = datadir + model + logical_pars['suffix']
+filename = datadir + model + option_pars['suffix']
 if not os.path.exists(datadir+model):
     os.makedirs(datadir+model)
-sourcefile = datadir + model + 'sources' + logical_pars['suffix']
-auxfile = datadir + model + 'aux' + logical_pars['suffix']
+sourcefile = datadir + model + 'sources' + option_pars['suffix']
+auxfile = datadir + model + 'aux' + option_pars['suffix']
 test = yt.load(filename)
