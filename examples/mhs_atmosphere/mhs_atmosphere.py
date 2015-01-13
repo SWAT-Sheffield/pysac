@@ -29,7 +29,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
-from pysac.mhs_atmosphere.parameters.model_pars import spruit as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import paper2c as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -58,12 +58,9 @@ option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
 scales, physical_constants = \
     atm.get_parameters()
 
-#if 1D or 2D set unused dimensions to 0, and unrequired xyz limits to 1.
-Nxyz = [128,128,128] # 3D grid
-xyz = [-1*u.Mm,1*u.Mm,-1*u.Mm,1*u.Mm,35*u.km,1.6*u.Mm] # xyz limits SI/CGS units
 
 #obtain code coordinates and model parameters in code units
-coords = atm.get_coords(Nxyz, u.Quantity(xyz))
+coords = atm.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
 
 #from pysac.mhs_atmosphere.hs_model import VALIIIc_data as VAL
 #from pysac.mhs_atmosphere.hs_model import MTWcorona_data as MTW
@@ -117,9 +114,9 @@ xi, yi, Si = atm.get_flux_tubes(
 #==============================================================================
 # split domain into processes if mpi
 #==============================================================================
-ax, ay, az = np.mgrid[coords['xmin']:coords['xmax']:1j*Nxyz[0],
-                      coords['ymin']:coords['ymax']:1j*Nxyz[1],
-                      coords['zmin']:coords['zmax']:1j*Nxyz[2]]
+ax, ay, az = np.mgrid[coords['xmin']:coords['xmax']:1j*model_pars['Nxyz'][0],
+                      coords['ymin']:coords['ymax']:1j*model_pars['Nxyz'][1],
+                      coords['zmin']:coords['zmax']:1j*model_pars['Nxyz'][2]]
 
 # split the grid between processes for mpi
 if l_mpi:
@@ -194,8 +191,10 @@ del pressure_mi, rho_mi, Bxi, Byi ,Bzi, B2x, B2y
 #==============================================================================
 # Construct 3D hs arrays and then add the mhs adjustments to obtain atmosphere
 #==============================================================================
-# select the 1D array spanning the local mpi process
-indz = np.where(coords['Z'] >= z.min()) and np.where(coords['Z'] <= z.max())
+# select the 1D array spanning the local mpi process; the add/sub of dz to 
+# ensure all indices are used, but only once
+indz = np.where(coords['Z'] >= z.min()-0.1*coords['dz']) and \
+       np.where(coords['Z'] <= z.max()+0.1*coords['dz'])
 pressure_z, rho_z, Rgas_z = pressure_Z[indz], rho_Z[indz], Rgas_Z[indz]
 # local proc 3D mhs arrays
 pressure, rho = atm.mhs_3D_profile(z,
@@ -233,7 +232,7 @@ atm.save_SACvariables(
               option_pars,
               physical_constants,
               coords,
-              Nxyz
+              model_pars['Nxyz']
              )
 # save the balancing forces as the background source terms for SAC simulation
 atm.save_SACsources(
@@ -243,7 +242,7 @@ atm.save_SACsources(
               option_pars,
               physical_constants,
               coords,
-              Nxyz
+              model_pars['Nxyz']
              )
 # save auxilliary variable and 1D profiles for plotting and analysis
 Rgas = np.zeros(x.shape)
@@ -274,6 +273,6 @@ atm.save_auxilliary1D(
               option_pars,
               physical_constants,
               coords,
-              Nxyz
+              model_pars['Nxyz']
              )
 

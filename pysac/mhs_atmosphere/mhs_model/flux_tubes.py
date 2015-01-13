@@ -52,6 +52,64 @@ def get_flux_tubes(
                                 [  50e-3]
                                ], unit=u.T)
                      )# 50mT SI
+    # parameters for matching Gent,Fedun,Erdelyi 2014 twisted flux tubes
+    elif option_pars['l_multi_twist']:
+        xi, yi, Si = (
+                      u.Quantity([
+                                [ 0.34],
+                                [ 0.07],
+                                [  .14],
+                                [-0.31]
+                               ], unit=u.Mm),
+                      u.Quantity([
+                                [ 0.20],
+                                [ 0.33],
+                                [ 0.04],
+                                [-0.34]
+                               ], unit=u.Mm),
+                      u.Quantity([
+                                [  50e-3],
+                                [  50e-3],
+                                [  50e-3],
+                                [  50e-3]
+                               ], unit=u.T)
+                     )# 50mT SI
+    elif option_pars['l_multi_netwk']:
+        xi, yi, Si = (
+            u.Quantity(np.random.uniform(-0.5, 0.5, model_pars['nftubes']),
+            unit=u.Mm),
+            u.Quantity(np.random.uniform(-0.5, 0.5, model_pars['nftubes']),
+            unit=u.Mm),
+            u.Quantity(np.ones(model_pars['nftubes'])*0.33,
+            unit=u.T)
+            )
+        x1 = [-1.75, -0.75, 1.25,  1.00, -0.75]
+        y1 = [-1.00,  0.50, 0.50, -1.50,  1.70]
+        xi[  : 3] = xi[  : 3] + x1[0] * u.Mm
+        xi[3 : 6] = xi[ 3: 6] + x1[1] * u.Mm
+        xi[6 : 9] = xi[ 6: 9] + x1[2] * u.Mm
+        xi[9 :12] = xi[ 9:12] + x1[3] * u.Mm
+        xi[12:15] = xi[12:15] + x1[4] * u.Mm
+        yi[  : 3] = yi[  : 3] + y1[0] * u.Mm
+        yi[3 : 6] = yi[ 3: 6] + y1[1] * u.Mm
+        yi[6 : 9] = yi[ 6: 9] + y1[2] * u.Mm
+        yi[9 :12] = yi[ 9:12] + y1[3] * u.Mm
+        yi[12:15] = yi[12:15] + y1[4] * u.Mm
+    elif option_pars['l_multi_lanes']:
+        xi, yi, Si = (
+            u.Quantity(np.random.uniform(-0.3, 0.3, model_pars['nftubes']),
+            unit=u.Mm),
+            u.Quantity(np.random.uniform(-0.3, 0.3, model_pars['nftubes']),
+            unit=u.Mm),
+            u.Quantity(np.ones(model_pars['nftubes'])*0.5,
+            unit=u.T)
+            )
+        xi[  : 3] = xi[  : 3] - 1.875 * u.Mm
+        xi[3 : 6] = xi[ 3: 6] - 1.125 * u.Mm
+        xi[6 : 9] = xi[ 6: 9] - 0.375 * u.Mm
+        xi[9 :12] = xi[ 9:12] + 0.375 * u.Mm
+        xi[12:15] = xi[12:15] + 1.125 * u.Mm
+        xi[15:18] = xi[15:18] + 1.875 * u.Mm
     else:
         raise ValueError("in get_flux_tubes axial parameters need to be defined")
 

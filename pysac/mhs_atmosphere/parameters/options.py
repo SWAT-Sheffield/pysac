@@ -30,7 +30,7 @@ def set_options(model, l_mpi, l_gdf=True):
         'l_single':      False,# only one flux tube
         'l_hmi':         False,# construct photopheric map of Bz from HMI/SDI
         'l_tube_pair':   False,# pair of flux tubes
-        'l_multi_bps':   False,# multiple flux tubes as described in GFE (2014)
+        'l_multi_netwk': False,# multiple flux tubes as described in GFE (2014)
         'l_multi_lanes': False,# multiple flux tubes as described in GFE (2014)
         'l_multi_twist': False,# multiple flux tubes as described in GFE (2014)
         'l_2D_loop':     False,# make a 2D loop with sinusoidal Bz(x,0,0)
@@ -62,11 +62,11 @@ def set_options(model, l_mpi, l_gdf=True):
         option_pars['l_ambB']            = True 
         option_pars['l_B0_expz']         = True 
         option_pars['l_multi_twist'    ] = True 
-        option_pars['l_atmos_val3c_mtw = True'] 
+        option_pars['l_atmos_val3c_mtw'] = True 
     if model['model'] == 'paper2c':
         option_pars['l_ambB']            = True 
         option_pars['l_B0_expz']         = True 
-        option_pars['l_multi_bps']       = True 
+        option_pars['l_multi_netwk']     = True 
         option_pars['l_atmos_val3c_mtw'] = True 
     if model['model'] == 'paper2d':
         option_pars['l_ambB']            = True 
