@@ -83,7 +83,7 @@ if not option_pars['l_spruit']:
 #calculate 1d hydrostatic balance from empirical density profile
 #==============================================================================
 if option_pars['l_spruit']:
-    option_pars['l_const'] = True
+    option_pars['l_square'] = True
     pressure_Z, rho_Z, Rgas_Z = atm.get_spruit_hs(coords['Z'],
                                                   model_pars,
                                                   physical_constants,

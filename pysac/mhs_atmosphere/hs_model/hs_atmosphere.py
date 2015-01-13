@@ -119,39 +119,38 @@ def get_spruit_hs(
         for Alfven speed \sqrt(B^2/rho) constant rho~exp(-4z/chrom_scale)...
         These are approximate due to the effect on density of the non-zero
         magnetic tension force.
-        For HS equilibrium dp/dz = rho g.
-    FAG: the hs balance needs to be rechecked, especially for last three
-         options. But code compiles correctly
+        For HS equilibrium dp/dz = rho g., so cannot be isothermal?
     """
     p0 = 117200.0 * u.dyne/u.cm**2
     r0 = 2.727e-07 * u.g/u.cm**3
     g0 = physical_constants['gravity']
     if option_pars['l_const']:
-        pressure_Z = p0\
-                     *np.exp(-4.0*Z/model_pars['chrom_scale'])
-        rho_Z = -4*p0/(g0*model_pars['chrom_scale'])\
-                     *np.exp(-4.0*Z/model_pars['chrom_scale'])
+        pressure_Z = p0 *     model_pars['chrom_scale']**3/\
+                             (model_pars['chrom_scale'] + Z)**3
+        rho_Z = -3./g0 * p0 * model_pars['chrom_scale']**3/\
+                             (model_pars['chrom_scale'] + Z)**4
+        rtest = -3./g0 * p0 / model_pars['chrom_scale']
     elif option_pars['l_sqrt']:
-        pressure_Z = p0/(1+Z/model_pars['chrom_scale'])**0.5\
-                     *np.exp(-4.0*Z**0.5/model_pars['chrom_scale'])
-        rho_Z = -  p0 (2 * g0 * model_pars['chrom_scale']**2 * (1 +
-                          Z/model_pars['chrom_scale'])**1.5
-                  ) * np.exp(-4.*Z/model_pars['chrom_scale'])
+        pressure_Z = p0 *     model_pars['chrom_scale']**4/\
+                             (model_pars['chrom_scale'] + Z)**4
+        rho_Z = -4./g0 * p0 * model_pars['chrom_scale']**4/\
+                             (model_pars['chrom_scale'] + Z)**5
+        rtest = -4./g0 * p0 / model_pars['chrom_scale']
     elif option_pars['l_linear']:
-        pressure_Z = p0/(1+Z/model_pars['chrom_scale'])**1\
-                     *np.exp(-4.0*Z/model_pars['chrom_scale'])
-        rho_Z = -4*p0/g0/model_pars['chrom_scale']/(
-                  1+Z/model_pars['chrom_scale'])**1\
-                * np.exp(-4. * Z / model_pars['chrom_scale'])
+        pressure_Z = p0 *     model_pars['chrom_scale']**5/\
+                             (model_pars['chrom_scale'] + Z)**5
+        rho_Z = -5./g0 * p0 * model_pars['chrom_scale']**5/\
+                             (model_pars['chrom_scale'] + Z)**6
+        rtest = -5./g0 * p0 / model_pars['chrom_scale']
     elif option_pars['l_square']:
-        pressure_Z = p0/(1+Z/model_pars['chrom_scale'])**2\
-                     *np.exp(-4.0*Z/model_pars['chrom_scale'])
-        rho_Z = -4*p0/g0/model_pars['chrom_scale']/(1+Z/model_pars['chrom_scale'])**2\
-                     *np.exp(-4.*Z/model_pars['chrom_scale'])
+        pressure_Z = p0 *     model_pars['chrom_scale']**7/\
+                             (model_pars['chrom_scale'] + Z)**7
+        rho_Z = -7./g0 * p0 * model_pars['chrom_scale']**7/\
+                             (model_pars['chrom_scale'] + Z)**8
+        rtest = -7./g0 * p0 / model_pars['chrom_scale']
     else:
         raise ValueError("in hs_model.hs_atmosphere.get_spruit_hs set \
                   option_pars True for axial Alfven speed Z dependence")
-    rtest = -4*p0/g0/model_pars['chrom_scale']
     #to compare the derived density from hs-balance with VAL3c value:
     print'VAL rho(0) = ',r0.decompose(),' vs spruit rho(0) = ',rtest.decompose()
     Rgas_Z = u.Quantity(np.ones(Z.size), u.one)
