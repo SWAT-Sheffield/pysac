@@ -8,14 +8,14 @@ This is the main module to construct a magnetohydrostatic solar atmosphere,
 given a specified magnetic network of self-similar magnetic flux tubes and
 save the output to gdf format.
 
-To select an existing configuration set the model label, Nxyz, xyz_SI and
-any other special parameters, then execute mhs_atmopshere.
+To select an existing configuration change the import as model_pars, set Nxyz,
+xyz_SI and any other special parameters, then execute mhs_atmopshere.
 
 To add new configurations:
-add the model label options to get_logical in parameters/logical.py;
-add options to get_model in parameters/model_pars.py;
+add the model options to set_options in parameters/options.py;
+add options required in parameters/model_pars.py;
 add alternative empirical data sets to hs_model/;
-add option to interpolate_atmosphere in hs_model/hs_atmosphere.py;
+add alternativ table than interploate_atmosphere in hs_model/hs_atmosphere.py;
 add option to get_flux_tubes in mhs_model/flux_tubes.py
 
 If an alternative formulation of the flux tube is required add options to
@@ -29,7 +29,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
-from pysac.mhs_atmosphere.parameters.model_pars import paper2a as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import spruit as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -70,24 +70,33 @@ coords = atm.get_coords(Nxyz, u.Quantity(xyz))
 
 #filenames = [VAL, MTW]
 # uncomment and switch to l_const/l_sqrt/l_linear/l_square as required
-option_pars['l_const'] = True
-#interpolate the hs 1D profiles from empirical data source[s]
-empirical_data = atm.read_VAL3c_MTW(mu=physical_constants['mu'])
+if not option_pars['l_spruit']:
+    #interpolate the hs 1D profiles from empirical data source[s]
+    empirical_data = atm.read_VAL3c_MTW(mu=physical_constants['mu'])
 
-table = \
-    atm.interpolate_atmosphere(empirical_data,
-                               coords['Zext']
-                              )
+    table = \
+        atm.interpolate_atmosphere(empirical_data,
+                                   coords['Zext']
+                                  )
 
 #==============================================================================
 #calculate 1d hydrostatic balance from empirical density profile
 #==============================================================================
-# the hs pressure balance is enhanced by pressure equivalent to the residual mean
-# coronal magnetic pressure contribution once the magnetic field is applied
-magp_meanz = np.ones(len(coords['Z'])) * u.one
-magp_meanz *= model_pars['pBplus']**2/(2*physical_constants['mu0'])
+if option_pars['l_spruit']:
+    option_pars['l_const'] = True
+    pressure_Z, rho_Z, Rgas_Z = atm.get_spruit_hs(coords['Z'],
+                                                  model_pars,
+                                                  physical_constants,
+                                                  option_pars
+                                                  )
+else:
+    # the hs pressure balance is enhanced by pressure equivalent to the
+    # residual mean coronal magnetic pressure contribution once the magnetic
+    # field has been applied
+    magp_meanz = np.ones(len(coords['Z'])) * u.one
+    magp_meanz *= model_pars['pBplus']**2/(2*physical_constants['mu0'])
 
-pressure_Z, rho_Z, Rgas_Z = atm.vertical_profile(
+    pressure_Z, rho_Z, Rgas_Z = atm.vertical_profile(
                                                  coords['Zext'],
                                                  coords['Z'],
                                                  table,

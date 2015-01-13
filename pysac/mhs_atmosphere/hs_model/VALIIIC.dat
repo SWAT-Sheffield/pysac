@@ -1,4 +1,4 @@
-#z [km]		rho [g cm-3]    p [erg]         T [K]           ratio[p_t/p_k+p_t] n_i[cm3]	n_e [cm3]
+#z [km]		rho [g cm-3]    p [erg cm-3]    T [K]           ratio[p_t/p_k+p_t] n_i[cm3]	n_e [cm3]
 Z		rho		p		T		ratio		n_i		n_e
  2298.0		7.494e-15	1.470e-01	141000.0	0.9752  	3.205e09	3.839e09	
  2290.0		1.179e-14	1.472e-01	89100.0		0.9614  	5.041e09	5.961e09	

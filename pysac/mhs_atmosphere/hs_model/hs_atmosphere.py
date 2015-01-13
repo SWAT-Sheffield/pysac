@@ -106,67 +106,59 @@ def interpolate_atmosphere(data, Z):
 # a simpler exponential atmosphere to test Spruit's analytical result
 #----------------------------------------------------------------------------
 def get_spruit_hs(
-                   filenames,
                    Z,
-                   scales,
                    model_pars,
                    physical_constants,
-                   option_pars,
-                   plot
+                   option_pars
                  ):
-    """ Reference data is collected to satisfy the global call for source data,
-        but only the photospheric values of pressure and density are required
-        for Spruit.
+    """ photospheric values of pressure and density are taken from VAL3c.
         Four options are available to select Alfven speed along the flux tube
         axis to be:
         constant, increase as the square root of Z, increase linearly and
-        increase as the square 0f Z. These are approximate due to the effect on
-        density of the non-zero magnetic tension force.
+        increase as the square 0f Z. We apply Bz~exp(-2z/chrom_scale) hence
+        for Alfven speed \sqrt(B^2/rho) constant rho~exp(-4z/chrom_scale)...
+        These are approximate due to the effect on density of the non-zero
+        magnetic tension force.
+        For HS equilibrium dp/dz = rho g.
+    FAG: the hs balance needs to be rechecked, especially for last three
+         options. But code compiles correctly
     """
-    option_pars['l_atmos_val3c_mtw'] = True
-    option_pars['l_spruit'] = False
-    pdata_, Tdata_i, rdata_, muofT_i, [val ,mtw] = \
-        interpolate_atmosphere(
-                           filenames,
-                           Z,
-                           scales,
-                           model_pars,
-                           physical_constants,
-                           option_pars,
-                           plot=True
-                          )
+    p0 = 117200.0 * u.dyne/u.cm**2
+    r0 = 2.727e-07 * u.g/u.cm**3
+    g0 = physical_constants['gravity']
     if option_pars['l_const']:
-        pdata_i = 1.1*pdata_[0]\
+        pressure_Z = p0\
                      *np.exp(-4.0*Z/model_pars['chrom_scale'])
-        rdata_i = 0.5*rdata_[0]\
+        rho_Z = -4*p0/(g0*model_pars['chrom_scale'])\
                      *np.exp(-4.0*Z/model_pars['chrom_scale'])
     elif option_pars['l_sqrt']:
-        pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**0.25\
-                     *np.exp(-4.0*Z/model_pars['chrom_scale'])
-        rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**0.25\
-                     *np.exp(-4.*Z/model_pars['chrom_scale'])
+        pressure_Z = p0/(1+Z/model_pars['chrom_scale'])**0.5\
+                     *np.exp(-4.0*Z**0.5/model_pars['chrom_scale'])
+        rho_Z = -  p0 (2 * g0 * model_pars['chrom_scale']**2 * (1 +
+                          Z/model_pars['chrom_scale'])**1.5
+                  ) * np.exp(-4.*Z/model_pars['chrom_scale'])
     elif option_pars['l_linear']:
-        pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**1\
+        pressure_Z = p0/(1+Z/model_pars['chrom_scale'])**1\
                      *np.exp(-4.0*Z/model_pars['chrom_scale'])
-        rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**1\
-                     *np.exp(-4.*Z/model_pars['chrom_scale'])
+        rho_Z = -4*p0/g0/model_pars['chrom_scale']/(
+                  1+Z/model_pars['chrom_scale'])**1\
+                * np.exp(-4. * Z / model_pars['chrom_scale'])
     elif option_pars['l_square']:
-        pdata_i = 1.1*pdata_[0]/(1+Z/model_pars['chrom_scale'])**2\
+        pressure_Z = p0/(1+Z/model_pars['chrom_scale'])**2\
                      *np.exp(-4.0*Z/model_pars['chrom_scale'])
-        rdata_i = 0.5*rdata_[0]/(1+Z/model_pars['chrom_scale'])**2\
+        rho_Z = -4*p0/g0/model_pars['chrom_scale']/(1+Z/model_pars['chrom_scale'])**2\
                      *np.exp(-4.*Z/model_pars['chrom_scale'])
     else:
-        import sys
-        sys.exit('in hs_model.hs_atmosphere.get_spruit_hs set \
-                  option_pars True for axial Alfven speed Z dependence')
-    muofT_i[:] = physical_constants['mu']
-    Tdata_i = pdata_i/rdata_i*physical_constants['mu']\
-                             *physical_constants['proton_mass']\
-                             /physical_constants['boltzmann']
-    option_pars['l_atmos_val3c_mtw'] = False
-    option_pars['l_spruit'] = True
+        raise ValueError("in hs_model.hs_atmosphere.get_spruit_hs set \
+                  option_pars True for axial Alfven speed Z dependence")
+    rtest = -4*p0/g0/model_pars['chrom_scale']
+    #to compare the derived density from hs-balance with VAL3c value:
+    print'VAL rho(0) = ',r0.decompose(),' vs spruit rho(0) = ',rtest.decompose()
+    Rgas_Z = u.Quantity(np.ones(Z.size), u.one)
+    Rgas_Z *= physical_constants['boltzmann']/\
+                physical_constants['proton_mass']/physical_constants['mu']
 
-    return pdata_i, Tdata_i, rdata_i, muofT_i, val, mtw
+    return pressure_Z, rho_Z, Rgas_Z
 
 #============================================================================
 # Construct 3D hydrostatic profiles and include the magneto adjustments
