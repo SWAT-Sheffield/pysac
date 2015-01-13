@@ -9,54 +9,22 @@ import astropy.constants as asc
 import astropy.units as u
 #import pysac.mhs_atmosphere.parameters.set_up as set_up
 
-def get_parameters(model, l_mpi, logical_pars, size):
+def get_parameters():
 #============================================================================
     # Dimensional units in terms of SI
 #============================================================================
-    if logical_pars['l_SI']:
-        lscale   = 1e6                     #m
-        rhoscale = 1e-6                    #kg/m3
-        uscale   = 1e3                     #m/s
-        escale   = rhoscale*uscale**2      #
-        tmscale  = lscale/uscale           #s
-        mscale   = rhoscale * lscale **3   #kg
-        Tscale   = 1.0                     #K 
-        Bscale   = 1e-3#np.sqrt(4*np.pi*1e-7)   #mTesla mT
-        Fscale   = rhoscale*uscale/tmscale #D momentum/Dt force density balance 
-    
-        scales   = {
-                'length':lscale, 
-                'density':rhoscale,
-                'velocity':uscale,
-                'energy density':escale, 
-                'time':tmscale, 
-                'mass':mscale,
-                'temperature':Tscale,
-                'magnetic':Bscale,
-                'force density':Fscale
-               }
-    if logical_pars['l_CGS']:
-        lscale   = 1e8                     #cm
-        rhoscale = 1e-9                    #g/cm3
-        uscale   = 1e5                     #cm/s
-        escale   = rhoscale*uscale**2      #
-        tmscale  = lscale/uscale           #s
-        mscale   = rhoscale * lscale **3   #kg
-        Tscale   = 1.0                     #K 
-        Bscale   = 1.0#np.sqrt(4*np.pi*1e-7)   #Gauss G
-        Fscale   = rhoscale*uscale/tmscale #D momentum/Dt force density balance 
-    
-        scales   = {
-                'length':lscale, 
-                'density':rhoscale,
-                'velocity':uscale,
-                'energy density':escale, 
-                'time':tmscale, 
-                'mass':mscale,
-                'temperature':Tscale,
-                'magnetic':Bscale,
-                'force density':Fscale
-               }
+    scales   = {
+            'length':         1*u.Mm,
+            'density':        1e-6*u.kg/u.m**3,
+            'velocity':       1e3*u.m/u.s,
+            'temperature':    1.0*u.K, 
+            'magnetic':       1e-3*u.mT
+           }
+    scales['energy density'] = scales['density'] * scales['velocity']**2
+    scales['time'] = scales['length'] / scales['velocity'] 
+    scales['mass'] = scales['density'] * scales['length']**3 
+    scales['force density'] = scales['density'] * scales['velocity'] / \
+                       scales['time'] #D momentum/Dt force density balance 
 #============================================================================
 # physical constants
 #============================================================================
@@ -68,5 +36,4 @@ def get_parameters(model, l_mpi, logical_pars, size):
                           'gravity':    -274.0*u.km/u.s/u.s
                          }
 
-    print"parameters for model "+model['model']
     return scales, physical_constants

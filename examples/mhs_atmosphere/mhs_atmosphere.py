@@ -29,7 +29,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
-from pysac.mhs_atmosphere.parameters.model_pars import paper2a as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -52,11 +52,11 @@ except ImportError:
 #model_pars['B_corona'] *= 0.
 local_procs=1
 #standard set of logical switches
-logical_pars = atm.set_options(model_pars, l_mpi, l_SI=True, l_gdf=True)
+option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
 
 #standard conversion to dimensionless units and physical constants
 scales, physical_constants = \
-    atm.get_parameters(model_pars, l_mpi, logical_pars, size)
+    atm.get_parameters()
 
 #if 1D or 2D set unused dimensions to 0, and unrequired xyz limits to 1.
 Nxyz = [128,128,128] # 3D grid
@@ -70,7 +70,7 @@ coords = atm.get_coords(Nxyz, u.Quantity(xyz))
 
 #filenames = [VAL, MTW]
 # uncomment and switch to l_const/l_sqrt/l_linear/l_square as required
-logical_pars['l_const'] = True
+option_pars['l_const'] = True
 #interpolate the hs 1D profiles from empirical data source[s]
 empirical_data = atm.read_VAL3c_MTW(mu=physical_constants['mu'])
 
@@ -103,7 +103,7 @@ pressure_Z, rho_Z, Rgas_Z = atm.vertical_profile(
 xi, yi, Si = atm.get_flux_tubes(
                                 model_pars,
                                 coords,
-                                logical_pars
+                                option_pars
                                )
 #==============================================================================
 # split domain into processes if mpi
@@ -153,7 +153,7 @@ for i in range(0,model_pars['nftubes']):
                 atm.construct_magnetic_field(
                                              x, y, z,
                                              xi[i], yi[i], Si[i],
-                                             model_pars, logical_pars,
+                                             model_pars, option_pars,
                                              physical_constants,
                                              scales
                                             )
@@ -169,7 +169,7 @@ for i in range(0,model_pars['nftubes']):
                                              xi[i], yi[i],
                                              xi[j], yi[j], Si[i], Si[j],
                                              model_pars,
-                                             logical_pars,
+                                             option_pars,
                                              physical_constants,
                                              scales
                                             )
@@ -207,11 +207,11 @@ energy = atm.get_internal_energy(pressure,
 # set up data directory and file names
 # may be worthwhile locating on /data if files are large
 datadir = os.path.expanduser('~/mhs_atmosphere/'+model_pars['model']+'/')
-filename = datadir + model_pars['model'] + logical_pars['suffix']
+filename = datadir + model_pars['model'] + option_pars['suffix']
 if not os.path.exists(datadir):
     os.makedirs(datadir)
-sourcefile = datadir + model_pars['model'] + '_sources' + logical_pars['suffix']
-auxfile = datadir + model_pars['model'] + '_aux' + logical_pars['suffix']
+sourcefile = datadir + model_pars['model'] + '_sources' + option_pars['suffix']
+auxfile = datadir + model_pars['model'] + '_aux' + option_pars['suffix']
 
 # save the variables for the initialisation of a SAC simulation
 atm.save_SACvariables(
@@ -221,7 +221,7 @@ atm.save_SACvariables(
               By,
               Bz,
               energy,
-              logical_pars,
+              option_pars,
               physical_constants,
               coords,
               Nxyz
@@ -231,7 +231,7 @@ atm.save_SACsources(
               sourcefile,
               Fx,
               Fy,
-              logical_pars,
+              option_pars,
               physical_constants,
               coords,
               Nxyz
@@ -240,7 +240,7 @@ atm.save_SACsources(
 Rgas = np.zeros(x.shape)
 Rgas[:] = Rgas_z
 temperature = pressure/rho/Rgas
-if not logical_pars['l_hdonly']:
+if not option_pars['l_hdonly']:
     inan = np.where(magp <=1e-7*pressure.min())
     magpbeta = magp
     magpbeta[inan] = 1e-7*pressure.min()  # low pressure floor to avoid NaN
@@ -262,7 +262,7 @@ atm.save_auxilliary1D(
               pressure_Z,
               rho_Z,
               Rgas_Z,
-              logical_pars,
+              option_pars,
               physical_constants,
               coords,
               Nxyz

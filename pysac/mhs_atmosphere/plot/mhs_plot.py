@@ -40,7 +40,7 @@ except ImportError:
 model = 'spruit'
 homedir = os.environ['HOME']
 #standard set of logical switches
-logical_pars = atm.get_logical(model, l_mpi, l_SI=True, l_gdf=True)
+logical_pars = atm.set_options(model, l_mpi, l_gdf=True)
 datadir = os.path.expanduser(homedir+'/mhs_atmosphere/'+model+'/')
 filename = datadir + model + logical_pars['suffix']
 if not os.path.exists(datadir+model):
