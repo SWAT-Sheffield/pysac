@@ -23,7 +23,7 @@ __all__ = ['read_VAL3c_MTW', 'interpolate_atmosphere', 'get_spruit_hs', 'vertica
 # Read in and interpolate HD atmosphere
 #============================================================================
 
-def read_VAL3c_MTW(VAL_file=None, MTW_file=None, mu=0.6):
+def read_VAL3c_MTW(VAL_file=None, MTW_file=None, mu=0.602):
     """
     Read in the data from Table 12 in Vernazza (1981) and combine with
     McWhirter (1975).
@@ -67,7 +67,7 @@ def read_VAL3c_MTW(VAL_file=None, MTW_file=None, mu=0.6):
     MTW = Table.read(MTW_file, format='ascii', comment='#')
     MTW['Z'].unit = u.km
     MTW['T'].unit = u.K
-    MTW['p'].unit = u.Unit('dyne/cm^2')
+    MTW['p'].unit = u.Unit('dyne cm-2')
     MTW['rho'] = (MTW['p'] / k_B / MTW['T'] * m_p * mu).to('g cm-3')
 
     MTW['mu'] = mu
@@ -78,6 +78,9 @@ def read_VAL3c_MTW(VAL_file=None, MTW_file=None, mu=0.6):
 
     return data
 
+#============================================================================
+# interpolate the empirical data onto a Z array 
+#============================================================================
 def interpolate_atmosphere(data, Z):
     """ This module generates a 1d array for the model plasma preesure, plasma
     density, temperature and mean molecular weight.
@@ -85,19 +88,18 @@ def interpolate_atmosphere(data, Z):
 
     hdata = np.array(data['Z'])
     # interpolate total pressure, temperature and density profiles
-    pdata_f = UnivariateSpline(hdata,np.array(np.log(data['p'])),k=1, s=0.25)
-    Tdata_f = UnivariateSpline(hdata,np.array(np.log(data['T'])),k=1, s=0.25)
-    rdata_f = UnivariateSpline(hdata,np.array(np.log(data['rho'])),k=1, s=0.25)
+    pdata_f = UnivariateSpline(hdata*data['Z'].unit,np.array(np.log(data['p'])),k=1, s=0.25)
+    Tdata_f = UnivariateSpline(hdata*data['Z'].unit,np.array(np.log(data['T'])),k=1, s=0.25)
+    rdata_f = UnivariateSpline(hdata*data['Z'].unit,np.array(np.log(data['rho'])),k=1, s=0.25)
     #s=0.0 to ensure all points are strictly used for ionisation state
     muofT_f = UnivariateSpline(hdata,np.array(np.log(data['mu'])),k=1, s=0.0)
 
     outdata = Table()
-    outdata['Z'] = Z
-    outdata['p'] = np.exp(pdata_f(Z)) * data['p'].unit
-    outdata['T'] = np.exp(Tdata_f(Z)) * data['T'].unit
-    outdata['rho'] = np.exp(rdata_f(Z)) * data['rho'].unit
-    outdata['mu'] = np.exp(muofT_f(Z)) * u.one
-
+    outdata['Z'] = Z.to(data['Z'].unit) 
+    outdata['p'] = np.exp(pdata_f(Z.to(data['Z'].unit))) * data['p'].unit
+    outdata['T'] = np.exp(Tdata_f(Z.to(data['Z'].unit))) * data['T'].unit
+    outdata['rho'] = np.exp(rdata_f(Z.to(data['Z'].unit))) * data['rho'].unit
+    outdata['mu'] = np.exp(muofT_f(Z.to(data['Z'].unit))) * u.one
 
     return outdata
 
@@ -162,7 +164,7 @@ def get_spruit_hs(
 #============================================================================
 # Construct 3D hydrostatic profiles and include the magneto adjustments
 #============================================================================
-def vertical_profile(Zint, Z,
+def vertical_profile(Z,
                      table,
                      magp,
                      physical_constants, dz,
@@ -172,30 +174,36 @@ def vertical_profile(Zint, Z,
        sensitivity to larger chromospheric gradients."""
 
     g0 = physical_constants['gravity']
-    Rgas_v = u.Quantity(np.ones(Z.size), u.one)
-    Rgas_v *= physical_constants['boltzmann']/\
+    Rgas_Z = u.Quantity(np.ones(Z.size), u.one)
+    Rgas_Z *= physical_constants['boltzmann']/\
                 physical_constants['proton_mass']/table['mu'][4:-4]
     rdata   = u.Quantity(table['rho'], copy=True)
-    #it may be necessary to enhance the density near the footpoint emprically
-#    rdata[:] = rdata_i[:]*(1. + 1.5 * np.exp(-Zint[:]/0.00005)) #+ 1.*rdata_i.min()#+ 0.1*rdata_i[4]*np.exp(-Zint/Z[50])
-    rdata_v = rdata[4:-4].copy()
+    rdata_Z = rdata[4:-4].copy()
     # inverted SAC 4th order derivative scheme to minimise numerical error
     """evaluate upper boundary pressure from equation of state + enhancement,
        magp, which will be replaced by the mean magnetic pressure in the
        corona, then integrate from inner next pressure
     """
     table_T = u.Quantity(table['T'])
-    linp_1 = table_T[-5]*rdata_v[-1]*Rgas_v[-1] + magp[-1]
+    linp_1 = table_T[-5]*rdata_Z[-1]*Rgas_Z[-1] + magp[-1]
     linp = u.Quantity(np.ones(len(Z)), unit=linp_1.unit)
     linp[-1] = linp_1
     linp[-2] = linp[-1] + magp[-2] - magp[-1] - ( 9.*g0*rdata[-1]*dz+19.*g0*rdata[-2]*dz- 5.*g0*rdata[-3]*dz+g0*rdata[-4]*dz)/24.
 
     for i in range(2,Z.size):
-        linp[-i-1] = (144.*linp[-i]+18.*linp[-i+1]
-                  -102.*(g0*rdata[-i]  )*dz
-                  - 84.*(g0*rdata[-i-1])*dz
-                  +  6.*(g0*rdata[-i-2])*dz
-                  )/162. + magp[-i-1] - magp[-i]
+        linp[-i-1] = (336.*linp[-i]-33.*linp[-i+1]
+                  - 25.*(g0*rdata[-i-7]  )*dz
+                  +114.*(g0*rdata[-i-6]  )*dz
+                  -321.*(g0*rdata[-i-5])*dz
+                  - 38.*(g0*rdata[-i-4])*dz
+                  )/303. + magp[-i-1] - magp[-i]
+#        linp[-i-1] = (144.*linp[-i]+18.*linp[-i+1]
+#                  -102.*(g0*rdata[-i]  )*dz
+#                  - 84.*(g0*rdata[-i-1])*dz
+#                  +  6.*(g0*rdata[-i-2])*dz
+#                  )/162. + magp[-i-1] - magp[-i]
 
-    thermalp_v = linp
-    return thermalp_v, rdata_v, Rgas_v
+    print linp.max(),linp.unit.decompose()
+    thermalp_Z = linp
+#    import pdb; pdb.set_trace()
+    return thermalp_Z, rdata_Z, Rgas_Z

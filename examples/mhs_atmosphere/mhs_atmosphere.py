@@ -29,7 +29,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
-from pysac.mhs_atmosphere.parameters.model_pars import paper2c as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -94,7 +94,6 @@ else:
     magp_meanz *= model_pars['pBplus']**2/(2*physical_constants['mu0'])
 
     pressure_Z, rho_Z, Rgas_Z = atm.vertical_profile(
-                                                 coords['Zext'],
                                                  coords['Z'],
                                                  table,
                                                  magp_meanz,
@@ -191,7 +190,7 @@ del pressure_mi, rho_mi, Bxi, Byi ,Bzi, B2x, B2y
 #==============================================================================
 # Construct 3D hs arrays and then add the mhs adjustments to obtain atmosphere
 #==============================================================================
-# select the 1D array spanning the local mpi process; the add/sub of dz to 
+# select the 1D array spanning the local mpi process; the add/sub of dz to
 # ensure all indices are used, but only once
 indz = np.where(coords['Z'] >= z.min()-0.1*coords['dz']) and \
        np.where(coords['Z'] <= z.max()+0.1*coords['dz'])
