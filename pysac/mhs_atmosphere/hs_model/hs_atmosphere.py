@@ -186,9 +186,11 @@ def vertical_profile(Z,
     """
     table_T = u.Quantity(table['T'])
     linp_1 = table_T[-5]*rdata_Z[-1]*Rgas_Z[-1] + magp[-1]
+    linp_2 = table_T[-6]*rdata_Z[-2]*Rgas_Z[-2] + magp[-2]
     linp = u.Quantity(np.ones(len(Z)), unit=linp_1.unit)
     linp[-1] = linp_1
-    linp[-2] = linp[-1] + magp[-2] - magp[-1] - ( 9.*g0*rdata[-1]*dz+19.*g0*rdata[-2]*dz- 5.*g0*rdata[-3]*dz+g0*rdata[-4]*dz)/24.
+    linp[-2] = linp_2
+#    linp[-2] = linp[-1] + magp[-2] - magp[-1] - ( 9.*g0*rdata[-1]*dz+19.*g0*rdata[-2]*dz- 5.*g0*rdata[-3]*dz+g0*rdata[-4]*dz)/24.
 
     for i in range(2,Z.size):
         linp[-i-1] = (336.*linp[-i]-33.*linp[-i+1]
