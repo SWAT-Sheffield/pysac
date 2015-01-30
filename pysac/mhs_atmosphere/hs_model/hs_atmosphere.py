@@ -79,27 +79,27 @@ def read_VAL3c_MTW(VAL_file=None, MTW_file=None, mu=0.602):
     return data
 
 #============================================================================
-# interpolate the empirical data onto a Z array 
+# interpolate the empirical data onto a Z array
 #============================================================================
 def interpolate_atmosphere(data, Z):
     """ This module generates a 1d array for the model plasma preesure, plasma
     density, temperature and mean molecular weight.
     """
 
-    hdata = np.array(data['Z'])
+    hdata = np.array(u.Quantity(data['Z']).to(u.m))
     # interpolate total pressure, temperature and density profiles
-    pdata_f = UnivariateSpline(hdata*data['Z'].unit,np.array(np.log(data['p'])),k=1, s=0.25)
-    Tdata_f = UnivariateSpline(hdata*data['Z'].unit,np.array(np.log(data['T'])),k=1, s=0.25)
-    rdata_f = UnivariateSpline(hdata*data['Z'].unit,np.array(np.log(data['rho'])),k=1, s=0.25)
+    pdata_f = UnivariateSpline(hdata,np.array(np.log(data['p'])),k=1, s=0.25)
+    Tdata_f = UnivariateSpline(hdata,np.array(np.log(data['T'])),k=1, s=0.25)
+    rdata_f = UnivariateSpline(hdata,np.array(np.log(data['rho'])),k=1, s=0.25)
     #s=0.0 to ensure all points are strictly used for ionisation state
     muofT_f = UnivariateSpline(hdata,np.array(np.log(data['mu'])),k=1, s=0.0)
 
     outdata = Table()
-    outdata['Z'] = Z.to(data['Z'].unit) 
-    outdata['p'] = np.exp(pdata_f(Z.to(data['Z'].unit))) * data['p'].unit
-    outdata['T'] = np.exp(Tdata_f(Z.to(data['Z'].unit))) * data['T'].unit
-    outdata['rho'] = np.exp(rdata_f(Z.to(data['Z'].unit))) * data['rho'].unit
-    outdata['mu'] = np.exp(muofT_f(Z.to(data['Z'].unit))) * u.one
+    outdata['Z'] = Z
+    outdata['p'] = np.exp(pdata_f(Z.to(u.m))) * data['p'].unit
+    outdata['T'] = np.exp(Tdata_f(Z.to(u.m))) * data['T'].unit
+    outdata['rho'] = np.exp(rdata_f(Z.to(u.m))) * data['rho'].unit
+    outdata['mu'] = np.exp(muofT_f(Z.to(u.m))) * u.one
 
     return outdata
 
@@ -166,46 +166,43 @@ def get_spruit_hs(
 #============================================================================
 def vertical_profile(Z,
                      table,
-                     magp,
-                     physical_constants, dz,
+                     magp0,
+                     physical_constants, dz
                     ):
     """Return the vertical profiles for thermal pressure and density in 1D.
        Integrate in reverse from the corona to the photosphere to remove
        sensitivity to larger chromospheric gradients."""
-
-    g0 = physical_constants['gravity']
-    Rgas_Z = u.Quantity(np.ones(Z.size), u.one)
-    Rgas_Z *= physical_constants['boltzmann']/\
-                physical_constants['proton_mass']/table['mu'][4:-4]
-    rdata   = u.Quantity(table['rho'], copy=True)
+    g0 = physical_constants['gravity'].to('m s-2')
+    Rgas = u.Quantity(np.ones(table['Z'].size), u.one)
+    Rgas *= (physical_constants['boltzmann']/\
+                physical_constants['proton_mass']/table['mu']).to('m2 K-1 s-2')
+    Rgas_Z  = Rgas[4:-4].copy()
+    rdata   = u.Quantity(table['rho'], copy=True).to('kg m-3')
     rdata_Z = rdata[4:-4].copy()
+    magp = magp0.to('kg m-1 s-2')
     # inverted SAC 4th order derivative scheme to minimise numerical error
     """evaluate upper boundary pressure from equation of state + enhancement,
        magp, which will be replaced by the mean magnetic pressure in the
        corona, then integrate from inner next pressure
     """
     table_T = u.Quantity(table['T'])
-    linp_1 = table_T[-5]*rdata_Z[-1]*Rgas_Z[-1] + magp[-1]
-    linp_2 = table_T[-6]*rdata_Z[-2]*Rgas_Z[-2] + magp[-2]
+    linp_1 = table_T[-1]*rdata[-1]*Rgas[-1] + magp[-1]
     linp = u.Quantity(np.ones(len(Z)), unit=linp_1.unit)
-    linp[-1] = linp_1
-    linp[-2] = linp_2
-#    linp[-2] = linp[-1] + magp[-2] - magp[-1] - ( 9.*g0*rdata[-1]*dz+19.*g0*rdata[-2]*dz- 5.*g0*rdata[-3]*dz+g0*rdata[-4]*dz)/24.
+    linp[-1] = table_T[-5]*rdata[-5]*Rgas[-5] + magp[-1]
 
-    for i in range(2,Z.size):
-        linp[-i-1] = (336.*linp[-i]-33.*linp[-i+1]
-                  - 25.*(g0*rdata[-i-7]  )*dz
-                  +114.*(g0*rdata[-i-6]  )*dz
-                  -321.*(g0*rdata[-i-5])*dz
-                  - 38.*(g0*rdata[-i-4])*dz
-                  )/303. + magp[-i-1] - magp[-i]
+#    for i in range(1,Z.size):
 #        linp[-i-1] = (144.*linp[-i]+18.*linp[-i+1]
-#                  -102.*(g0*rdata[-i]  )*dz
-#                  - 84.*(g0*rdata[-i-1])*dz
-#                  +  6.*(g0*rdata[-i-2])*dz
-#                  )/162. + magp[-i-1] - magp[-i]
-
-    print linp.max(),linp.unit.decompose()
+#                  -102.*(g0*rdata[-i-4]  )*dz
+#                  - 84.*(g0*rdata[-i-5])*dz
+#                  +  6.*(g0*rdata[-i-6])*dz
+#                  )/162. + magp[-i-1] - magp[-i-0]
+    for i in range(1,Z.size):
+        linp[-i-1] = (1152.*linp[-i]
+                  + 35.*(g0*rdata[-i-7])*dz
+                  -112.*(g0*rdata[-i-6])*dz
+                  -384.*(g0*rdata[-i-5])*dz
+                  -784.*(g0*rdata[-i-4])*dz
+                  + 77.*(g0*rdata[-i-3])*dz
+                  )/1152. + magp[-i-1] - magp[-i-0]
     thermalp_Z = linp
-#    import pdb; pdb.set_trace()
     return thermalp_Z, rdata_Z, Rgas_Z

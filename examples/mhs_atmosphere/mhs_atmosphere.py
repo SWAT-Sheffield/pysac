@@ -98,7 +98,7 @@ else:
                                                  table,
                                                  magp_meanz,
                                                  physical_constants,
-                                                 coords['dz'],
+                                                 coords['dz']
                                                  )
 
 #==============================================================================
