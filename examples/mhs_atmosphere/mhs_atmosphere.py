@@ -213,12 +213,13 @@ energy = atm.get_internal_energy(pressure,
 #============================================================================
 # set up data directory and file names
 # may be worthwhile locating on /data if files are large
-datadir = os.path.expanduser('~/mhs_atmosphere/'+model_pars['model']+'/')
+datadir = os.path.expanduser('~/Documents/mhs_atmosphere/'+model_pars['model']+'/')
 filename = datadir + model_pars['model'] + option_pars['suffix']
 if not os.path.exists(datadir):
     os.makedirs(datadir)
 sourcefile = datadir + model_pars['model'] + '_sources' + option_pars['suffix']
-auxfile = datadir + model_pars['model'] + '_aux' + option_pars['suffix']
+aux3D = datadir + model_pars['model'] + '_3Daux' + option_pars['suffix']
+aux1D = datadir + model_pars['model'] + '_1Daux' + option_pars['suffix']
 
 # save the variables for the initialisation of a SAC simulation
 atm.save_SACvariables(
@@ -256,8 +257,8 @@ else:
     pbeta  = magp+1.0    #dummy to avoid NaN
 alfven = np.sqrt(2.*physical_constants['mu0']*magp/rho)
 cspeed = np.sqrt(physical_constants['gamma']*pressure/rho)
-atm.save_auxilliary1D(
-              auxfile,
+atm.save_auxilliary3D(
+              aux3D,
               pressure_m,
               rho_m,
               temperature,
@@ -266,6 +267,13 @@ atm.save_auxilliary1D(
               cspeed,
               Btensx,
               Btensy,
+              option_pars,
+              physical_constants,
+              coords,
+              model_pars['Nxyz']
+             )
+atm.save_auxilliary1D(
+              aux1D,
               pressure_Z,
               rho_Z,
               Rgas_Z,

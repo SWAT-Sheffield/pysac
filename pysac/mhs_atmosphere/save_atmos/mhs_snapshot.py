@@ -53,14 +53,16 @@ def save_SACvariables(
 
             rho,Bx,By,Bz,energy = out_vars
     if rank == 0:
+        print'writing',filename
+        print'SAC background atmosphere'
 
         grid_dimensions = [Nxyz[0], Nxyz[1], Nxyz[2]]
         left_edge =  u.Quantity([coords['xmin'],
                                  coords['ymin'],
-                                 coords['zmin']])
+                                 coords['zmin']]).to(u.cm)
         right_edge = u.Quantity([coords['xmax'],
                                  coords['ymax'],
-                                 coords['zmax']])
+                                 coords['zmax']]).to(u.cm)
         g0 = physical_constants['gravity']
 
         dummy = np.zeros(rho.shape)
@@ -176,14 +178,16 @@ def save_SACsources(
 
             Fx,Fy = out_vars
     if rank == 0:
+        print'writing',sourcesfile
+        print'SAC background source terms'
 
         grid_dimensions = [Nxyz[0], Nxyz[1], Nxyz[2]]
         left_edge =  u.Quantity([coords['xmin'],
                                  coords['ymin'],
-                                 coords['zmin']])
+                                 coords['zmin']]).to(u.cm)
         right_edge = u.Quantity([coords['xmax'],
                                  coords['ymax'],
-                                 coords['zmax']])
+                                 coords['zmax']]).to(u.cm)
         g0 = physical_constants['gravity']
 
         dummy = np.zeros(Fx.shape)
@@ -223,7 +227,7 @@ def save_SACsources(
         gdf_file.close()
 #============================================================================
 
-def save_auxilliary1D(
+def save_auxilliary3D(
                     auxfile,
                     pressure_m,
                     rho_m,
@@ -233,9 +237,6 @@ def save_auxilliary1D(
                     cspeed,
                     dxB2,
                     dyB2,
-                    pressure_Z,
-                    rho_Z,
-                    Rgas_Z,
                     option_pars,
                     physical_constants,
                     coords,
@@ -272,18 +273,18 @@ def save_auxilliary1D(
             pressure_m, rho_m, temperature, pbeta,\
                 alfven, cspeed, dxB2, dyB2 = out_vars
     if rank == 0:
+        print'writing',auxfile
+        print'non-SAC 3D auxilliary data for plotting'
 #
         grid_dimensions = [Nxyz[0], Nxyz[1], Nxyz[2]]
         left_edge =  u.Quantity([coords['xmin'],
                                  coords['ymin'],
-                                 coords['zmin']])
+                                 coords['zmin']]).to(u.cm)
         right_edge = u.Quantity([coords['xmax'],
                                  coords['ymax'],
-                                 coords['zmax']])
+                                 coords['zmax']]).to(u.cm)
         g0 = physical_constants['gravity']
 
-        dummy3D = np.zeros(pressure_m.shape)
-        dummy1D = np.zeros(pressure_Z.shape)
         simulation_parameters = gdf.SimulationParameters([
                             ['boundary_conditions', np.zeros(6) + 2],
                             ['cosmological_simulation', 0          ],
@@ -307,21 +308,6 @@ def save_auxilliary1D(
 
         gdf_file = gdf.create_file(h5py.File(auxfile,'w'), simulation_parameters, grid_dimensions)
 
-        gdf.write_field_u(gdf_file,
-                              pressure_Z.reshape([1,1,pressure_Z.size]),
-                              '1D_plasma_pressure',
-                              'Background pressure Z-profile'
-                              )
-        gdf.write_field_u(gdf_file,
-                              rho_Z.reshape([1,1,rho_Z.size]),
-                              '1D_plasma_density',
-                              'Background density Z-profile'
-                              )
-        gdf.write_field_u(gdf_file,
-                              Rgas_Z.reshape([1,1,Rgas_Z.size]),
-                              '1D_ideal_gas_constant',
-                              'Background R_gas Z-profile'
-                              )
         gdf.write_field_u(gdf_file,
                               pressure_m,
                               '3D_plasma_pressure_balance',
@@ -361,5 +347,79 @@ def save_auxilliary1D(
                               dyB2,
                               '3D_mag_tension_y',
                               'y-component bg magnetic tension'
+                              )
+        gdf_file.close()
+#============================================================================
+
+def save_auxilliary1D(
+                    auxfile,
+                    pressure_Z,
+                    rho_Z,
+                    Rgas_Z,
+                    option_pars,
+                    physical_constants,
+                    coords,
+                    Nxyz
+                   ):
+    """ Save auxilliary variables for use in plotting background setup in
+    hdf5 (gdf default) format after collating the data from mpi sub processes
+    if necessary.
+    """
+    rank = 0
+    if option_pars['l_mpi']:
+        from mpi4py import MPI
+        comm = MPI.COMM_WORLD
+        rank = comm.Get_rank()
+
+    if rank == 0:
+        print'writing',auxfile
+        print'non-SAC 1D auxilliary data for plotting'
+#
+        grid_dimensions = [0, 0, Nxyz[2]]
+        left_edge =  u.Quantity([coords['xmin'],
+                                 coords['ymin'],
+                                 coords['zmin']]).to(u.cm)
+        right_edge = u.Quantity([coords['xmin'],
+                                 coords['ymin'],
+                                 coords['zmax']]).to(u.cm)
+        g0 = physical_constants['gravity']
+
+        simulation_parameters = gdf.SimulationParameters([
+                            ['boundary_conditions', np.zeros(6) + 2],
+                            ['cosmological_simulation', 0          ],
+                            ['current_iteration', 0                ],
+                            ['current_time', 0.0                   ],
+                            ['dimensionality', 3                   ],
+                            ['domain_dimensions', grid_dimensions  ],
+                            ['domain_left_edge', left_edge         ],
+                            ['domain_right_edge', right_edge       ],
+                            ['eta', 0.0                            ],
+                            ['field_ordering', 0                   ],
+                            ['gamma', 1.66666667                   ],
+                            ['gravity0', 0.0                       ],
+                            ['gravity1', 0.0                       ],
+                            ['gravity2', g0                     ],
+                            ['nu', 0.0                             ],
+                            ['num_ghost_zones', 0                  ],
+                            ['refine_by', 0                        ],
+                            ['unique_identifier', 'sacgdf2014'     ]
+                            ])
+
+        gdf_file = gdf.create_file(h5py.File(auxfile,'w'), simulation_parameters, grid_dimensions)
+
+        gdf.write_field_u(gdf_file,
+                              pressure_Z.reshape([1,1,pressure_Z.size]),
+                              '1D_plasma_pressure',
+                              'Background pressure Z-profile'
+                              )
+        gdf.write_field_u(gdf_file,
+                              rho_Z.reshape([1,1,pressure_Z.size]),
+                              '1D_plasma_density',
+                              'Background density Z-profile'
+                              )
+        gdf.write_field_u(gdf_file,
+                              Rgas_Z.reshape([1,1,pressure_Z.size]),
+                              '1D_ideal_gas_constant',
+                              'Background R_gas Z-profile'
                               )
         gdf_file.close()
