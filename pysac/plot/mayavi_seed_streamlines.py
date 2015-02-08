@@ -25,27 +25,29 @@ from mayavi.modules.streamline import Streamline
 
 __all__ = ['SeedStreamline']
 
-class SeedStreamline(Streamline):
+from distutils.version import LooseVersion
+
+class SeedStreamline44(Streamline):
     """
     This class is a modification of the mayavi Streamline class that accepts
     an array of seed points as a input rather than a widget.
-    
+
     Examples
     --------
     Create a new Streamline instance and add it to a pipeline
-    
+
     >>> from pysac.plot.mayavi_seed_streamline import SeedStreamline
     >>> field_lines = SeedStreamline(seed_points = np.array(seeds))
     >>> myvectorfield.add_child(field_lines)
     """
-    
+
     seed_points = Array(allow_none=False)
     seed = Instance(tvtk.PolyData, args=())
     update_mode = Trait('interactive', TraitPrefixList(['interactive',
                                                          'semi-interactive',
                                                          'non-interactive']),
                          desc='the speed at which the poly data is updated')
-    
+
     def setup_pipeline(self):
         """Override this method so that it *creates* the tvtk
         pipeline.
@@ -60,7 +62,7 @@ class SeedStreamline(Streamline):
         """
         # Create and setup the default objects.
         self.seed = tvtk.PolyData(points=self.seed_points)
-        self.stream_tracer = tvtk.StreamTracer(maximum_propagation=200,
+        self.stream_tracer = tvtk.StreamTracer(maximum_propagation=2000,
                                                integration_direction='backward',
                                                compute_vorticity=False,
                                                integrator_type='runge_kutta4',
@@ -71,6 +73,83 @@ class SeedStreamline(Streamline):
         self.actor = mayavi.components.actor.Actor()
         # Setup the actor suitably for this module.
         self.actor.property.line_width = 2.0
+
+    def update_pipeline(self):
+        """Override this method so that it *updates* the tvtk pipeline
+        when data upstream is known to have changed.
+
+        This method is invoked (automatically) when any of the inputs
+        sends a `pipeline_changed` event.
+        """
+        mm = self.module_manager
+        if mm is None:
+            return
+
+        src = mm.source
+        self.configure_connection(self.stream_tracer, src)
+        #self.seed.inputs = [src]
+
+        # Setup the radius/width of the tube/ribbon filters based on
+        # given input.
+        if self._first:
+            b = src.outputs[0].bounds
+            l = [(b[1]-b[0]), (b[3]-b[2]), (b[5]-b[4])]
+            length = np.sqrt(l[0]*l[0] + l[1]*l[1] + l[2]*l[2])
+            self.ribbon_filter.width = length*0.0075
+            self.tube_filter.radius = length*0.0075
+            self._first = False
+
+        self._streamline_type_changed(self.streamline_type)
+        # Set the LUT for the mapper.
+        self.actor.set_lut(mm.scalar_lut_manager.lut)
+
+        self.pipeline_changed = True
+
+    def _seed_points_changed(self, old, new):
+        self.seed = tvtk.PolyData(points=self.seed_points)
+
+    def _stream_tracer_changed(self, old, new):
+        if old is not None:
+            old.on_trait_change(self.render, remove=True)
+        seed = self.seed
+        if seed is not None:
+            self.configure_source_data(new, seed)
+        new.on_trait_change(self.render)
+        mm = self.module_manager
+        if mm is not None:
+            src = mm.source
+            self.configure_connection(new, src)
+
+        # A default output so there are no pipeline errors.  The
+        # update_pipeline call corrects this if needed.
+        self.outputs = [new.output]
+
+        self.update_pipeline()
+
+    def _seed_changed(self, old, new):
+        st = self.stream_tracer
+        if st is not None:
+            self.configure_connection(st, new)
+        #self._change_components(old, new)
+
+class SeedStreamline43(SeedStreamline44):
+    """
+    This class is a modification of the mayavi Streamline class that accepts
+    an array of seed points as a input rather than a widget.
+
+    Notes
+    -----
+
+    This is a version for MayaVi < 4.3
+
+    Examples
+    --------
+    Create a new Streamline instance and add it to a pipeline
+
+    >>> from pysac.plot.mayavi_seed_streamline import SeedStreamline
+    >>> field_lines = SeedStreamline(seed_points = np.array(seeds))
+    >>> myvectorfield.add_child(field_lines)
+    """
 
     def update_pipeline(self):
         """Override this method so that it *updates* the tvtk pipeline
@@ -102,9 +181,6 @@ class SeedStreamline(Streamline):
         self.actor.set_lut(mm.scalar_lut_manager.lut)
 
         self.pipeline_changed = True
-    
-    def _seed_points_changed(self, old, new):
-        self.seed = tvtk.PolyData(points=self.seed_points)
 
     def _stream_tracer_changed(self, old, new):
         if old is not None:
@@ -122,9 +198,15 @@ class SeedStreamline(Streamline):
         self.outputs = [new.output]
 
         self.update_pipeline()
-        
+
     def _seed_changed(self, old, new):
         st = self.stream_tracer
         if st is not None:
             st.source = new#.poly_data
         #self._change_components(old, new)
+
+
+if LooseVersion(mayavi.__version__) > LooseVersion('4.4'):
+    SeedStreamline = SeedStreamline44
+else:
+    SeedStreamline = SeedStreamline43
