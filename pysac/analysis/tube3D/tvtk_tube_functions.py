@@ -9,6 +9,7 @@ pesudo parallel streamlines.
 
 import numpy as np
 from tvtk.api import tvtk
+import tvtk.common as tvtk_common
 
 __all__ = ['move_seeds', 'make_circle_seeds', 'create_flux_surface',
            'update_flux_surface', 'make_poly_norms', 'norms_sanity_check',
@@ -107,8 +108,8 @@ def create_flux_surface(bfield, surf_seeds):
     """
     #Make a streamline instance with the bfield
     surf_field_lines = tvtk.StreamTracer()
-#    surf_field_lines.configure_connection(surf_field_lines, bfield)
-    surf_field_lines.input_connection = bfield
+#    surf_field_lines.input_connection = bfield
+    tvtk_common.configure_connection(surf_field_lines, bfield)
 
     surf_field_lines.source = surf_seeds
     surf_field_lines.integrator = tvtk.RungeKutta4()
