@@ -47,7 +47,7 @@ def set_options(model, l_mpi, l_gdf=True):
     if model['model'] == 'spruit':    
         option_pars['l_single']          = True 
         option_pars['l_spruit']          = True 
-        option_pars['l_B0_expz']         = True 
+#        option_pars['l_B0_quadz']         = True 
     if model['model'] == 'paper1':
         option_pars['l_ambB']            = True 
         option_pars['l_B0_expz']         = True

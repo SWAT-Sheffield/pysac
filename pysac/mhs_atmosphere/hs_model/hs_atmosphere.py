@@ -123,33 +123,38 @@ def get_spruit_hs(
         magnetic tension force.
         For HS equilibrium dp/dz = rho g., so cannot be isothermal?
     """
-    p0 = 117200.0 * u.dyne/u.cm**2
+    p0 = model_pars['p0']
     r0 = 2.727e-07 * u.g/u.cm**3
     g0 = physical_constants['gravity']
     if option_pars['l_const']:
-        pressure_Z = p0 *     model_pars['chrom_scale']**3/\
-                             (model_pars['chrom_scale'] + Z)**3
-        rho_Z = -3./g0 * p0 * model_pars['chrom_scale']**3/\
-                             (model_pars['chrom_scale'] + Z)**4
-        rtest = -3./g0 * p0 / model_pars['chrom_scale']
+        pressure_Z = p0 * (model_pars['chrom_scale']**0.5
+                            - (model_pars['chrom_scale'] + Z)**0.5
+                          )/model_pars['chrom_scale']**0.5
+        rho_Z = -0.5/g0 * p0 / model_pars['chrom_scale']**0.5/\
+                             (model_pars['chrom_scale'] + Z)**0.5
+        rtest = -0.5/g0 * p0 / model_pars['chrom_scale']
+        model_pars['model'] += '_const'
     elif option_pars['l_sqrt']:
-        pressure_Z = p0 *     model_pars['chrom_scale']**4/\
-                             (model_pars['chrom_scale'] + Z)**4
-        rho_Z = -4./g0 * p0 * model_pars['chrom_scale']**4/\
-                             (model_pars['chrom_scale'] + Z)**5
-        rtest = -4./g0 * p0 / model_pars['chrom_scale']
+        pressure_Z = p0 *     model_pars['chrom_scale']**0.5/\
+                             (model_pars['chrom_scale'] + Z)**0.5
+        rho_Z = -0.5/g0 * p0 * model_pars['chrom_scale']**0.5/\
+                             (model_pars['chrom_scale'] + Z)**1.5
+        rtest = -0.5/g0 * p0 / model_pars['chrom_scale']
+        model_pars['model'] += '_sqrt'
     elif option_pars['l_linear']:
-        pressure_Z = p0 *     model_pars['chrom_scale']**5/\
-                             (model_pars['chrom_scale'] + Z)**5
-        rho_Z = -5./g0 * p0 * model_pars['chrom_scale']**5/\
-                             (model_pars['chrom_scale'] + Z)**6
-        rtest = -5./g0 * p0 / model_pars['chrom_scale']
+        pressure_Z = p0 *     model_pars['chrom_scale']**1.5/\
+                             (model_pars['chrom_scale'] + Z)**1.5
+        rho_Z = -1.5/g0 * p0 * model_pars['chrom_scale']**1.5/\
+                             (model_pars['chrom_scale'] + Z)**2.5
+        rtest = -1.5/g0 * p0 / model_pars['chrom_scale']
+        model_pars['model'] += '_linear'
     elif option_pars['l_square']:
-        pressure_Z = p0 *     model_pars['chrom_scale']**7/\
-                             (model_pars['chrom_scale'] + Z)**7
-        rho_Z = -7./g0 * p0 * model_pars['chrom_scale']**7/\
-                             (model_pars['chrom_scale'] + Z)**8
-        rtest = -7./g0 * p0 / model_pars['chrom_scale']
+        pressure_Z = p0 *     model_pars['chrom_scale']**3.5/\
+                             (model_pars['chrom_scale'] + Z)**3.5
+        rho_Z = -3.5/g0 * p0 * model_pars['chrom_scale']**3.5/\
+                             (model_pars['chrom_scale'] + Z)**4.5
+        rtest = -3.5/g0 * p0 / model_pars['chrom_scale']
+        model_pars['model'] += '_square'
     else:
         raise ValueError("in hs_model.hs_atmosphere.get_spruit_hs set \
                   option_pars True for axial Alfven speed Z dependence")

@@ -8,6 +8,8 @@ import numpy as np
 import pysac.io.gdf_writer as gdf
 import h5py
 import astropy.units as u
+import h5py as h5
+
 ##============================================================================
 ## Save a file!!!
 ##============================================================================
@@ -40,7 +42,11 @@ def save_SACvariables(
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
         gather_vars = [
-                       rho,Bx,By,Bz,energy
+                       rho.to(u.Unit('kg m-3')),
+                       Bx.to(u.Unit('Tesla')),
+                       By.to(u.Unit('Tesla')),
+                       Bz.to(u.Unit('Tesla')),
+                       energy.to(u.Unit('kg m-2 s-2'))
                       ]
         concat_vars = []
         for var in gather_vars:
@@ -59,10 +65,10 @@ def save_SACvariables(
         grid_dimensions = [Nxyz[0], Nxyz[1], Nxyz[2]]
         left_edge =  u.Quantity([coords['xmin'],
                                  coords['ymin'],
-                                 coords['zmin']]).to(u.cm)
+                                 coords['zmin']]).to(u.m)
         right_edge = u.Quantity([coords['xmax'],
                                  coords['ymax'],
-                                 coords['zmax']]).to(u.cm)
+                                 coords['zmax']]).to(u.m)
         g0 = physical_constants['gravity']
 
         dummy = np.zeros(rho.shape)
@@ -102,7 +108,7 @@ def save_SACvariables(
                               'internal_energy_bg',
                               'Background Internal Energy'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('Pa'),
+        gdf.write_field_u(gdf_file, dummy*u.Unit('kg m-1 s-2'),
                               'internal_energy_pert',
                               'Perturbation Internal Energy'
                               )
@@ -144,6 +150,28 @@ def save_SACvariables(
                               )
 
         gdf_file.close()
+
+#    BASE = [("length_unit", "m"), ("mass_unit", "kg"), ("time_unit", "s"),
+#            ("velocity_unit", "m/s"), ("magnetic_unit", "T")]
+#    
+#    with h5.File(filename) as h5f:
+#        if "dataset_units" not in h5f:
+#            h5f.create_group("dataset_units")
+#        for field_name, item in  h5f["field_types"].items():
+#            h5f["dataset_units"][field_name] = 1.0
+#            if "density" in field_name:
+#                h5f["dataset_units"][field_name].attrs["unit"] = "kg / m ** 3"
+#            elif "internal_energy" in field_name:
+#                h5f["dataset_units"][field_name].attrs["unit"] = "N / m ** 2"
+#            elif "mag_field" in field_name:
+#                h5f["dataset_units"][field_name].attrs["unit"] = "T"
+#            elif "velocity" in field_name:
+#                h5f["dataset_units"][field_name].attrs["unit"] = "m / s"
+#    
+#        for base_name, base_unit in BASE:
+#            h5f["dataset_units"][base_name] = 1.0
+#            h5f["dataset_units"][base_name].attrs["unit"] = base_unit
+#    h5f.File(filename, 'w')
 #============================================================================
 
 def save_SACsources(
@@ -184,10 +212,10 @@ def save_SACsources(
         grid_dimensions = [Nxyz[0], Nxyz[1], Nxyz[2]]
         left_edge =  u.Quantity([coords['xmin'],
                                  coords['ymin'],
-                                 coords['zmin']]).to(u.cm)
+                                 coords['zmin']]).to(u.m)
         right_edge = u.Quantity([coords['xmax'],
                                  coords['ymax'],
-                                 coords['zmax']]).to(u.cm)
+                                 coords['zmax']]).to(u.m)
         g0 = physical_constants['gravity']
 
         dummy = np.zeros(Fx.shape)
@@ -279,10 +307,10 @@ def save_auxilliary3D(
         grid_dimensions = [Nxyz[0], Nxyz[1], Nxyz[2]]
         left_edge =  u.Quantity([coords['xmin'],
                                  coords['ymin'],
-                                 coords['zmin']]).to(u.cm)
+                                 coords['zmin']]).to(u.m)
         right_edge = u.Quantity([coords['xmax'],
                                  coords['ymax'],
-                                 coords['zmax']]).to(u.cm)
+                                 coords['zmax']]).to(u.m)
         g0 = physical_constants['gravity']
 
         simulation_parameters = gdf.SimulationParameters([
@@ -310,43 +338,43 @@ def save_auxilliary3D(
 
         gdf.write_field_u(gdf_file,
                               pressure_m,
-                              '3D_plasma_pressure_balance',
+                              'pressure_mhs',
                               'Background magneto-pressure balance'
                               )
         gdf.write_field_u(gdf_file,
                               rho_m,
-                              '3D_plasma_density_balance',
+                              'density_mhs',
                               'Background magneto-density balance'
                               )
         gdf.write_field_u(gdf_file,
                               temperature,
-                              '3D_temperature',
+                              'temperature',
                               'Background temperature'
                               )
         gdf.write_field_u(gdf_file,
                               pbeta,
-                              '3D_plasma_beta',
+                              'plasma_beta',
                               'Background plasma beta'
                               )
         gdf.write_field_u(gdf_file,
                               alfven,
-                              '3D_Alfven_speed',
+                              'Alfven_speed',
                               'Background Alfven speed'
                               )
         gdf.write_field_u(gdf_file,
                               cspeed,
-                              '3D_sound_speed',
+                              'sound_speed',
                               'Background sound speed'
                               )
         gdf.write_field_u(gdf_file,
                               dxB2,
-                              '3D_mag_tension_x',
-                              'x-component bg magnetic tension'
+                              'mag_tension_x',
+                              'x-component background magnetic tension'
                               )
         gdf.write_field_u(gdf_file,
                               dyB2,
-                              '3D_mag_tension_y',
-                              'y-component bg magnetic tension'
+                              'mag_tension_y',
+                              'y-component background magnetic tension'
                               )
         gdf_file.close()
 #============================================================================
@@ -375,15 +403,21 @@ def save_auxilliary1D(
         print'writing',auxfile
         print'non-SAC 1D auxilliary data for plotting'
 #
-        grid_dimensions = [0, 0, Nxyz[2]]
+        grid_dimensions = [2, 2, Nxyz[2]] #dims > 1 to be read by yt
         left_edge =  u.Quantity([coords['xmin'],
                                  coords['ymin'],
-                                 coords['zmin']]).to(u.cm)
-        right_edge = u.Quantity([coords['xmin'],
-                                 coords['ymin'],
-                                 coords['zmax']]).to(u.cm)
+                                 coords['zmin']]).to(u.m)
+        right_edge = u.Quantity([coords['xmax'],
+                                 coords['ymax'],
+                                 coords['zmax']]).to(u.m)
         g0 = physical_constants['gravity']
-
+        pressureHS = u.Quantity(np.zeros(grid_dimensions), unit=pressure_Z.unit)
+        rhoHS = u.Quantity(np.zeros(grid_dimensions), unit=rho_Z.unit)
+        RgasHS = u.Quantity(np.zeros(grid_dimensions), unit=Rgas_Z.unit)
+#        import pdb; pdb.set_trace()
+        pressureHS[:] = pressure_Z
+        rhoHS[:] = rho_Z
+        RgasHS[:] = Rgas_Z
         simulation_parameters = gdf.SimulationParameters([
                             ['boundary_conditions', np.zeros(6) + 2],
                             ['cosmological_simulation', 0          ],
@@ -408,18 +442,18 @@ def save_auxilliary1D(
         gdf_file = gdf.create_file(h5py.File(auxfile,'w'), simulation_parameters, grid_dimensions)
 
         gdf.write_field_u(gdf_file,
-                              pressure_Z.reshape([1,1,pressure_Z.size]),
-                              '1D_plasma_pressure',
-                              'Background pressure Z-profile'
+                              pressureHS,
+                              'pressure_HS',
+                              'Background 1D hydrostatic-pressure'
                               )
         gdf.write_field_u(gdf_file,
-                              rho_Z.reshape([1,1,pressure_Z.size]),
-                              '1D_plasma_density',
-                              'Background density Z-profile'
+                              rhoHS,
+                              'density_HS',
+                              'Background 1D hydrostatic-density'
                               )
         gdf.write_field_u(gdf_file,
-                              Rgas_Z.reshape([1,1,pressure_Z.size]),
-                              '1D_ideal_gas_constant',
-                              'Background R_gas Z-profile'
+                              RgasHS,
+                              'ideal_gas_constant_HS',
+                              'Background 1D hydrostatic-R_gas'
                               )
         gdf_file.close()

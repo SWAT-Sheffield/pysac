@@ -23,7 +23,8 @@ def mhs_3D_profile(z,
                   ):
     """Return the vertical profiles for thermal pressure and density in 3D"""
     #Make things 3D
-    rho_0 = np.empty(z.shape) * u.g /u.m**3
+    rho_0 = np.empty(z.shape) * u.kg /u.m**3
+#    import pdb; pdb.set_trace()
     rho_0[:] = rho_z
     #hydrostatic vertical profile
     pressure_0 = np.empty(z.shape) * u.Pa

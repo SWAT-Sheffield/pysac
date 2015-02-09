@@ -29,7 +29,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
-from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import spruit as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -53,10 +53,39 @@ except ImportError:
 local_procs=1
 #standard set of logical switches
 option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
-
 #standard conversion to dimensionless units and physical constants
 scales, physical_constants = \
     atm.get_parameters()
+if option_pars['l_spruit']:
+    option_pars['l_linear'] = True
+    if option_pars['l_const']:
+        model_pars['chrom_scale'] *= 1.
+        model_pars['p0'] *= 2.
+        physical_constants['gravity'] *= 1.
+        model_pars['radial_scale'] *= 1.
+#        model_pars['xyz'][5] *= 1.
+    if option_pars['l_sqrt']:
+        model_pars['chrom_scale'] *= 5.65e-3
+        model_pars['p0'] *= 1.
+        physical_constants['gravity'] *= 7.5e3
+        model_pars['radial_scale'] *= 0.7
+#        model_pars['xyz'][5] *= 2e4
+    elif option_pars['l_linear']:
+        model_pars['chrom_scale'] *= 0.062
+        model_pars['p0'] *= 3e2
+        physical_constants['gravity'] *= 8e3
+        model_pars['radial_scale'] *= 1.
+#        model_pars['xyz'][5] *= 5.
+    elif option_pars['l_square']:
+        model_pars['chrom_scale'] *= 1.65
+        model_pars['p0'] *= 2e4
+        physical_constants['gravity'] *= 5e4
+        model_pars['radial_scale'] *= 1.
+#        model_pars['xyz'][5] *= 1.
+    else:
+        model_pars['chrom_scale'] *= 1.
+        model_pars['p0'] *= 1.
+#        model_pars['xyz'][5] *= 1.
 
 
 #obtain code coordinates and model parameters in code units
@@ -80,7 +109,6 @@ if not option_pars['l_spruit']:
 #calculate 1d hydrostatic balance from empirical density profile
 #==============================================================================
 if option_pars['l_spruit']:
-    option_pars['l_square'] = True
     pressure_Z, rho_Z, Rgas_Z = atm.get_spruit_hs(coords['Z'],
                                                   model_pars,
                                                   physical_constants,
@@ -255,7 +283,12 @@ if not option_pars['l_hdonly']:
     pbeta  = pressure/magpbeta
 else:
     pbeta  = magp+1.0    #dummy to avoid NaN
-alfven = np.sqrt(2.*physical_constants['mu0']*magp/rho)
+alfven = np.sqrt(2.*magp/rho)
+if option_pars['l_spruit']:
+    if rank == 0:
+        print'Alfven speed Z.min to Z.max =',\
+        alfven[model_pars['Nxyz'][0]/2,model_pars['Nxyz'][1]/2, 0].decompose(),\
+        alfven[model_pars['Nxyz'][0]/2,model_pars['Nxyz'][1]/2,-1].decompose()
 cspeed = np.sqrt(physical_constants['gamma']*pressure/rho)
 atm.save_auxilliary3D(
               aux3D,

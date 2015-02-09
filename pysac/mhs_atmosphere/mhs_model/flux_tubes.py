@@ -149,6 +149,11 @@ def construct_magnetic_field(
         B10dz= -2*z*B1z/z1**2                    - B2z/z2    - B3z/z3
         B20dz= -2*  B1z/z1**2 + 4*z**2*B1z/z1**4 + B2z/z2**2 + B3z/z3**2
         B30dz= 12*z*B1z/z1**4 - 8*z**3*B1z/z1**6 - B2z/z2**3 - B3z/z3**3
+    elif option_pars['l_spruit']:
+        B0z = Bf2 * z2**(0.125) / (z + z2)**(0.125)
+        B10dz = -0.125 * B0z / (z + z2)
+        B20dz = 9./64. * B0z / (z + z2)**2
+        B30dz = -153./512 * B0z / (z + z2)**3
     else:
         #if option_pars['l_BO_quadz']:
         B1z = Bf1 * z1**2 / (z**2 + z1**2)
