@@ -90,3 +90,21 @@ def get_mayavi_colourmap(rgb1,rgb2,interp,n,Mw,Sw,alpha):
         RGB_out[i,:3] = np.array([r,g,b])*255
     RGB_out[:,-1] = alpha
     return RGB_out
+
+def lsm_to_mayavi(lsm):
+    """
+    Convert a `matplotlib.colors.LinearSegmentedColormap` to a mayavi array.
+    """
+    r = np.array(lsm._segmentdata['red'])[:,0]
+    g = np.array(lsm._segmentdata['green'])[:,0]
+    b = np.array(lsm._segmentdata['blue'])[:,0]
+
+    # rescale to 0-255
+    r, g, b = r*255, g*255, b*255
+
+    RGB = np.zeros([len(r),4], dtype=np.uint8)+255
+    RGB[:,0] = r
+    RGB[:,1] = g
+    RGB[:,2] = b
+
+    return RGB
