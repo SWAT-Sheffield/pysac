@@ -20,7 +20,7 @@ scales, physical_constants = \
 coords = atm.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
 option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
 if option_pars['l_spruit']:
-    option_pars['l_const'] = True
+    option_pars['l_linear'] = True
     if option_pars['l_const']:
         model_pars['chrom_scale'] *= 1.
 #        model_pars['xyz'][5] *= 1.

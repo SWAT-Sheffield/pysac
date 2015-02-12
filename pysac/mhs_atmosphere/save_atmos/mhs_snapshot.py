@@ -8,7 +8,7 @@ import numpy as np
 import pysac.io.gdf_writer as gdf
 import h5py
 import astropy.units as u
-import h5py as h5
+#import h5py as h5
 
 ##============================================================================
 ## Save a file!!!
@@ -86,7 +86,7 @@ def save_SACvariables(
                             ['gamma', 1.66666667                   ],
                             ['gravity0', 0.0                       ],
                             ['gravity1', 0.0                       ],
-                            ['gravity2', g0                     ],
+                            ['gravity2', g0                        ],
                             ['nu', 0.0                             ],
                             ['num_ghost_zones', 0                  ],
                             ['refine_by', 0                        ],
@@ -154,24 +154,25 @@ def save_SACvariables(
 #    BASE = [("length_unit", "m"), ("mass_unit", "kg"), ("time_unit", "s"),
 #            ("velocity_unit", "m/s"), ("magnetic_unit", "T")]
 #    
-#    with h5.File(filename) as h5f:
-#        if "dataset_units" not in h5f:
-#            h5f.create_group("dataset_units")
-#        for field_name, item in  h5f["field_types"].items():
-#            h5f["dataset_units"][field_name] = 1.0
-#            if "density" in field_name:
-#                h5f["dataset_units"][field_name].attrs["unit"] = "kg / m ** 3"
-#            elif "internal_energy" in field_name:
-#                h5f["dataset_units"][field_name].attrs["unit"] = "N / m ** 2"
-#            elif "mag_field" in field_name:
-#                h5f["dataset_units"][field_name].attrs["unit"] = "T"
-#            elif "velocity" in field_name:
-#                h5f["dataset_units"][field_name].attrs["unit"] = "m / s"
+    with h5py.File(filename,'r+') as h5f:
+        if "dataset_units" not in h5f:
+            h5f.create_group("dataset_units")
+        for field_name, item in  h5f["field_types"].items():
+            h5f["dataset_units"][field_name] = 1.0
+            if "density" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "kg / m ** 3"
+            elif "internal_energy" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "N / m ** 2"
+            elif "mag_field" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "T"
+            elif "velocity" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "m / s"
 #    
+#    import pdb; pdb.set_trace()
 #        for base_name, base_unit in BASE:
 #            h5f["dataset_units"][base_name] = 1.0
 #            h5f["dataset_units"][base_name].attrs["unit"] = base_unit
-#    h5f.File(filename, 'w')
+
 #============================================================================
 
 def save_SACsources(
@@ -218,7 +219,6 @@ def save_SACsources(
                                  coords['zmax']]).to(u.m)
         g0 = physical_constants['gravity']
 
-        dummy = np.zeros(Fx.shape)
         simulation_parameters = gdf.SimulationParameters([
                             ['boundary_conditions', np.zeros(6) + 2],
                             ['cosmological_simulation', 0          ],
@@ -253,6 +253,20 @@ def save_SACsources(
                               'y Component of Background Balancing Force'
                               )
         gdf_file.close()
+
+    with h5py.File(sourcesfile,'r+') as h5f:
+        if "dataset_units" not in h5f:
+            h5f.create_group("dataset_units")
+        for field_name, item in  h5f["field_types"].items():
+            h5f["dataset_units"][field_name] = 1.0
+            if "density" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "kg / m ** 3"
+            elif "internal_energy" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "N / m ** 2"
+            elif "mag_field" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "T"
+            elif "velocity" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "m / s"
 #============================================================================
 
 def save_auxilliary3D(
@@ -303,7 +317,7 @@ def save_auxilliary3D(
     if rank == 0:
         print'writing',auxfile
         print'non-SAC 3D auxilliary data for plotting'
-#
+
         grid_dimensions = [Nxyz[0], Nxyz[1], Nxyz[2]]
         left_edge =  u.Quantity([coords['xmin'],
                                  coords['ymin'],
@@ -358,7 +372,7 @@ def save_auxilliary3D(
                               )
         gdf.write_field_u(gdf_file,
                               alfven,
-                              'Alfven_speed',
+                              'alfven_speed',
                               'Background Alfven speed'
                               )
         gdf.write_field_u(gdf_file,
@@ -377,6 +391,24 @@ def save_auxilliary3D(
                               'y-component background magnetic tension'
                               )
         gdf_file.close()
+
+    with h5py.File(auxfile,'r+') as h5f:
+        if "dataset_units" not in h5f:
+            h5f.create_group("dataset_units")
+        for field_name, item in  h5f["field_types"].items():
+            h5f["dataset_units"][field_name] = 1.0
+            if "density" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "kg / m ** 3"
+            elif "pressure" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "N / m ** 2"
+            elif "temperature" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "K"
+            elif "tension" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "N / m ** 3"
+            elif "speed" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "m / s"
+            elif "beta" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = ""
 #============================================================================
 
 def save_auxilliary1D(
@@ -402,7 +434,7 @@ def save_auxilliary1D(
     if rank == 0:
         print'writing',auxfile
         print'non-SAC 1D auxilliary data for plotting'
-#
+
         grid_dimensions = [2, 2, Nxyz[2]] #dims > 1 to be read by yt
         left_edge =  u.Quantity([coords['xmin'],
                                  coords['ymin'],
@@ -414,7 +446,6 @@ def save_auxilliary1D(
         pressureHS = u.Quantity(np.zeros(grid_dimensions), unit=pressure_Z.unit)
         rhoHS = u.Quantity(np.zeros(grid_dimensions), unit=rho_Z.unit)
         RgasHS = u.Quantity(np.zeros(grid_dimensions), unit=Rgas_Z.unit)
-#        import pdb; pdb.set_trace()
         pressureHS[:] = pressure_Z
         rhoHS[:] = rho_Z
         RgasHS[:] = Rgas_Z
@@ -457,3 +488,17 @@ def save_auxilliary1D(
                               'Background 1D hydrostatic-R_gas'
                               )
         gdf_file.close()
+    
+    with h5py.File(auxfile,'r+') as h5f:
+        if "dataset_units" not in h5f:
+            h5f.create_group("dataset_units")
+        for field_name, item in  h5f["field_types"].items():
+            h5f["dataset_units"][field_name] = 1.0
+            if "density" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "kg / m ** 3"
+            elif "pressure" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "N / m ** 2"
+            elif "gas" in field_name:
+                h5f["dataset_units"][field_name].attrs["unit"] = "m2 K-1 s-2"
+
+#=============================================================================
