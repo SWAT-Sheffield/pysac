@@ -151,27 +151,6 @@ def save_SACvariables(
 
         gdf_file.close()
 
-#    BASE = [("length_unit", "m"), ("mass_unit", "kg"), ("time_unit", "s"),
-#            ("velocity_unit", "m/s"), ("magnetic_unit", "T")]
-#    
-    with h5py.File(filename,'r+') as h5f:
-        if "dataset_units" not in h5f:
-            h5f.create_group("dataset_units")
-        for field_name, item in  h5f["field_types"].items():
-            h5f["dataset_units"][field_name] = 1.0
-            if "density" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "kg / m ** 3"
-            elif "internal_energy" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "N / m ** 2"
-            elif "mag_field" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "T"
-            elif "velocity" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "m / s"
-#    
-#    import pdb; pdb.set_trace()
-#        for base_name, base_unit in BASE:
-#            h5f["dataset_units"][base_name] = 1.0
-#            h5f["dataset_units"][base_name].attrs["unit"] = base_unit
 
 #============================================================================
 
@@ -254,19 +233,6 @@ def save_SACsources(
                               )
         gdf_file.close()
 
-    with h5py.File(sourcesfile,'r+') as h5f:
-        if "dataset_units" not in h5f:
-            h5f.create_group("dataset_units")
-        for field_name, item in  h5f["field_types"].items():
-            h5f["dataset_units"][field_name] = 1.0
-            if "density" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "kg / m ** 3"
-            elif "internal_energy" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "N / m ** 2"
-            elif "mag_field" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "T"
-            elif "velocity" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "m / s"
 #============================================================================
 
 def save_auxilliary3D(
@@ -392,23 +358,6 @@ def save_auxilliary3D(
                               )
         gdf_file.close()
 
-    with h5py.File(auxfile,'r+') as h5f:
-        if "dataset_units" not in h5f:
-            h5f.create_group("dataset_units")
-        for field_name, item in  h5f["field_types"].items():
-            h5f["dataset_units"][field_name] = 1.0
-            if "density" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "kg / m ** 3"
-            elif "pressure" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "N / m ** 2"
-            elif "temperature" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "K"
-            elif "tension" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "N / m ** 3"
-            elif "speed" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "m / s"
-            elif "beta" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = ""
 #============================================================================
 
 def save_auxilliary1D(
@@ -443,9 +392,12 @@ def save_auxilliary1D(
                                  coords['ymax'],
                                  coords['zmax']]).to(u.m)
         g0 = physical_constants['gravity']
-        pressureHS = u.Quantity(np.zeros(grid_dimensions), unit=pressure_Z.unit)
-        rhoHS = u.Quantity(np.zeros(grid_dimensions), unit=rho_Z.unit)
-        RgasHS = u.Quantity(np.zeros(grid_dimensions), unit=Rgas_Z.unit)
+        pressureHS = u.Quantity(np.zeros(grid_dimensions),
+                                unit=pressure_Z.to("Pa").unit)
+        rhoHS = u.Quantity(np.zeros(grid_dimensions),
+                           unit=rho_Z.to('kg m-3').unit)
+        RgasHS = u.Quantity(np.zeros(grid_dimensions),
+                            unit=Rgas_Z.to('m2 K-1 s-2').unit)
         pressureHS[:] = pressure_Z
         rhoHS[:] = rho_Z
         RgasHS[:] = Rgas_Z
@@ -470,6 +422,7 @@ def save_auxilliary1D(
                             ['unique_identifier', 'sacgdf2014'     ]
                             ])
 
+#        import pdb; pdb.set_trace()
         gdf_file = gdf.create_file(h5py.File(auxfile,'w'), simulation_parameters, grid_dimensions)
 
         gdf.write_field_u(gdf_file,
@@ -489,16 +442,5 @@ def save_auxilliary1D(
                               )
         gdf_file.close()
     
-    with h5py.File(auxfile,'r+') as h5f:
-        if "dataset_units" not in h5f:
-            h5f.create_group("dataset_units")
-        for field_name, item in  h5f["field_types"].items():
-            h5f["dataset_units"][field_name] = 1.0
-            if "density" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "kg / m ** 3"
-            elif "pressure" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "N / m ** 2"
-            elif "gas" in field_name:
-                h5f["dataset_units"][field_name].attrs["unit"] = "m2 K-1 s-2"
 
 #=============================================================================
