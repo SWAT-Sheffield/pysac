@@ -111,7 +111,8 @@ def create_flux_surface(bfield, surf_seeds):
 #    surf_field_lines.input_connection = bfield
     tvtk_common.configure_connection(surf_field_lines, bfield)
 
-    surf_field_lines.source = surf_seeds
+    tvtk_common.configure_source_data(surf_field_lines, surf_seeds)
+#    surf_field_lines.source = surf_seeds
     surf_field_lines.integrator = tvtk.RungeKutta4()
     surf_field_lines.maximum_propagation = 1000
     surf_field_lines.integration_direction = 'backward'
@@ -119,7 +120,7 @@ def create_flux_surface(bfield, surf_seeds):
 
     #Create surface from 'parallel' lines
     surface = tvtk.RuledSurfaceFilter()
-    surface.configure_connection(surface, surf_field_lines)
+    tvtk_common.configure_connection(surface, surf_field_lines)
 #    surface.input = surf_field_lines.output
     surface.close_surface = True
     surface.pass_lines = True
@@ -155,7 +156,8 @@ def make_poly_norms(poly_data):
         The normal vectors
     """
     poly_norms = tvtk.PolyDataNormals()
-    poly_norms.input = poly_data
+    tvtk_common.configure_input_data(poly_norms, poly_data)
+#    poly_norms.input = poly_data
     poly_norms.compute_point_normals = True
     poly_norms.flip_normals = False
     poly_norms.update()
