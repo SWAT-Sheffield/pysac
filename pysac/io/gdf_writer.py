@@ -6,6 +6,7 @@ import copy
 
 import numpy as np
 import astropy.units as u
+import yt
 
 import h5py
 from h5py import h5s, h5p, h5fd
@@ -122,6 +123,14 @@ def create_file(f, simulation_parameters, grid_dimensions,
     # "particle_types" group
     g = f.create_group("particle_types")
 
+    # "dataset_units" group
+    g = f.create_group("dataset_units")
+    BASE = [("length_unit", "m"), ("mass_unit", "kg"), ("time_unit", "s"),
+            ("velocity_unit", "m / s"), ("magnetic_unit", "T")]
+    for base_name, base_unit in BASE:
+        f["dataset_units"][base_name] = 1.0
+        f["dataset_units"][base_name].attrs["unit"] = base_unit
+
     # root datasets -- info about the grids
     f["grid_dimensions"] = np.reshape(grid_dimensions, (1, 3)) #needs to be 1XN
     f["grid_left_index"] = np.zeros((1,3)) #needs to be 1XN
@@ -151,7 +160,7 @@ def write_field_u(gdf_file, data, field_title, field_name, field_shape=None,
     data: astropy.units.Quantity
         The data to be written
 
-    field_tile: str
+    field_title: str
         The name of the field dataset
 
     field_name: str
@@ -180,6 +189,10 @@ def write_field_u(gdf_file, data, field_title, field_name, field_shape=None,
     fv.attrs['field_to_cgs'] = field.unit.to_system(u.cgs)[0].scale
     fv.attrs['field_units'] = np.string_(field.unit.to_string("latex").strip('$'))
     fv.attrs['staggering'] = staggering
+
+    ytunit = np.string_(yt.YTQuantity.from_astropy(field).units)
+    gdf_file["dataset_units"][field_title] = 1.0
+    gdf_file["dataset_units"][field_title].attrs["unit"] = ytunit
 
 #    gr[field_title][arr_slice] = np.array(field)
     if api == 'high':
