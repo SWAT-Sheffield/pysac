@@ -56,79 +56,43 @@ option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
 #standard conversion to dimensionless units and physical constants
 scales, physical_constants = \
     atm.get_parameters()
-if option_pars['l_spruit']:
-    option_pars['l_linear'] = True
-    if option_pars['l_const']:
-        model_pars['chrom_scale'] *= 1.
-        model_pars['p0'] *= 2.
-        physical_constants['gravity'] *= 1.
-        model_pars['radial_scale'] *= 1.
-#        model_pars['xyz'][5] *= 1.
-    if option_pars['l_sqrt']:
-        model_pars['chrom_scale'] *= 5.65e-3
-        model_pars['p0'] *= 1.
-        physical_constants['gravity'] *= 7.5e3
-        model_pars['radial_scale'] *= 0.7
-#        model_pars['xyz'][5] *= 2e4
-    elif option_pars['l_linear']:
-        model_pars['chrom_scale'] *= 0.062
-        model_pars['p0'] *= 3e2
-        physical_constants['gravity'] *= 8e3
-        model_pars['radial_scale'] *= 1.
-#        model_pars['xyz'][5] *= 5.
-    elif option_pars['l_square']:
-        model_pars['chrom_scale'] *= 1.65
-        model_pars['p0'] *= 2e4
-        physical_constants['gravity'] *= 5e4
-        model_pars['radial_scale'] *= 1.
-#        model_pars['xyz'][5] *= 1.
-    else:
-        model_pars['chrom_scale'] *= 1.
-        model_pars['p0'] *= 1.
-#        model_pars['xyz'][5] *= 1.
+option_pars['l_const'] = True
+if option_pars['l_const']:
+    model_pars['chrom_scale'] *= 1.
+    model_pars['p0'] *= 1e14
+    physical_constants['gravity'] *= 1.
+    model_pars['radial_scale'] *= 1.
+elif option_pars['l_sqrt']:
+    model_pars['chrom_scale'] *= 5.65e-3
+    model_pars['p0'] *= 1.
+    physical_constants['gravity'] *= 7.5e3
+    model_pars['radial_scale'] *= 0.7
+elif option_pars['l_linear']:
+    model_pars['chrom_scale'] *= 0.062
+    model_pars['p0'] *= 3e2
+    physical_constants['gravity'] *= 8e3
+    model_pars['radial_scale'] *= 1.
+elif option_pars['l_square']:
+    model_pars['chrom_scale'] *= 1.65
+    model_pars['p0'] *= 2e4
+    physical_constants['gravity'] *= 5e4
+    model_pars['radial_scale'] *= 1.
+else:
+    model_pars['chrom_scale'] *= 1.
+    model_pars['p0'] *= 1.
 
 
 #obtain code coordinates and model parameters in code units
 coords = atm.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
 
-#from pysac.mhs_atmosphere.hs_model import VALIIIc_data as VAL
-#from pysac.mhs_atmosphere.hs_model import MTWcorona_data as MTW
-
-#filenames = [VAL, MTW]
-# uncomment and switch to l_const/l_sqrt/l_linear/l_square as required
-if not option_pars['l_spruit']:
-    #interpolate the hs 1D profiles from empirical data source[s]
-    empirical_data = atm.read_VAL3c_MTW(mu=physical_constants['mu'])
-
-    table = \
-        atm.interpolate_atmosphere(empirical_data,
-                                   coords['Zext']
-                                  )
-
 #==============================================================================
 #calculate 1d hydrostatic balance from empirical density profile
 #==============================================================================
-if option_pars['l_spruit']:
-    pressure_Z, rho_Z, Rgas_Z = atm.get_spruit_hs(coords['Z'],
+pressure_Z, rho_Z, Rgas_Z = atm.get_spruit_hs(coords['Z'],
                                                   model_pars,
                                                   physical_constants,
                                                   option_pars
                                                   )
-else:
-    # the hs pressure balance is enhanced by pressure equivalent to the
-    # residual mean coronal magnetic pressure contribution once the magnetic
-    # field has been applied
-    magp_meanz = np.ones(len(coords['Z'])) * u.one
-    magp_meanz *= model_pars['pBplus']**2/(2*physical_constants['mu0'])
-
-    pressure_Z, rho_Z, Rgas_Z = atm.vertical_profile(
-                                                 coords['Z'],
-                                                 table,
-                                                 magp_meanz,
-                                                 physical_constants,
-                                                 coords['dz']
-                                                 )
-
 #==============================================================================
 # load flux tube footpoint parameters
 #==============================================================================
@@ -284,11 +248,10 @@ if not option_pars['l_hdonly']:
 else:
     pbeta  = magp+1.0    #dummy to avoid NaN
 alfven = np.sqrt(2.*magp/rho)
-if option_pars['l_spruit']:
-    if rank == 0:
-        print'Alfven speed Z.min to Z.max =',\
-        alfven[model_pars['Nxyz'][0]/2,model_pars['Nxyz'][1]/2, 0].decompose(),\
-        alfven[model_pars['Nxyz'][0]/2,model_pars['Nxyz'][1]/2,-1].decompose()
+if rank == 0:
+    print'Alfven speed Z.min to Z.max =',\
+    alfven[model_pars['Nxyz'][0]/2,model_pars['Nxyz'][1]/2, 0].decompose(),\
+    alfven[model_pars['Nxyz'][0]/2,model_pars['Nxyz'][1]/2,-1].decompose()
 cspeed = np.sqrt(physical_constants['gamma']*pressure/rho)
 atm.save_auxilliary3D(
               aux3D,
