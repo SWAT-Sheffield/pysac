@@ -149,13 +149,12 @@ def construct_magnetic_field(
         B10dz= -2*z*B1z/z1**2                    - B2z/z2    - B3z/z3
         B20dz= -2*  B1z/z1**2 + 4*z**2*B1z/z1**4 + B2z/z2**2 + B3z/z3**2
         B30dz= 12*z*B1z/z1**4 - 8*z**3*B1z/z1**6 - B2z/z2**3 - B3z/z3**3
-    elif option_pars['l_spruit']:
+    elif option_pars['l_B0_rootz']:
         B0z = Bf2 * z2**(0.125) / (z + z2)**(0.125)
         B10dz = -0.125 * B0z / (z + z2)
         B20dz = 9./64. * B0z / (z + z2)**2
         B30dz = -153./512 * B0z / (z + z2)**3
-    else:
-        #if option_pars['l_BO_quadz']:
+    elif option_pars['l_B0_quadz']:
         B1z = Bf1 * z1**2 / (z**2 + z1**2)
         B2z = Bf2 * z2 /(z + z2)
         B3z = Bf3 * np.exp(-z/z3)#       B3z = Bf3 * z3 /(z + z3)
@@ -163,6 +162,10 @@ def construct_magnetic_field(
         B10dz=- 2 * z *B1z**2/z1**2                    -  B2z**2/z2    -  B3z/z3
         B20dz=  8*z**2*B1z**3/z1**4 - 2*  B1z**2/z1**2 +2*B2z**3/z2**2 +2*B3z/z3**2
         B30dz=-48*z**3*B1z**4/z1**6 +24*z*B1z**3/z1**4 -6*B2z**4/z2**3 -6*B3z/z3**3
+    else:
+        raise ValueError("in mhs_model.flux_tubes.construct_magnetic_field \
+                  option_pars all False for axial strength Z dependence")
+
     rr= np.sqrt((x-x0)**2 + (y-y0)**2)
     #self similarity functions
     fxyz= -0.5*rr**2 * B0z**2
@@ -198,7 +201,7 @@ def construct_magnetic_field(
              - 2. * B0z3*B10dz
             ) + 2 * S*Bbz * G0 * fxyz / f02 * B10dz/B0z / mu0 / g0 * (
             f02 * B20dz/B0z + (2 * fxyz - f02) * B10dz2/B0z2) + S*Bbz * G0 * (
-            f02 * B30dz/B0z + (4*fxyz - 3*f02) * B20dz*B10dz*B0z2 
+            f02 * B30dz/B0z + (4*fxyz - 3*f02) * B20dz*B10dz*B0z2
               + 2 * f02 * B10dz**3/B0z3 ) / mu0 / g0
     B2x = (Bx * dxBx + By * dyBx + Bz * dzBx)/mu0
     B2y = (Bx * dxBy + By * dyBy + Bz * dzBy)/mu0
@@ -283,9 +286,9 @@ def construct_pairwise_field(x, y, z,
 
         #Magnetic Pressure and horizontal thermal pressure balance term
     pbbal= (0.5 * Si*Sj*G0ij * (f02*(B10dz2 + B0z*B20dz) - B0z4)
-           -0.5 * Bbz*B10dz2 * (Si*ri2*G0i + Sj*rj2*G0j) 
-           +      Bbz*B20dz/B0z*f02 * (Si*G0i + Sj*G0j)      )/mu0 
-           
+           -0.5 * Bbz*B10dz2 * (Si*ri2*G0i + Sj*rj2*G0j)
+           +      Bbz*B20dz/B0z*f02 * (Si*G0i + Sj*G0j)      )/mu0
+
         #density balancing B
     rho_1 = \
             2.*Si*Sj*G0ij*BB10dz*(
@@ -294,16 +297,16 @@ def construct_pairwise_field(x, y, z,
             + 0.5*f02 * (3.*B20dz/B0z + B30dz/B10dz)
             +((x-xi)*(x-xj) + (y-yi)*(y-yj)) * ((
             1. + (fxyzi + fxyzj)/f02) * B10dz2 + BB20dz - B0z4/f02)
-            ) + Bbz * Si*G0i * (B30dz/B0z*f02 - ri2*B20dz*B10dz 
-              - 0.5*B10dz2*BB10dz*ri4/f02 + (ri2-f02/B0z2)*B20dz*B10dz 
-            ) + Bbz * Sj*G0j * (B30dz/B0z*f02 - rj2*B20dz*B10dz 
+            ) + Bbz * Si*G0i * (B30dz/B0z*f02 - ri2*B20dz*B10dz
+              - 0.5*B10dz2*BB10dz*ri4/f02 + (ri2-f02/B0z2)*B20dz*B10dz
+            ) + Bbz * Sj*G0j * (B30dz/B0z*f02 - rj2*B20dz*B10dz
               - 0.5*B10dz2*BB10dz*rj4/f02 + (rj2-f02/B0z2)*B20dz*B10dz
-            ) 
+            )
     rho_1 /= (g0 * mu0)
     Fx   = - 2*Si*Sj/mu0 * G0ij*BB10dz2*B0z2 * (
                (x-xi) * fxyzi/f02
              + (x-xj) * fxyzj/f02
-                                               ) 
+                                               )
     Fy   = - 2*Si*Sj/mu0 * G0ij*BB10dz2*B0z2 * (
                (y-yi) * fxyzi/f02
              + (y-yj) * fxyzj/f02

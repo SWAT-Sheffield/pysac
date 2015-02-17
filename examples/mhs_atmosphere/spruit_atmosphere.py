@@ -56,28 +56,39 @@ option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
 #standard conversion to dimensionless units and physical constants
 scales, physical_constants = \
     atm.get_parameters()
+# select the option in the next line
 option_pars['l_const'] = True
+# Alfven speed constant along the axis of the flux tube
 if option_pars['l_const']:
-    model_pars['chrom_scale'] *= 1.
-    model_pars['p0'] *= 1e14
+    option_pars['l_B0_quadz'] = True
+    model_pars['chrom_scale'] *= 5e1
+    model_pars['p0'] *= 1.5e1
     physical_constants['gravity'] *= 1.
     model_pars['radial_scale'] *= 1.
+# Alfven speed proportional to sqrt(Z) along the axis of the flux tube
 elif option_pars['l_sqrt']:
+    option_pars['l_B0_rootz'] = True
     model_pars['chrom_scale'] *= 5.65e-3
     model_pars['p0'] *= 1.
     physical_constants['gravity'] *= 7.5e3
     model_pars['radial_scale'] *= 0.7
+# Alfven speed proportional to Z along the axis of the flux tube
 elif option_pars['l_linear']:
+    option_pars['l_B0_rootz'] = True
     model_pars['chrom_scale'] *= 0.062
     model_pars['p0'] *= 3e2
     physical_constants['gravity'] *= 8e3
     model_pars['radial_scale'] *= 1.
+# Alfven speed proportional to Z^2 along the axis of the flux tube
 elif option_pars['l_square']:
+    option_pars['l_B0_rootz'] = True
     model_pars['chrom_scale'] *= 1.65
     model_pars['p0'] *= 2e4
     physical_constants['gravity'] *= 5e4
     model_pars['radial_scale'] *= 1.
+# Alfven speed not defined along the axis of the flux tube
 else:
+    option_pars['l_B0_rootz'] = True
     model_pars['chrom_scale'] *= 1.
     model_pars['p0'] *= 1.
 
@@ -237,7 +248,7 @@ atm.save_SACsources(
               model_pars['Nxyz']
              )
 # save auxilliary variable and 1D profiles for plotting and analysis
-Rgas = np.zeros(x.shape)
+Rgas = u.Quantity(np.zeros(x.shape), unit=Rgas_z.unit)
 Rgas[:] = Rgas_z
 temperature = pressure/rho/Rgas
 if not option_pars['l_hdonly']:

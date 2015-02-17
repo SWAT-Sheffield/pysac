@@ -127,12 +127,11 @@ def get_spruit_hs(
     r0 = 2.727e-07 * u.g/u.cm**3
     g0 = physical_constants['gravity']
     if option_pars['l_const']:
-        pressure_Z = p0 * (model_pars['chrom_scale']**0.5
-                            - (model_pars['chrom_scale'] + Z)**0.5
-                          )/model_pars['chrom_scale']**0.5
-        rho_Z = -0.5/g0 * p0 / model_pars['chrom_scale']**0.5/\
-                             (model_pars['chrom_scale'] + Z)**0.5
-        rtest = -0.5/g0 * p0 / model_pars['chrom_scale']
+        pressure_Z = p0 * model_pars['chrom_scale']**3 /\
+                            (model_pars['chrom_scale'] + Z)**3
+        rho_Z = -p0 / g0 * 3. * model_pars['chrom_scale']**3/\
+                            (model_pars['chrom_scale'] + Z)**4
+        rtest = -p0 / g0 * 3. / model_pars['chrom_scale']
         model_pars['model'] += '_const'
     elif option_pars['l_sqrt']:
         pressure_Z = p0 *     model_pars['chrom_scale']**0.5/\

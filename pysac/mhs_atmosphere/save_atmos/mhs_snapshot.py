@@ -327,7 +327,7 @@ def save_auxilliary3D(
                               'Background magneto-density balance'
                               )
         gdf.write_field_u(gdf_file,
-                              temperature,
+                              temperature.to(u.K),
                               'temperature',
                               'Background temperature'
                               )

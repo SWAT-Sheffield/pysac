@@ -27,6 +27,7 @@ def set_options(model, l_mpi, l_gdf=True):
         'l_square':      False,# axial Alfven speed square Z-depend (Spruit)
         'l_B0_expz':     False,# Z-depend of Bz(r=0) exponentials
         'l_B0_quadz':    False,# Z-depend of Bz(r=0) polynomials + exponential 
+        'l_B0_rootz':    False,# Z-depend of Bz(r=0) sqrt polynomials 
         'l_single':      False,# only one flux tube
         'l_hmi':         False,# construct photopheric map of Bz from HMI/SDI
         'l_tube_pair':   False,# pair of flux tubes
