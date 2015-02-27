@@ -7,7 +7,7 @@ import astropy.units as u
 
 import h5py
 
-from ..gdf_writer import write_field_u, create_file, SimulationParameters
+from ..gdf_writer import write_field, create_file, SimulationParameters
 
 __all__ = ['convert_w_3D', 'convert_w_2D', 'write_gdf']
            
@@ -262,7 +262,7 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     f['x'] = x
 
     for field_title,afield in fields.items():
-       write_field_u(f, afield['field'], field_title, afield['field_name'],
+       write_field(f, afield['field'], field_title, afield['field_name'],
                    field_shape=header['nx'], arr_slice=arr_slice,
                    staggering=afield['staggering'],
                    collective=False, api='high')
