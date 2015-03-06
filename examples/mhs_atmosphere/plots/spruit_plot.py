@@ -76,8 +76,14 @@ for spruit in spruits:
                 oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
                 figname  = figsdir+spruit+'_'+var_field+'.eps'
                 nx_2 = ds.domain_dimensions[1]/2
+                if 'mag' in var_field:
+                    lines=True
+                elif 'pressure' in var_field:
+                    lines=True
+                else:
+                    lines=False
                 atm.make_2d_plot(ds, var_field, figname, normal=['y',nx_2],
-                                 aspect=0.2)
+                                 aspect=0.2, lines=lines, model=spruit)
 #                slc = yt.SlicePlot(ds, fields=var_field,
 #                                   center=[0., 0., zcent],
 #                                   normal='x', origin='native'

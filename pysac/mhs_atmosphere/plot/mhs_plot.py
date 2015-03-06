@@ -15,6 +15,7 @@ from matplotlib.colors import LogNorm, SymLogNorm
 from matplotlib.ticker import LogFormatterMathtext, FormatStrFormatter
 import matplotlib.colors as colors
 from collections import OrderedDict as od
+import os
 y_axis_labels = od((
                 ('temp',r'$T$ [K], '),
                 ('dens',r'$\rho$ [kg km$^{-3}$], '),
@@ -118,7 +119,8 @@ def make_1d_zplot(f, plot_label,
 
 #-----------------------------------------------------------------------------
 def make_2d_plot(ds, var_field, figname, normal = ['y',64],
-                   lines=False, figxz=[4.5,5.60], aspect=1.0
+                   lines=False, figxz=[4.5,5.60], aspect=1.0, model='',
+                   lines_first_time=True, seeds = [0.0,0.0]
                   ):
     if 'dens' in var_field:
         var = ds.index.grids[0][var_field].in_units('kg / km**3')
@@ -130,7 +132,29 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
         slc = var[:,normal[1],:]/var.unit_quantity
     if normal[0] is 'z':
         slc = var[:,:,normal[1]]/var.unit_quantity
-
+    if lines:
+        if len(model) == 0:
+            raise ValueError("in plot.mhs_plot.make_2d_plot specify the model")
+        flines_dir = os.path.expanduser('~/Documents/mhs_atmosphere/flines/')
+        flines_file = os.path.expanduser(flines_dir+model+'_flines.npy')
+        if not os.path.exists(flines_dir):
+            os.makedirs(flines_dir)
+        if os.path.exists(flines_file):
+            if not lines_first_time:
+                field_lines = np.load(flines_file)
+            else:
+                if normal[0] is 'x':
+                    v1 = ds.index.grids[0]['mag_field_bg_y'][normal[1],:,:]
+                    v2 = ds.index.grids[0]['mag_field_bg_z'][normal[1],:,:]
+                if normal[0] is 'y':
+                    v1 = ds.index.grids[0]['mag_field_bg_x'][:,normal[1],:]
+                    v2 = ds.index.grids[0]['mag_field_bg_z'][:,normal[1],:]
+                if normal[0] is 'z':
+                    v1 = ds.index.grids[0]['mag_field_bg_x'][:,:,normal[1]]
+                    v2 = ds.index.grids[0]['mag_field_bg_y'][:,:,normal[1]]
+                    
+                field_lines = make_field_lines(v1,v2,seeds,
+                                             flines_file,lines_first_time,dS=1)
     colour = cm.YlOrBr
     if 'mag_field' in var_field:
         colour = cm.BuPu
@@ -195,7 +219,7 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
 #============================================================================
 # Fieldline Generation
 #============================================================================
-def fieldlinesdown(v1,v2,seeds,dS=1):
+def make_field_lines(v1,v2,seeds,flines_file,lines_first_time,dS=1):
     """ Simple Euler fieldline integrator
     v1,v2 - y and x vectors*lscale
     seeds - array of coordinate (array indexes) pairs
@@ -240,6 +264,8 @@ def fieldlinesdown(v1,v2,seeds,dS=1):
             out[0] = out1
             out[1] = out2
             field.append(out)
+    lines_first_time = False
+    np.save(flines_file, field)        
 
     return np.array(field)
 
