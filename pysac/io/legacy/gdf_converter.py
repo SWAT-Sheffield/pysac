@@ -181,7 +181,7 @@ def convert_w_2D(w, w_):
 
 def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
               data_author=None, data_comment=None,
-                collective=False, api='high'):
+              collective=False, api='high'):
     """
     Write a gdf file from a vac-data header a w array and an x array.
 
@@ -265,6 +265,6 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
        write_field(f, afield['field'], field_title, afield['field_name'],
                    field_shape=header['nx'], arr_slice=arr_slice,
                    staggering=afield['staggering'],
-                   collective=False, api='high')
+                   collective=collective, api=api)
 
     f.close()

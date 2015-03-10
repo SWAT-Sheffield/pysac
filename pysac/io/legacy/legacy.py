@@ -231,18 +231,35 @@ class VACfile():
         self.header['nx'] = self.file.readInts()
         self.header['eqpar'] = self.file.readReals()
         self.header['varnames'] = self.file.readRecord().split()
-
+        
+        # Reading in the FORTRAN arrays into Python can be achieved in a
+        # number of different ways.
+        # The arrays on disk are in the following order:
+        # [z, x, y, n]
+        # Where n is the coordinate in the x array and the varible in the case
+        # of the w array.
+        # Note: the w array is actually saved as nw * [z, x, y] arrays rather 
+        # than one 4D array, unlike the x array.
+        
+        # X ARRAY
+        # Reading in the x array in the same order that it is in on disk:
+        self.x = self.file.readReals()
+        s = self.header['nx'] + [self.header['ndim']]
+        self.x = np.reshape(self.x, s, order='F')
+        # This returns [z, x, y, 3] for a 3D array, where the indicies of the 
+        # last dimension are 0 - z, 1 - x, 2 - y.
+        
+# This code might read x in with the index dimension first, it is also possible
+# to achieve that using reshape. But it is safer to keep it in disk order.
 #        self.x = np.zeros([self.header['ndim']] + self.header['nx'])
 #        for i in range(0,self.header['ndim']):
 #            self.x[i] = np.reshape(self.file.readReals(), self.header['nx'], order='F')
-        self.x = self.file.readReals()
-#        s = self.header['nx'] + [self.header['ndim']]
-        s = [self.header['ndim']] + self.header['nx']
-        self.x = np.reshape(self.x,s,order='F') ## - Don't know! Array was wrong
-        #shape when using F order, makes me wonder!
+        
 
-        self.w = np.zeros([self.header['params'][-1]]+self.header['nx'],order='F')
-        for i in xrange(0,self.header['params'][-1]):
+        # The w array is read in as a sequence of 3D arrays, so the index 
+        # dimension is put first.
+        self.w = np.zeros([self.header['params'][-1]]+self.header['nx'], order='F')
+        for i in xrange(0, self.header['params'][-1]):
             self.w[i] = np.reshape(self.file.readReals(), self.header['nx'], order='F')
         self.w_ = {}
         ndim = self.header['params'][2]
