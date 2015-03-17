@@ -6,12 +6,13 @@ import copy
 
 import numpy as np
 import astropy.units as u
+from astropy.utils import deprecated
 import yt
 
 import h5py
 from h5py import h5s, h5p, h5fd
 
-__all__ = ['write_field', 'write_field_u', 'create_file', 'SimulationParameters']
+__all__ = ['write_field', 'write_field_raw', 'create_file', 'SimulationParameters']
 
 
 class SimulationParameters(dict):
@@ -145,7 +146,7 @@ def create_file(f, simulation_parameters, grid_dimensions,
 
     return f
 
-def write_field_u(gdf_file, data, field_title, field_name, field_shape=None,
+def write_field(gdf_file, data, field_title, field_name, field_shape=None,
                 arr_slice=np.s_[:], staggering=0,
                 collective=False, api='high'):
     """
@@ -177,6 +178,11 @@ def write_field_u(gdf_file, data, field_title, field_name, field_shape=None,
 
     """
     gr = gdf_file["/data/grid_%010i"%0]
+
+    if not isinstance(data, u.Quantity):
+        raise TypeError("data must be an astropy Quantity")
+    
+    # Make sure we are in SI land
     field = data.si
 
     if not field_shape:
@@ -202,7 +208,8 @@ def write_field_u(gdf_file, data, field_title, field_name, field_shape=None,
     else:
         raise ValueError("Please specifiy 'high' or 'low'")
 
-def write_field(gdf_file, field, field_shape=None, arr_slice=np.s_[:],
+@deprecated('0.3', "Writing GDF files from non-quantity arrays is no longer supported")
+def write_field_raw(gdf_file, field, field_shape=None, arr_slice=np.s_[:],
                 collective=False, api='high'):
     """
     Write a field to an existing gdf file.

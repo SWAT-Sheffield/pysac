@@ -42,7 +42,9 @@ def move_seeds(seeds, vfield, dt):
     seeds_arr: ndarray
         New Seed points
     """
-    v_seed = tvtk.ProbeFilter(source=vfield,input=seeds)
+    v_seed = tvtk.ProbeFilter()
+    tvtk_common.configure_input_data(v_seed, seeds)
+    tvtk_common.configure_source_data(v_seed, vfield)
     v_seed.update()
     int_vels = np.array(v_seed.output.point_data.vectors)[:,:2]/(15.625*1e3)
     seed_arr = np.array(seeds.points)
@@ -214,8 +216,8 @@ def get_surface_vectors(poly_norms, surf_bfield):
 
 def interpolate_scalars(image_data, poly_data):
     """ Interpolate a imagedata scalars to a set points in polydata"""
-    surface_probe_filter = tvtk.ProbeFilter(source=image_data,
-                                          input=poly_data)
+    surface_probe_filter = tvtk.ProbeFilter(source=image_data)
+    tvtk_common.configure_input_data(surface_probe_filter, poly_data)
     surface_probe_filter.update()
 
     # Calculate Vperp, Vpar, Vphi
@@ -224,8 +226,8 @@ def interpolate_scalars(image_data, poly_data):
 
 def interpolate_vectors(image_data, poly_data):
     """ Interpolate a imagedata vectors to a set points in polydata"""
-    surface_probe_filter = tvtk.ProbeFilter(source=image_data,
-                                          input=poly_data)
+    surface_probe_filter = tvtk.ProbeFilter(source=image_data)
+    tvtk_common.configure_input_data(surface_probe_filter, poly_data)
     surface_probe_filter.update()
 
     # Calculate Vperp, Vpar, Vphi
@@ -234,7 +236,8 @@ def interpolate_vectors(image_data, poly_data):
 
 def update_interpolated_vectors(poly_data, surface_probe_filter):
     if poly_data:
-        surface_probe_filter.input = poly_data
+        tvtk_common.configure_input_data(surface_probe_filter, poly_data)
+        #surface_probe_filter.input = poly_data
     surface_probe_filter.update()
     # Calculate Vperp, Vpar, Vphi
     surface_vectors = np.array(surface_probe_filter.output.point_data.vectors)
@@ -243,7 +246,8 @@ def update_interpolated_vectors(poly_data, surface_probe_filter):
 
 def update_interpolated_scalars(poly_data, surface_probe_filter):
     if poly_data:
-        surface_probe_filter.input = poly_data
+        tvtk_common.configure_input_data(surface_probe_filter, poly_data)
+        #surface_probe_filter.input = poly_data
     surface_probe_filter.update()
     # Calculate Vperp, Vpar, Vphi
     surface_scalars = np.array(surface_probe_filter.output.point_data.scalars)
@@ -265,12 +269,10 @@ def get_surface_velocity_comp(surface_velocities, normals, torsionals, parallels
 def get_the_line(bfield, surf_seeds, n):
     """Generate the vertical line on the surface"""
     the_line = tvtk.StreamTracer(input=bfield,
-                                 source=tvtk.PolyData(
-                                 points=np.array(
-                                    [surf_seeds.points.get_point(n),[0,0,0]]
-                                                )
-                                                     )
                                  )
+    source=tvtk.PolyData(points=np.array([surf_seeds.points.get_point(n),[0,0,0]]))
+    tvtk_common.configure_input_data(the_line, bfield)
+    tvtk_common.configure_source_data(the_line, source)
 
     the_line.integrator = tvtk.RungeKutta4()
     the_line.maximum_propagation = 1000
