@@ -14,7 +14,7 @@ from matplotlib import cm
 from matplotlib.colors import LogNorm
 from matplotlib.ticker import LogFormatterMathtext, FormatStrFormatter
 import matplotlib.colors as colors
-import yt
+import pysac.yt
 #from pysac.mhs_atmosphere.parameters.model_pars import spruit as model_pars
 from yt.visualization.streamlines import Streamlines
 from yt.visualization.api import get_multi_plot
@@ -45,8 +45,8 @@ for spruit in spruits:
     print(files)
 
     for file_ in files:
-        ds = yt.load(file_)
-#        ds = pysac.yt.SACGDFDataset(file_)
+#        ds = yt.load(file_)
+        ds = pysac.yt.SACGDFDataset(file_)
         xcent = (ds.parameters['domain_right_edge'][0] +
                  ds.parameters['domain_left_edge'][0])/2.
         ycent = (ds.parameters['domain_right_edge'][1] +

@@ -95,56 +95,56 @@ def save_SACvariables(
 
         gdf_file = gdf.create_file(h5py.File(filename,'w'), simulation_parameters, grid_dimensions)
 
-        gdf.write_field_u(gdf_file, rho,
+        gdf.write_field(gdf_file, rho,
                               'density_bg',
                               'Background Density'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('kg/m^3'),
+        gdf.write_field(gdf_file, dummy*u.Unit('kg/m^3'),
                               'density_pert',
                               'Perturbation Density'
                               )
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               energy,
                               'internal_energy_bg',
                               'Background Internal Energy'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('kg m-1 s-2'),
+        gdf.write_field(gdf_file, dummy*u.Unit('kg m-1 s-2'),
                               'internal_energy_pert',
                               'Perturbation Internal Energy'
                               )
-        gdf.write_field_u(gdf_file, Bx,
+        gdf.write_field(gdf_file, Bx,
                               'mag_field_x_bg',
                               'x Component of Background Magnetic Field'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'),
+        gdf.write_field(gdf_file, dummy*u.Unit('Tesla'),
                               'mag_field_x_pert',
                               'x Component of Pertubation Magnetic Field'
                               )
-        gdf.write_field_u(gdf_file, By,
+        gdf.write_field(gdf_file, By,
                               'mag_field_y_bg',
                               'y Component of Background Magnetic Field'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'),
+        gdf.write_field(gdf_file, dummy*u.Unit('Tesla'),
                               'mag_field_y_pert',
                               'y Component of Pertubation Magnetic Field'
                               )
-        gdf.write_field_u(gdf_file, Bz,
+        gdf.write_field(gdf_file, Bz,
                               'mag_field_z_bg',
                               'z Component of Background Magnetic Field'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('Tesla'),
+        gdf.write_field(gdf_file, dummy*u.Unit('Tesla'),
                               'mag_field_z_pert',
                               'z Component of Pertubation Magnetic Field'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'),
+        gdf.write_field(gdf_file, dummy*u.Unit('m/s'),
                               'velocity_x',
                               'x Component of Velocity'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'),
+        gdf.write_field(gdf_file, dummy*u.Unit('m/s'),
                               'velocity_y',
                               'y Component of Velocity'
                               )
-        gdf.write_field_u(gdf_file, dummy*u.Unit('m/s'),
+        gdf.write_field(gdf_file, dummy*u.Unit('m/s'),
                                 'velocity_z',
                                 'z Component of Velocity'
                               )
@@ -221,12 +221,12 @@ def save_SACsources(
 
         gdf_file = gdf.create_file(h5py.File(sourcesfile,'w'), simulation_parameters, grid_dimensions)
 
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               Fx,
                               'balancing_force_x_bg',
                               'x Component of Background Balancing Force'
                               )
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               Fy,
                               'balancing_force_y_bg',
                               'y Component of Background Balancing Force'
@@ -316,42 +316,42 @@ def save_auxilliary3D(
 
         gdf_file = gdf.create_file(h5py.File(auxfile,'w'), simulation_parameters, grid_dimensions)
 
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               pressure_m,
                               'pressure_mhs',
                               'Background magneto-pressure balance'
                               )
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               rho_m,
                               'density_mhs',
                               'Background magneto-density balance'
                               )
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               temperature.to(u.K),
                               'temperature',
                               'Background temperature'
                               )
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               pbeta,
                               'plasma_beta',
                               'Background plasma beta'
                               )
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               alfven,
                               'alfven_speed',
                               'Background Alfven speed'
                               )
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               cspeed,
                               'sound_speed',
                               'Background sound speed'
                               )
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               dxB2,
                               'mag_tension_x',
                               'x-component background magnetic tension'
                               )
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               dyB2,
                               'mag_tension_y',
                               'y-component background magnetic tension'
@@ -425,17 +425,17 @@ def save_auxilliary1D(
 #        import pdb; pdb.set_trace()
         gdf_file = gdf.create_file(h5py.File(auxfile,'w'), simulation_parameters, grid_dimensions)
 
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               pressureHS,
                               'pressure_HS',
                               'Background 1D hydrostatic-pressure'
                               )
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               rhoHS,
                               'density_HS',
                               'Background 1D hydrostatic-density'
                               )
-        gdf.write_field_u(gdf_file,
+        gdf.write_field(gdf_file,
                               RgasHS,
                               'ideal_gas_constant_HS',
                               'Background 1D hydrostatic-R_gas'

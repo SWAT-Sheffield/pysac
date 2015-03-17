@@ -1,6 +1,6 @@
 """
 A set of dervied fields for yt 2.x which combine pertubation and background components
-and define magnitudes, as well as calculate things like charaistic speeds.
+and define magnitudes, as well as calculate things like characteristic speeds.
 
 Note: These use yt 3.x like field naming conventions
 """
