@@ -24,8 +24,8 @@ l_mpi=False
 scales, physical_constants = \
     atm.get_parameters()
 #define the models required
-spruits = ['spruit_const','spruit_sqrt','spruit_linear','spruit_square']
-#spruits = ['spruit_const']
+#spruits = ['spruit_const','spruit_sqrt','spruit_linear','spruit_square']
+spruits = ['spruit_const']
 oneD_arrays = {}
 oned_dataset = []
 figxz = [5.5,5.60]
@@ -65,8 +65,8 @@ for spruit in spruits:
         scale = np.max(np.abs(ds.parameters['domain_left_edge']))
         pos_dx = np.random.random((N,3))*scale-scale/2.
         pos = c+pos_dx
-
         vars_ = ds.index.field_list
+        lines, contours = False, False
         for var_ in vars_:
             var_field = var_[1]
             max_var = np.max(np.abs(ds.index.grids[0][var_field]))/\
@@ -77,30 +77,22 @@ for spruit in spruits:
                 figname  = figsdir+spruit+'_'+var_field+'.eps'
                 nx_2 = ds.domain_dimensions[1]/2
                 if 'mag' in var_field:
-                    lines=True
-                elif 'pressure' in var_field:
-                    lines=True
+                    lines = True
+                elif 'density' or 'pressure' in var_field:
+                    lines = True
+                    if 'D' in file_:
+                        lines = False
                 else:
-                    lines=False
-                atm.make_2d_plot(ds, var_field, figname, normal=['y',nx_2],
-                                 aspect=0.2, lines=lines, model=spruit)
-#                slc = yt.SlicePlot(ds, fields=var_field,
-#                                   center=[0., 0., zcent],
-#                                   normal='x', origin='native'
-#                                   )#, width = (zplot 'm'))
-#                slc.figure_size *= 1.
-#                slc.set_axes_unit('Mm')
-#                slc.aspect = .25
-##                slc.zoom = 2.
-#                slc.set_font_size(12)
-#                slc.set_minorticks('all', 'off')
-##                slc.set_cmap(var_field, colour)
-#                slc.plots[var_field].hide_colorbar()
-#                slc.set_cbar_minorticks('all', 'off')
-##                import pdb; pdb.set_trace()
-#                figname  = spruit+'_'+var_field+'.eps'
-#
-#                slc.save(figsdir+figname)
+                    lines = False
+                if '_HS' in var_field:
+                    contours = False
+                else:
+                    contours = True
+                atm.make_2d_plot(ds, var_field, figname, 
+                                                    normal=['y',nx_2],
+                                                    aspect=0.2, lines=lines,
+                                                    contours=contours,
+                                                    model=spruit)
     plot_label = figsdir+spruit+'_axis.eps'
     keys = ['alfven_speed','sound_speed','mag_field_z_bg']
     subkeys = ['axis']
