@@ -20,7 +20,7 @@ if yt.__version__.startswith('2'):
 
     #mu0 = 1.25663706e-6
     mu0 = np.pi * 4
-    gamma = 1.6666
+    gamma = 5./3.
 
     @yt.derived_field(take_log=False, units=r'g cm^{-3}')
     def density(field, data):
