@@ -41,8 +41,9 @@ for spruit in spruits:
                              ds.index.grids[0][var_field].unit_quantity
             var = ds.index.grids[0][var_field]
             if max_var > 0.:
+                # save 1D slices from each variable for plotting
                 oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
-                figname  = figsdir+spruit+'_'+var_field+'.eps'
+                # select the central slice to plot normal to the y-plane
                 nx_2 = ds.domain_dimensions[1]/2
                 if 'mag' in var_field:
                     lines = True
@@ -56,11 +57,32 @@ for spruit in spruits:
                     contours = False
                 else:
                     contours = True
-                atm.make_2d_plot(ds, var_field, figname, 
+                # save 2D plot in model's figures directory
+                figname  = figsdir+spruit+'_'+var_field+'.eps'
+                atm.make_2d_plot(ds, var_field, figname,
                                                     normal=['y',nx_2],
                                                     aspect=0.2, lines=lines,
                                                     contours=contours,
                                                     model=spruit)
+        if ('gas','thermal_pressure') in ds.derived_field_list:
+            var_field = 'thermal_pressure'
+            figname  = figsdir+spruit+'_'+var_field+'.eps'
+            lines, contours = True, True
+            atm.make_2d_plot(ds, var_field, figname,
+                                                normal=['y',nx_2],
+                                                aspect=0.2, lines=lines,
+                                                contours=contours,
+                                                model=spruit)
+        if ('gas','mag_pressure') in ds.derived_field_list:
+            var_field = 'mag_pressure'
+            figname  = figsdir+spruit+'_'+var_field+'.eps'
+            lines, contours = True, True
+            atm.make_2d_plot(ds, var_field, figname,
+                                                normal=['y',nx_2],
+                                                aspect=0.2, lines=lines,
+                                                contours=contours,
+                                                model=spruit)
+
     plot_label = figsdir+spruit+'_axis.eps'
     keys = ['alfven_speed','sound_speed','mag_field_z_bg']
     subkeys = ['axis']

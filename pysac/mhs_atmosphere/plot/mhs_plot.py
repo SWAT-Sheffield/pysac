@@ -242,30 +242,15 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
             if normal[0] is 'x':
                 v1 = ds.index.grids[0]['mag_field_y_bg'][normal[1],:,:]
                 v2 = ds.index.grids[0]['mag_field_z_bg'][normal[1],:,:]
-                #beta = ds.index.grids[0]['plasma_beta'][normal[1],:,:]
-                beta =  (ds.parameters['gamma'] - 1.) * (
-                    ds.index.grids[0]['internal_energy'][normal[1],:,:]-
-#                    ds.index.grids[0]['kinetic_energy'][normal[1],:,:]-
-                       ds.index.grids[0]['mag_pressure'][normal[1],:,:]
-                   ) / ds.index.grids[0]['mag_pressure'][normal[1],:,:]
+                beta =  ds.index.grids[0]['plasma_beta'][normal[1],:,:]
             if normal[0] is 'y':                      
                 v1 = ds.index.grids[0]['mag_field_x_bg'][:,normal[1],:]
                 v2 = ds.index.grids[0]['mag_field_z_bg'][:,normal[1],:]
-                #beta = ds.index.grids[0]['plasma_beta'][:,normal[1],:]
-                beta =  (ds.parameters['gamma'] - 1.) *         (
-                    ds.index.grids[0]['internal_energy'][:,normal[1],:]-
-#                    ds.index.grids[0]['kinetic_energy'][:,normal[1],:]-
-                       ds.index.grids[0]['mag_pressure'][:,normal[1],:]
-                   ) / ds.index.grids[0]['mag_pressure'][:,normal[1],:]
+                beta =  ds.index.grids[0]['plasma_beta'][:,normal[1],:]
             if normal[0] is 'z':                      
                 v1 = ds.index.grids[0]['mag_field_x_bg'][:,:,normal[1]]
                 v2 = ds.index.grids[0]['mag_field_y_bg'][:,:,normal[1]]
-#                beta = ds.index.grids[0]['plasma_beta'][:,:,normal[1]]
-                beta =  (ds.parameters['gamma'] - 1.) * (
-                    ds.index.grids[0]['internal_energy'][:,:,normal[1]]-
-#                    ds.index.grids[0]['kinetic_energy'][:,:,normal[1]]-
-                       ds.index.grids[0]['mag_pressure'][:,:,normal[1]]
-                   ) / ds.index.grids[0]['mag_pressure'][:,:,normal[1]]
+                beta =  ds.index.grids[0]['plasma_beta'][:,:,normal[1]]
             v1 = np.array(v1)
             v2 = np.array(v2)
             beta = np.array(beta)
