@@ -165,9 +165,9 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
     if 'temperature' in var_field:
         colour = cm.RdBu_r
     if 'beta' in var_field:
-        colour = cm.PiYG
+        colour = cm.PiYG_r
     if 'tension' in var_field:
-        colour = 'RdYlGn_r'
+        colour = cm.RdYlGn_r
 
     #increase the horizontal extent to include second colorbar for field lines
     if lines:
@@ -188,7 +188,10 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
             l_norm = True
         else:
             norm = colors.Normalize()
-            l_norm = False
+            if slc.max() > 1e3:
+                l_norm = True
+            else:
+                l_norm = False
 
     #plot a 2D 
     plt.imshow(slc.T, colour,
@@ -239,16 +242,30 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
             if normal[0] is 'x':
                 v1 = ds.index.grids[0]['mag_field_y_bg'][normal[1],:,:]
                 v2 = ds.index.grids[0]['mag_field_z_bg'][normal[1],:,:]
-                beta = ds.index.grids[0]['plasma_beta'][normal[1],:,:]
+                #beta = ds.index.grids[0]['plasma_beta'][normal[1],:,:]
+                beta =  (ds.parameters['gamma'] - 1.) * (
+                    ds.index.grids[0]['internal_energy'][normal[1],:,:]-
+#                    ds.index.grids[0]['kinetic_energy'][normal[1],:,:]-
+                       ds.index.grids[0]['mag_pressure'][normal[1],:,:]
+                   ) / ds.index.grids[0]['mag_pressure'][normal[1],:,:]
             if normal[0] is 'y':                      
                 v1 = ds.index.grids[0]['mag_field_x_bg'][:,normal[1],:]
                 v2 = ds.index.grids[0]['mag_field_z_bg'][:,normal[1],:]
-                beta = ds.index.grids[0]['plasma_beta'][:,normal[1],:]
+                #beta = ds.index.grids[0]['plasma_beta'][:,normal[1],:]
+                beta =  (ds.parameters['gamma'] - 1.) *         (
+                    ds.index.grids[0]['internal_energy'][:,normal[1],:]-
+#                    ds.index.grids[0]['kinetic_energy'][:,normal[1],:]-
+                       ds.index.grids[0]['mag_pressure'][:,normal[1],:]
+                   ) / ds.index.grids[0]['mag_pressure'][:,normal[1],:]
             if normal[0] is 'z':                      
                 v1 = ds.index.grids[0]['mag_field_x_bg'][:,:,normal[1]]
                 v2 = ds.index.grids[0]['mag_field_y_bg'][:,:,normal[1]]
-                beta = ds.index.grids[0]['plasma_beta'][:,:,normal[1]]
-#            import pdb; pdb.set_trace()
+#                beta = ds.index.grids[0]['plasma_beta'][:,:,normal[1]]
+                beta =  (ds.parameters['gamma'] - 1.) * (
+                    ds.index.grids[0]['internal_energy'][:,:,normal[1]]-
+#                    ds.index.grids[0]['kinetic_energy'][:,:,normal[1]]-
+                       ds.index.grids[0]['mag_pressure'][:,:,normal[1]]
+                   ) / ds.index.grids[0]['mag_pressure'][:,:,normal[1]]
             v1 = np.array(v1)
             v2 = np.array(v2)
             beta = np.array(beta)
@@ -272,10 +289,21 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
         if contours:
             X = np.linspace(extent[0],extent[1],slc.shape[0])       
             Y = np.linspace(extent[2],extent[3],slc.shape[1])
-            CS=plt.contour(X,Y,beta,4,
-    #                       #levels=[5e3,1e4,1e5,2.5e5,1e6],
-                           linewidths=1,cmap=cm.PiYG,norm=LogNorm())
-            plt.clabel(CS, fmt='%.3f')
+            CS=plt.contour(X,Y,beta.T,4,
+                           levels=[beta.min(),
+                                   1e-2,1e-1,1.,1e1,1e2,
+                                   beta.max()],
+                           linewidths=1,cmap=cm.PiYG_r,norm=LogNorm())
+            if beta.min() < 1e-2:
+                fomt = '%.3f'
+            elif beta.min() < 1e-1:
+                fomt = '%.2f'
+            elif beta.min() < 1:
+                fomt = '%.1f'
+            else:
+                fomt = '%.0f'
+            import pdb; pdb.set_trace()
+            plt.clabel(CS, fmt=fomt)
 #    import pdb; pdb.set_trace()
     plt.savefig(figname)
 

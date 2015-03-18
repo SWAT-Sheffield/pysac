@@ -70,7 +70,7 @@ def save_SACvariables(
                                  coords['ymax'],
                                  coords['zmax']]).to(u.m)
         g0 = physical_constants['gravity']
-
+        gamma = 5./3.
         dummy = np.zeros(rho.shape)
         simulation_parameters = gdf.SimulationParameters([
                             ['boundary_conditions', np.zeros(6) + 2],
@@ -83,7 +83,7 @@ def save_SACvariables(
                             ['domain_right_edge', right_edge       ],
                             ['eta', 0.0                            ],
                             ['field_ordering', 0                   ],
-                            ['gamma', 1.66666667                   ],
+                            ['gamma', gamma                   ],
                             ['gravity0', 0.0                       ],
                             ['gravity1', 0.0                       ],
                             ['gravity2', g0                        ],
@@ -209,10 +209,10 @@ def save_SACsources(
                             ['domain_right_edge', right_edge       ],
                             ['eta', 0.0                            ],
                             ['field_ordering', 0                   ],
-                            ['gamma', 1.66666667                   ],
+                            ['gamma', physical_constants['gamma']  ],
                             ['gravity0', 0.0                       ],
                             ['gravity1', 0.0                       ],
-                            ['gravity2', g0                     ],
+                            ['gravity2', physical_constants['gravity']],
                             ['nu', 0.0                             ],
                             ['num_ghost_zones', 0                  ],
                             ['refine_by', 0                        ],
@@ -291,7 +291,7 @@ def save_auxilliary3D(
         right_edge = u.Quantity([coords['xmax'],
                                  coords['ymax'],
                                  coords['zmax']]).to(u.m)
-        g0 = physical_constants['gravity']
+        
 
         simulation_parameters = gdf.SimulationParameters([
                             ['boundary_conditions', np.zeros(6) + 2],
@@ -304,10 +304,10 @@ def save_auxilliary3D(
                             ['domain_right_edge', right_edge       ],
                             ['eta', 0.0                            ],
                             ['field_ordering', 0                   ],
-                            ['gamma', 1.66666667                   ],
+                            ['gamma', physical_constants['gamma']  ],
                             ['gravity0', 0.0                       ],
                             ['gravity1', 0.0                       ],
-                            ['gravity2', g0                     ],
+                            ['gravity2', physical_constants['gravity']],
                             ['nu', 0.0                             ],
                             ['num_ghost_zones', 0                  ],
                             ['refine_by', 0                        ],
@@ -391,7 +391,7 @@ def save_auxilliary1D(
         right_edge = u.Quantity([coords['xmax'],
                                  coords['ymax'],
                                  coords['zmax']]).to(u.m)
-        g0 = physical_constants['gravity']
+
         pressureHS = u.Quantity(np.zeros(grid_dimensions),
                                 unit=pressure_Z.to("Pa").unit)
         rhoHS = u.Quantity(np.zeros(grid_dimensions),
@@ -412,10 +412,10 @@ def save_auxilliary1D(
                             ['domain_right_edge', right_edge       ],
                             ['eta', 0.0                            ],
                             ['field_ordering', 0                   ],
-                            ['gamma', 1.66666667                   ],
+                            ['gamma', physical_constants['gamma']  ],
                             ['gravity0', 0.0                       ],
                             ['gravity1', 0.0                       ],
-                            ['gravity2', g0                     ],
+                            ['gravity2', physical_constants['gravity']],
                             ['nu', 0.0                             ],
                             ['num_ghost_zones', 0                  ],
                             ['refine_by', 0                        ],

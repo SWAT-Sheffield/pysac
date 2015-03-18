@@ -78,6 +78,6 @@ class SACGDFFieldInfo(GDFFieldInfo):
                        units=r'm/s', force_override=True)
 
         def plasma_beta(field, data):
-            return data['mag_pressure'] / data['thermal_pressure']
+            return data['thermal_pressure'] / data['mag_pressure']
         self.add_field(('gas','plasma_beta'), function=plasma_beta,
                        units=r'dimensionless', force_override=True)
