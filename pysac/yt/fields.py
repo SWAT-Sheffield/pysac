@@ -49,7 +49,7 @@ class SACGDFFieldInfo(GDFFieldInfo):
 
         def thermal_pressure(field, data):
             #p = (\gamma -1) ( e - \rho v^2/2 - B^2/2)
-            g1 = data.ds.parameters.get('gamma',[1.66666])[0] -1
+            g1 = data.ds.parameters.get('gamma', 1.66666) -1
             if data.ds.dimensionality == 2:
                 kp = (data['density'] * (data['velocity_x']**2 +
                                          data['velocity_y']**2))/2.
@@ -72,7 +72,7 @@ class SACGDFFieldInfo(GDFFieldInfo):
                        units=r'm/s', force_override=True)
 
         def sound_speed(field, data):
-            gamma = data.ds.parameters.get('gamma',[1.66666])[0]
+            gamma = data.ds.parameters.get('gamma', 1.66666)
             return np.sqrt((gamma * data['thermal_pressure']) / data['density'])
         self.add_field(('gas','sound_speed'), function=sound_speed,
                        units=r'm/s', force_override=True)
