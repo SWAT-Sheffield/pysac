@@ -302,7 +302,7 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
                 fomt = '%.1f'
             else:
                 fomt = '%.0f'
-            import pdb; pdb.set_trace()
+#            import pdb; pdb.set_trace()
             plt.clabel(CS, fmt=fomt)
 #    import pdb; pdb.set_trace()
     plt.savefig(figname)
