@@ -111,7 +111,7 @@ def create_flux_surface(bfield, surf_seeds):
     #Make a streamline instance with the bfield
     surf_field_lines = tvtk.StreamTracer()
 #    surf_field_lines.input_connection = bfield
-    tvtk_common.configure_connection(surf_field_lines, bfield)
+    tvtk_common.configure_input(surf_field_lines, bfield)
 
     tvtk_common.configure_source_data(surf_field_lines, surf_seeds)
 #    surf_field_lines.source = surf_seeds
@@ -216,7 +216,8 @@ def get_surface_vectors(poly_norms, surf_bfield):
 
 def interpolate_scalars(image_data, poly_data):
     """ Interpolate a imagedata scalars to a set points in polydata"""
-    surface_probe_filter = tvtk.ProbeFilter(source=image_data)
+    surface_probe_filter = tvtk.ProbeFilter()
+    tvtk_common.configure_source_data(surface_probe_filter, image_data)
     tvtk_common.configure_input_data(surface_probe_filter, poly_data)
     surface_probe_filter.update()
 
@@ -226,7 +227,8 @@ def interpolate_scalars(image_data, poly_data):
 
 def interpolate_vectors(image_data, poly_data):
     """ Interpolate a imagedata vectors to a set points in polydata"""
-    surface_probe_filter = tvtk.ProbeFilter(source=image_data)
+    surface_probe_filter = tvtk.ProbeFilter()
+    tvtk_common.configure_source_data(surface_probe_filter, image_data)
     tvtk_common.configure_input_data(surface_probe_filter, poly_data)
     surface_probe_filter.update()
 
@@ -268,8 +270,7 @@ def get_surface_velocity_comp(surface_velocities, normals, torsionals, parallels
 
 def get_the_line(bfield, surf_seeds, n):
     """Generate the vertical line on the surface"""
-    the_line = tvtk.StreamTracer(input=bfield,
-                                 )
+    the_line = tvtk.StreamTracer()
     source=tvtk.PolyData(points=np.array([surf_seeds.points.get_point(n),[0,0,0]]))
     tvtk_common.configure_input_data(the_line, bfield)
     tvtk_common.configure_source_data(the_line, source)
@@ -358,7 +359,8 @@ class PolyDataWriter(object):
             self.poly_out.point_data.add_array(pd_par.scalars)
 
     def write(self):
-        w = tvtk.XMLPolyDataWriter(input=self.poly_out,file_name=self.filename)
+        w = tvtk.XMLPolyDataWriter(file_name=self.filename)
+        tvtk_common.configure_input(w, self.poly_out)
         w.write()
 
 def write_step(file_name, surface,
@@ -412,7 +414,8 @@ def write_flux(file_name, surface, surface_density, surface_va, surface_beta,
     poly_out.point_data.add_array(pd_Fperp.scalars)
     poly_out.point_data.add_array(pd_Fphi.scalars)
 
-    w = tvtk.XMLPolyDataWriter(input=poly_out,file_name=file_name)
+    w = tvtk.XMLPolyDataWriter(file_name=file_name)
+    tvtk_common.configure_input(w, poly_out)
     w.write()
 
 def write_wave_flux(file_name, surface_poly, parallels, normals, torsionals,
@@ -435,7 +438,8 @@ def write_wave_flux(file_name, surface_poly, parallels, normals, torsionals,
     poly_out.point_data.add_array(pd_Fwperp.scalars)
     poly_out.point_data.add_array(pd_Fwphi.scalars)
 
-    w = tvtk.XMLPolyDataWriter(input=poly_out,file_name=file_name)
+    w = tvtk.XMLPolyDataWriter(file_name=file_name)
+    tvtk_common.configure_input(w, poly_out)
     w.write()
 
 def read_step(filename):
