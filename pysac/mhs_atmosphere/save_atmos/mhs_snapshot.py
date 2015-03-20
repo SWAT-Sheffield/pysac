@@ -43,9 +43,9 @@ def save_SACvariables(
         rank = comm.Get_rank()
         gather_vars = [
                        rho.to(u.Unit('kg m-3')),
-                       Bx.to(u.Unit('Tesla')),
-                       By.to(u.Unit('Tesla')),
-                       Bz.to(u.Unit('Tesla')),
+                       Bx.to(u.Unit('T')),
+                       By.to(u.Unit('T')),
+                       Bz.to(u.Unit('T')),
                        energy.to(u.Unit('kg m-2 s-2'))
                       ]
         concat_vars = []
@@ -116,7 +116,7 @@ def save_SACvariables(
                               'mag_field_x_bg',
                               'x Component of Background Magnetic Field'
                               )
-        gdf.write_field(gdf_file, dummy*u.Unit('Tesla'),
+        gdf.write_field(gdf_file, dummy*u.Unit('T'),
                               'mag_field_x_pert',
                               'x Component of Pertubation Magnetic Field'
                               )
@@ -124,7 +124,7 @@ def save_SACvariables(
                               'mag_field_y_bg',
                               'y Component of Background Magnetic Field'
                               )
-        gdf.write_field(gdf_file, dummy*u.Unit('Tesla'),
+        gdf.write_field(gdf_file, dummy*u.Unit('T'),
                               'mag_field_y_pert',
                               'y Component of Pertubation Magnetic Field'
                               )
@@ -132,7 +132,7 @@ def save_SACvariables(
                               'mag_field_z_bg',
                               'z Component of Background Magnetic Field'
                               )
-        gdf.write_field(gdf_file, dummy*u.Unit('Tesla'),
+        gdf.write_field(gdf_file, dummy*u.Unit('T'),
                               'mag_field_z_pert',
                               'z Component of Pertubation Magnetic Field'
                               )
