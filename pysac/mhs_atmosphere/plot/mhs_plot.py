@@ -308,8 +308,8 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
             Y = np.linspace(extent[2],extent[3],slc.shape[1])
             U = np.sqrt(v1**2 + v2**2)
             plt.streamplot(X.value, Y.value, v1.T, v2.T, color=U.T,
-                           cmap=cm.BuPu, density=0.9, 
-                           linewidth = 3*U.T/U.max(), minlength = 0.75,
+                           cmap=cm.BuPu, density=0.75, 
+                           linewidth = 3*U.T/U.max(), minlength = 0.95,
                            #linewidth = 2*np.exp(np.log(U.T)-np.log(U.max()))
                           ) 
             #add second colorbar for field strength 
