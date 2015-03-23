@@ -14,8 +14,8 @@ l_mpi=False
 scales, physical_constants = \
     atm.get_parameters()
 #define the models required
-#spruits = ['spruit_const','spruit_sqrt','spruit_linear','spruit_square']
-spruits = ['spruit_const']
+spruits = ['spruit_const','spruit_sqrt','spruit_linear','spruit_square']
+#spruits = ['spruit_const']
 oneD_arrays = {}
 oned_dataset = []
 #loop over all four models

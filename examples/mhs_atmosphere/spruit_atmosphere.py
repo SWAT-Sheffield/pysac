@@ -49,7 +49,6 @@ except ImportError:
 #==============================================================================
 #set up model parameters
 #==============================================================================
-#model_pars['B_corona'] *= 0.
 local_procs=1
 #standard set of logical switches
 option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
@@ -93,7 +92,7 @@ else:
     model_pars['p0'] *= 1.
 
 
-#obtain code coordinates and model parameters in code units
+#obtain code coordinates and model parameters in astropy units
 coords = atm.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
 
 #==============================================================================
