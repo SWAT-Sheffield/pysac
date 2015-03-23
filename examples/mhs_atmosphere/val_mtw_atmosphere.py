@@ -29,7 +29,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
-from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import paper2c as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -49,7 +49,6 @@ except ImportError:
 #==============================================================================
 #set up model parameters
 #==============================================================================
-#model_pars['B_corona'] *= 0.
 local_procs=1
 #standard set of logical switches
 option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
@@ -57,13 +56,9 @@ option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
 scales, physical_constants = \
     atm.get_parameters()
 
-#obtain code coordinates and model parameters in code units
+#obtain code coordinates and model parameters in astropy units
 coords = atm.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
 
-#from pysac.mhs_atmosphere.hs_model import VALIIIc_data as VAL
-#from pysac.mhs_atmosphere.hs_model import MTWcorona_data as MTW
-
-#filenames = [VAL, MTW]
 #interpolate the hs 1D profiles from empirical data source[s]
 empirical_data = atm.read_VAL3c_MTW(mu=physical_constants['mu'])
 
@@ -233,7 +228,7 @@ atm.save_SACsources(
               model_pars['Nxyz']
              )
 # save auxilliary variable and 1D profiles for plotting and analysis
-Rgas = np.zeros(x.shape)
+Rgas = u.Quantity(np.zeros(x.shape), unit=Rgas_z.unit)
 Rgas[:] = Rgas_z
 temperature = pressure/rho/Rgas
 if not option_pars['l_hdonly']:
