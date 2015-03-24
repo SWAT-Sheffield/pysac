@@ -34,16 +34,16 @@ def get_flux_tubes(
     elif option_pars['l_tube_pair']:
         xi, yi, Si = (
                       u.Quantity([
-                                [ 0.00],
-                                [ 0.00],
-                                [  .15],
-                                [-0.15]
-                               ], unit=u.Mm),
-                      u.Quantity([
                                 [  1.2],
                                 [  1.2],
                                 [-1.15],
                                 [-1.25]
+                               ], unit=u.Mm),
+                      u.Quantity([
+                                [ 0.00],
+                                [ 0.00],
+                                [  .15],
+                                [-0.15]
                                ], unit=u.Mm),
                       u.Quantity([
                                 [  50e-3],
