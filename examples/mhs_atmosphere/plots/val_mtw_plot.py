@@ -14,8 +14,8 @@ l_mpi=False
 scales, physical_constants = \
     atm.get_parameters()
 #define the models required
-papers = ['paper1','paper2a','paper2b','paper2c','paper2d']
-#papers = ['paper1']
+#papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
+papers = ['paper1']
 oneD_arrays = {}
 oned_dataset = []
 #loop over all four models
@@ -23,6 +23,8 @@ for paper in papers:
     datadir = os.path.expanduser('~/Documents/mhs_atmosphere/'+
                                  paper+'/')
     figsdir = os.path.expanduser('~/Documents/mhs_atmosphere/figs/'+paper+'/')
+    if not os.path.exists(figsdir):
+        os.makedirs(figsdir)
     #open all gdf files in the model directory
     files = glob.glob(datadir+'/*')
     #files = glob.glob(datadir+'/'+papers[0]+'_3Daux.gdf')
@@ -45,47 +47,84 @@ for paper in papers:
                 oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
                 # select the central slice to plot normal to the y-plane
                 nx_2 = ds.domain_dimensions[1]/2
-                if 'mag' in var_field:
-                    lines = True
-                elif 'density' or 'pressure' in var_field:
-                    lines = True
-                    if 'D' in file_:
-                        lines = False
-                else:
-                    lines = False
+                lines, contours = True, True
                 if '_HS' in var_field:
-                    contours = False
+                    lines, contours = False, False
+                elif '1D' in file_:
+                    lines, contours = False, False
                 else:
-                    contours = True
+                    lines, contours = True, True
+                if '2c' in file_ or '2d' in file_:
+                    aspect = 2.0
+                    line_density = 0.7
+                else:
+                    aspect = 0.5
+                    line_density = 1.6
                 # save 2D plot in model's figures directory
                 figname  = figsdir+paper+'_'+var_field+'.eps'
                 atm.make_2d_plot(ds, var_field, figname,
-                                                    normal=['y',nx_2],
-                                                    aspect=0.2, lines=lines,
-                                                    contours=contours,
-                                                    model=paper)
+                                 normal=['y',nx_2],
+                                 aspect=aspect, lines=lines,
+                                 contours=contours,
+                                 model=paper, figxz=[5.5,5.6],
+                                 line_density=line_density
+                                 )
+        if ('gas','density') in ds.derived_field_list:
+            var_field = 'density'
+            oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
+
         if ('gas','thermal_pressure') in ds.derived_field_list:
             var_field = 'thermal_pressure'
+            oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
             figname  = figsdir+paper+'_'+var_field+'.eps'
             lines, contours = True, True
             atm.make_2d_plot(ds, var_field, figname,
-                                                normal=['y',nx_2],
-                                                aspect=0.2, lines=lines,
-                                                contours=contours,
-                                                model=paper)
+                             normal=['y',nx_2],
+                             aspect=aspect, lines=lines,
+                             contours=contours,
+                             model=paper, figxz=[5.5,5.6],
+                             line_density=line_density
+                             )
         if ('gas','mag_pressure') in ds.derived_field_list:
             var_field = 'mag_pressure'
+            oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
             figname  = figsdir+paper+'_'+var_field+'.eps'
             lines, contours = True, True
             atm.make_2d_plot(ds, var_field, figname,
-                                                normal=['y',nx_2],
-                                                aspect=0.2, lines=lines,
-                                                contours=contours,
-                                                model=paper)
-
+                             normal=['y',nx_2],
+                             aspect=aspect, lines=lines,
+                             contours=contours,
+                             model=paper, figxz=[5.5,5.6],
+                             line_density=line_density
+                             )
     plot_label = figsdir+paper+'_axis.eps'
-    keys = ['alfven_speed','sound_speed','mag_field_z_bg']
+#    keys = ['alfven_speed','sound_speed','mag_field_z_bg']
+    keys = ['thermal_pressure','mag_pressure','temperature','density']
     subkeys = ['axis']
     atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
-                      ylog = True, xlog = True
+                      ylog = True, xlog = False
+                                           )
+    plot_label = figsdir+paper+'_edge.eps'
+    keys = ['thermal_pressure','mag_pressure','temperature','density']
+    subkeys = ['edge']
+    atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+                      ylog = True, xlog = False
+                                           )
+    plot_label = figsdir+paper+'_speeds.eps'
+    keys = ['alfven_speed','sound_speed']
+    subkeys = ['mean','min','max']
+    atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+                      ylog = True, xlog = False, loc_legend='lower right'
+                                           )
+    plot_label = figsdir+paper+'_meanz.eps'
+    keys = ['thermal_pressure','mag_pressure','density']
+    subkeys = ['mean','min','max']
+    atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+                      ylog = True, xlog = False
+                                           )
+    plot_label = figsdir+paper+'_beta.eps'
+    keys = ['plasma_beta','mag_pressure','thermal_pressure']
+    subkeys = ['mean','min','max']
+    atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+                      ylog = True, xlog = False
                                            )
