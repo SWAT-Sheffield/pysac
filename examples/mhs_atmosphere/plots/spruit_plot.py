@@ -23,6 +23,8 @@ for spruit in spruits:
     datadir = os.path.expanduser('~/Documents/mhs_atmosphere/'+
                                  spruit+'/')
     figsdir = os.path.expanduser('~/Documents/mhs_atmosphere/figs/'+spruit+'/')
+    if not os.path.exists(figsdir):
+        os.makedirs(figsdir)
     #open all gdf files in the model directory
     files = glob.glob(datadir+'/*')
     #files = glob.glob(datadir+'/'+spruits[0]+'_3Daux.gdf')
@@ -47,7 +49,7 @@ for spruit in spruits:
                 nx_2 = ds.domain_dimensions[1]/2
                 if 'mag' in var_field:
                     lines = True
-                elif 'density' or 'pressure' in var_field:
+                elif 'density' in var_field or 'pressure' in var_field:
                     lines = True
                     if 'D' in file_:
                         lines = False
