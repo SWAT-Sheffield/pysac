@@ -29,6 +29,7 @@ y_axis_labels = od((
                 ('temp',r'$T$ [K], '),
                 ('dens',r'$\rho$ [kg km$^{-3}$], '),
                 ('press',r'$p$ [Pa], '),
+                ('mag_pressure',r''),
                 ('mag_field_x',r'$B_x$ [T], '),
                 ('mag_field_y',r'$B_y$ [T], '),
                 ('mag_field_z',r'$B_z$ [T], '),
@@ -42,22 +43,23 @@ y_axis_labels = od((
 #plots. Ordered to control option on, for example, 'mag_pressure'.
 #add to the dictionary if variable not specified
 line_colours = od((('temp','red'), ('dens','purple'),
+                ('press','green'),
                 ('mag_field_x','blue'),
                 ('mag_field_y','blue'),
                 ('mag_field_z','blue'),
-                ('press','green'),
+                ('mag_pressure','blue'),
                 ('beta','purple'),('alfven','cyan'),('sound','red')))
 #determine line styles and widths between mean profiles and outliers
 line_styles = {
                'min':':',
-               'max':':',
+               'max':':'
                }
-line_standard = ['-','-.','--',':']
-line_widths = {'mean':3.0,
+line_standard = ['-','--','-.',':']
+line_widths = {'mean':2.0,
                'min':1.0,
                'max':1.0,
-               'axis':3.0,
-               'edge':3.0
+               'axis':2.0,
+               'edge':2.0
               }
 
 #data may be required from more than one data file for 1D slices, so collate
@@ -90,7 +92,7 @@ def make_1d_zplot(f, plot_label,
                  keys = ['pressure_HS','density_HS','temperature'],
                  subkeys = ['axis'],
                  figxy=[6.47,4.0],
-                 ylog = True, xlog = False
+                 ylog = True, xlog = False, loc_legend='center right'
                 ):
     """select 1D arrays and plot appropriate slices['y',nx_2]
     f: the collated set of labelled 1D arrays
@@ -104,31 +106,44 @@ def make_1d_zplot(f, plot_label,
     tags = set()
     count = 0
     for key in keys:
+        #select line style for field if not overwritten by subkey
         linestyle = line_standard[count]
-        count +=1
         if count > 3:
             count -= 4
         for subkey in subkeys:
+            count += 1
             color = None
             for tag in line_colours.keys():
                 if tag in key:
                     tags.add(tag)
                     color = line_colours[tag]
-            label = str.replace(subkey+' '+key, '_',' ')
-            print(tags)
+            #label field only when required for legend
+            if subkey in 'min' or subkey in'max':
+                nolabel = True
+            else:
+                nolabel = False
+                label = str.replace(subkey+' '+key, '_',' ')
             for tag in line_styles.keys():
-                if tag in subkeys:
+                #replace line style and wind back count for next field
+                #if line_style to be used instead
+                if tag in subkey:
                     linestyle = line_styles[tag]
+                    count -= 1
             for tag in line_widths.keys():
-                if tag in subkeys:
+                if tag in subkey:
                     linewidth = line_widths[tag]
             #rescale density so camparable in plot with pressure/temperature
             rescale = np.string_(f[key][subkey].units)
             if 'density' in key:
                 rescale = 'kg / km**3'
-            plt.plot(f[key]['Z'].in_units('Mm'),
-                     f[key][subkey].in_units(rescale),color=color,
-                     linestyle=linestyle, lw=linewidth, label=label)
+            if nolabel: 
+                plt.plot(f[key]['Z'].in_units('Mm'),
+                         f[key][subkey].in_units(rescale),color=color,
+                         linestyle=linestyle, lw=linewidth)
+            else:
+                plt.plot(f[key]['Z'].in_units('Mm'),
+                         f[key][subkey].in_units(rescale),color=color,
+                         linestyle=linestyle, lw=linewidth, label=label)
     #collate labels for y-axis and apply log scale if True
     ylabel = ''
     for tag in tags:
@@ -144,13 +159,14 @@ def make_1d_zplot(f, plot_label,
     #raise plot x-axis to fit x-label 
     plt.subplots_adjust(bottom=0.125)
     #consider moving legend for different plots, add a loc to function call?
-    legend = plt.legend(loc='center right')
+    legend = plt.legend(loc=loc_legend)
     plt.savefig(plot_label)
 
 #-----------------------------------------------------------------------------
 def make_2d_plot(ds, var_field, figname, normal = ['y',64],
                    lines=False, contours=False,
-                   figxz=[6.5,5.60], aspect=1.0, model=''
+                   figxz=[6.5,5.60], aspect=1.0, model='', 
+                   line_density = 0.75
                   ):
     """ds: a gdf data structure, from which the variable labelled by the
     string var_field is selected. 
@@ -200,6 +216,10 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
         colour = cm.RdYlGn_r
     if 'velocity' in var_field:
         colour = cm.RdYlGn
+    if 'alfven' in var_field:
+        colour = cm.Blues
+    if 'sound' in var_field:
+        colour = cm.Greens_r
 
     #increase the horizontal extent to include second colorbar for field lines
     if lines:
@@ -308,9 +328,8 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
             Y = np.linspace(extent[2],extent[3],slc.shape[1])
             U = np.sqrt(v1**2 + v2**2)
             plt.streamplot(X.value, Y.value, v1.T, v2.T, color=U.T,
-                           cmap=cm.BuPu, density=0.75, 
-                           linewidth = 3*U.T/U.max(), minlength = 0.95,
-                           #linewidth = 2*np.exp(np.log(U.T)-np.log(U.max()))
+                           cmap=cm.BuPu, density=line_density, 
+                           linewidth = 3*U.T/U.max(), minlength = 0.99
                           ) 
             #add second colorbar for field strength 
             cbar2 = plt.colorbar(format = l_f,
