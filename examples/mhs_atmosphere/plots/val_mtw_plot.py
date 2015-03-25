@@ -14,8 +14,8 @@ l_mpi=False
 scales, physical_constants = \
     atm.get_parameters()
 #define the models required
-#papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
-papers = ['paper1']
+papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
+#papers = ['paper1']
 oneD_arrays = {}
 oned_dataset = []
 #loop over all four models
@@ -57,6 +57,9 @@ for paper in papers:
                 if '2c' in file_ or '2d' in file_:
                     aspect = 2.0
                     line_density = 0.7
+                elif 'mfe' in file_:
+                    aspect = 1.75
+                    line_density = 1.0
                 else:
                     aspect = 0.5
                     line_density = 1.6
@@ -99,16 +102,16 @@ for paper in papers:
                              )
     plot_label = figsdir+paper+'_axis.eps'
 #    keys = ['alfven_speed','sound_speed','mag_field_z_bg']
-    keys = ['thermal_pressure','mag_pressure','temperature','density']
+    keys = ['thermal_pressure','mag_pressure','density','temperature']
     subkeys = ['axis']
     atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
-                      ylog = True, xlog = False
+                      ylog = True, xlog = False, empirical=True
                                            )
     plot_label = figsdir+paper+'_edge.eps'
-    keys = ['thermal_pressure','mag_pressure','temperature','density']
+    keys = ['thermal_pressure','mag_pressure','density','temperature']
     subkeys = ['edge']
     atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
-                      ylog = True, xlog = False
+                      ylog = True, xlog = False, empirical=True
                                            )
     plot_label = figsdir+paper+'_speeds.eps'
     keys = ['alfven_speed','sound_speed']

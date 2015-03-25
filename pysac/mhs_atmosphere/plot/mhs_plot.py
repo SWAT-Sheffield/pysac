@@ -21,7 +21,7 @@ import matplotlib.colors as colors
 from collections import OrderedDict as od
 import os
 import warnings
-
+import astropy.units as u
 #match the field name to the appropriate axis/colorbar labels. Ordered to 
 #control option on, for example, 'mag_pressure'.
 #add to the dictionary if variable not specified
@@ -92,7 +92,8 @@ def make_1d_zplot(f, plot_label,
                  keys = ['pressure_HS','density_HS','temperature'],
                  subkeys = ['axis'],
                  figxy=[6.47,4.0],
-                 ylog = True, xlog = False, loc_legend='center right'
+                 ylog = True, xlog = False, loc_legend='center right',
+                 empirical = False
                 ):
     """select 1D arrays and plot appropriate slices['y',nx_2]
     f: the collated set of labelled 1D arrays
@@ -102,6 +103,18 @@ def make_1d_zplot(f, plot_label,
     ylog/xlog: True to use logarithmic scale
     """
     plt.figure(figsize = figxy)
+    if empirical:
+        import pysac.mhs_atmosphere as atm
+        table = atm.read_VAL3c_MTW()
+        table_keys = ['p','rho','T']
+        table_sym = ['g*','m+','rx']
+        table_units = ['Pa','kg/km3','K']
+        Z = u.Quantity(table['Z'], unit=table['Z'].unit).to('Mm')
+        for tab in range(0,3):
+            empiric = u.Quantity(table[table_keys[tab]], 
+                                 unit = table[table_keys[tab]].unit
+                                ).to(table_units[tab])
+            plt.plot(Z, empiric, table_sym[tab])
     #initialise set of tags to be plotted and count for line styles
     tags = set()
     count = 0
@@ -154,6 +167,11 @@ def make_1d_zplot(f, plot_label,
         plt.gca().set_xscale('log',subsy=[5,10])
 #    plt.gca().set_yticks([1.0e-3,1.0e-1,1.0e1,1.0e3,1.0e5])
     plt.xlabel('Height [Mm]')
+    if empirical:
+        #limit x axis to simulation data rather than empirical range
+        xmax = f[keys[0]]['Z'].in_units('Mm').max()
+        xmax /= xmax.unit_quantity
+        plt.xlim(0,xmax)
     #tidy label string by stripping final ', ' from the end  
     plt.ylabel(ylabel[:-2])
     #raise plot x-axis to fit x-label 

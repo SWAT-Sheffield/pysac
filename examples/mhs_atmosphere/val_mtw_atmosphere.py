@@ -29,7 +29,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
-from pysac.mhs_atmosphere.parameters.model_pars import paper2c as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
