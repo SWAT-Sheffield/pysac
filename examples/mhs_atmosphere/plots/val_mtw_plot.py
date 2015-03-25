@@ -46,7 +46,7 @@ for paper in papers:
                 # save 1D slices from each variable for plotting
                 oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
                 # select the central slice to plot normal to the y-plane
-                nx_2 = ds.domain_dimensions[1]/2
+                plane, N_2 = 'y', ds.domain_dimensions[1]/2
                 lines, contours = True, True
                 if '_HS' in var_field:
                     lines, contours = False, False
@@ -55,8 +55,11 @@ for paper in papers:
                 else:
                     lines, contours = True, True
                 if '2c' in file_ or '2d' in file_:
-                    aspect = 2.0
+                    aspect = 2.5
                     line_density = 0.7
+                elif '2a' in file_:
+                    aspect = 0.7
+                    line_density = 0.9
                 elif 'mfe' in file_:
                     aspect = 1.75
                     line_density = 1.0
@@ -66,7 +69,7 @@ for paper in papers:
                 # save 2D plot in model's figures directory
                 figname  = figsdir+paper+'_'+var_field+'.eps'
                 atm.make_2d_plot(ds, var_field, figname,
-                                 normal=['y',nx_2],
+                                 normal=[plane,N_2],
                                  aspect=aspect, lines=lines,
                                  contours=contours,
                                  model=paper, figxz=[5.5,5.6],
@@ -82,7 +85,7 @@ for paper in papers:
             figname  = figsdir+paper+'_'+var_field+'.eps'
             lines, contours = True, True
             atm.make_2d_plot(ds, var_field, figname,
-                             normal=['y',nx_2],
+                             normal=[plane,N_2],
                              aspect=aspect, lines=lines,
                              contours=contours,
                              model=paper, figxz=[5.5,5.6],
@@ -94,7 +97,7 @@ for paper in papers:
             figname  = figsdir+paper+'_'+var_field+'.eps'
             lines, contours = True, True
             atm.make_2d_plot(ds, var_field, figname,
-                             normal=['y',nx_2],
+                             normal=[plane,N_2],
                              aspect=aspect, lines=lines,
                              contours=contours,
                              model=paper, figxz=[5.5,5.6],

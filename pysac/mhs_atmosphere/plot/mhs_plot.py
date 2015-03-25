@@ -22,6 +22,8 @@ from collections import OrderedDict as od
 import os
 import warnings
 import astropy.units as u
+from mayavi_cust_streamlines import sStreamline
+from mayavi import mlab
 #match the field name to the appropriate axis/colorbar labels. Ordered to 
 #control option on, for example, 'mag_pressure'.
 #add to the dictionary if variable not specified
@@ -29,6 +31,7 @@ y_axis_labels = od((
                 ('temp',r'$T$ [K], '),
                 ('dens',r'$\rho$ [kg km$^{-3}$], '),
                 ('press',r'$p$ [Pa], '),
+                ('energy',r'$e$ [N m$^{-2}$], '),
                 ('mag_pressure',r''),
                 ('mag_field_x',r'$B_x$ [T], '),
                 ('mag_field_y',r'$B_y$ [T], '),
@@ -374,6 +377,20 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
                 fomt = '%.0f'
             plt.clabel(CS, fmt=fomt)
     plt.savefig(figname)
+
+##============================================================================
+## Fieldline Generation
+##============================================================================
+#def mad_3d_plot(ds, fields, figname,
+#                figxy=[900,950]
+#               ):
+#    
+#    cube_slice = np.s_[:,:,:]
+#    x_slice = np.s_[:,:,:,:]
+#    scene = mlab.figure(1, bgcolor=(1, 1, 1),
+#                    fgcolor=(0.5, 0.5, 0.5),size=figxy)
+#
+#    mlab.savefig(figname)
 #    import pdb; pdb.set_trace()
 
 ##============================================================================
