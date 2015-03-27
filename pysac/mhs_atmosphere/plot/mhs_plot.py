@@ -22,7 +22,7 @@ from collections import OrderedDict as od
 import os
 import warnings
 import astropy.units as u
-from mayavi_cust_streamlines import sStreamline
+#from mayavi_cust_streamlines import sStreamline
 from mayavi import mlab
 #match the field name to the appropriate axis/colorbar labels. Ordered to 
 #control option on, for example, 'mag_pressure'.
@@ -381,15 +381,37 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
 ##============================================================================
 ## Fieldline Generation
 ##============================================================================
-#def mad_3d_plot(ds, fields, figname,
-#                figxy=[900,950]
-#               ):
-#    
-#    cube_slice = np.s_[:,:,:]
-#    x_slice = np.s_[:,:,:,:]
-#    scene = mlab.figure(1, bgcolor=(1, 1, 1),
-#                    fgcolor=(0.5, 0.5, 0.5),size=figxy)
-#
+def make_3d_plot(ds, figname, 
+#                 fields= ['thermal_pressure','plasma_beta',
+                 fields= ['density','alpven speed',
+                           'mag_field_x','mag_field_y','mag_field_z'], 
+                figxy=[900,950]
+               ):
+    """Make a 3D rendition of the atmosphere including volume filling, iso
+    surfaces and field lines. 
+    ds: gdf data set
+    figname: string with path of file to save image
+    fields: list of strings indicating the fields to be plotted
+            first volume filling, second iso surfaces, third:fifth vector field
+    """
+        
+    cube_slice = np.s_[:,:,:]
+    x_slice = np.s_[:,:,:,:]
+    scene = mlab.figure(1, bgcolor=(1, 1, 1),
+                    fgcolor=(0.5, 0.5, 0.5),size=figxy)
+
+    x = {} 
+    for i in range(0,3):   
+        x[i] = np.linspace(ds.domain_left_edge[i].in_units('Mm'),
+                           ds.domain_right_edge[i].in_units('Mm'),
+                           ds.domain_dimensions[i]
+                           )
+    vol = ds.index.grids[fields[0]]
+    iso = ds.index.grids[fields[1]]
+    vc1 = ds.index.grids[fields[2]]
+    vc2 = ds.index.grids[fields[3]]
+    vc3 = ds.index.grids[fields[4]]
+
 #    mlab.savefig(figname)
 #    import pdb; pdb.set_trace()
 
@@ -397,9 +419,9 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
 ## Fieldline Generation
 ##============================================================================
 ##def get_seeds(model):
-"""Depricated version to calculate field lines, subsequent to inbuilt 
-streamlines with color and thickness analogue
-"""
+#"""Depricated version to calculate field lines, subsequent to inbuilt 
+#streamlines with color and thickness analogue
+#"""
 #    
 #
 #
