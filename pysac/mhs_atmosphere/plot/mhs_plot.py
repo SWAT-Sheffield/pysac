@@ -22,8 +22,8 @@ from collections import OrderedDict as od
 import os
 import warnings
 import astropy.units as u
-#from mayavi_cust_streamlines import sStreamline
 from mayavi import mlab
+from pysac.plot.mayavi_seed_streamlines import SeedStreamline
 #match the field name to the appropriate axis/colorbar labels. Ordered to 
 #control option on, for example, 'mag_pressure'.
 #add to the dictionary if variable not specified
@@ -383,9 +383,11 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
 ##============================================================================
 def make_3d_plot(ds, figname, 
 #                 fields= ['thermal_pressure','plasma_beta',
-                 fields= ['density','alpven speed',
+                 fields= ['density','alfven speed',
                            'mag_field_x','mag_field_y','mag_field_z'], 
-                figxy=[900,950]
+                figxy=[500,550],
+                view=(-45., 90., 20., np.array([0,0,3.75])),
+                seeds=np.array([[0,0,1]])
                ):
     """Make a 3D rendition of the atmosphere including volume filling, iso
     surfaces and field lines. 
@@ -394,26 +396,139 @@ def make_3d_plot(ds, figname,
     fields: list of strings indicating the fields to be plotted
             first volume filling, second iso surfaces, third:fifth vector field
     """
-        
-    cube_slice = np.s_[:,:,:]
-    x_slice = np.s_[:,:,:,:]
+
+#    # extract field labels for plot variables
+#    vector_field = 'magnetic field'
+#    if 'velocity' in fields[-1]:
+#        vector_field = 'velocity field'
+#    if 'current' in fields[-1]:
+#        vector_field = 'electric current'
+#    if 'vort' in fields[-1]:
+#        vector_field = 'vorticity'
+            
+#    mlab.options.offscreen = True
+    
     scene = mlab.figure(1, bgcolor=(1, 1, 1),
                     fgcolor=(0.5, 0.5, 0.5),size=figxy)
+    x,y,z = np.mgrid[ ds.domain_left_edge[0].in_units('Mm'):
+                     ds.domain_right_edge[0].in_units('Mm'):
+                     1j*ds.domain_dimensions[0],
+                      ds.domain_left_edge[1].in_units('Mm'):
+                     ds.domain_right_edge[1].in_units('Mm'):
+                     1j*ds.domain_dimensions[1],
+                      ds.domain_left_edge[2].in_units('Mm'):
+                     ds.domain_right_edge[2].in_units('Mm'):
+                     1j*ds.domain_dimensions[2]
+                    ]
 
-    x = {} 
-    for i in range(0,3):   
-        x[i] = np.linspace(ds.domain_left_edge[i].in_units('Mm'),
-                           ds.domain_right_edge[i].in_units('Mm'),
-                           ds.domain_dimensions[i]
-                           )
-    vol = ds.index.grids[fields[0]]
-    iso = ds.index.grids[fields[1]]
-    vc1 = ds.index.grids[fields[2]]
-    vc2 = ds.index.grids[fields[3]]
-    vc3 = ds.index.grids[fields[4]]
+    fill = np.array(ds.index.grids[0][fields[0]])
+    surf = np.array(ds.index.grids[0][fields[1]])
+    vec1 = np.array(ds.index.grids[0][fields[2]])
+    vec2 = np.array(ds.index.grids[0][fields[3]])
+    vec3 = np.array(ds.index.grids[0][fields[4]])
 
-#    mlab.savefig(figname)
-#    import pdb; pdb.set_trace()
+    volfill = mlab.pipeline.scalar_field(x,y,z, fill,
+                                     name=fields[0])
+
+    isosurf = mlab.pipeline.scalar_field(x,y,z, surf,
+                                     name=fields[1])
+#    # Set up projection outline to 2D analogue plot
+#    o1 = mlab.outline()
+#    o1.manual_bounds = True
+#    o1.bounds = [x.min(),x.max(),y.min(),y.max(),z.min(),z.max()]
+#    o1.actor.property.line_width = 3
+#    o1.actor.property.color = (0.5,0.5,0.5)
+#    o1.actor.property.line_stipple_pattern = 0x0FF00
+
+    # Generate isosurfaces
+    iso = mlab.pipeline.iso_surface(isosurf)
+    iso.contour.auto_contours = True
+    iso.module_manager.scalar_lut_manager.lut_mode = 'PiYG'  
+    iso.module_manager.scalar_lut_manager.reverse_lut = True 
+#    iso.contour.contours = [3,1.5,0,-0.25,-0.75]   
+#    iso.module_manager.scalar_lut_manager.data_range = [-1.5,3.5]          
+    iso.actor.property.opacity = 0.4
+
+    # Plot the flow of trajectories with suitable parameters.
+#    vfield = mlab.flow(x, y, z, vec1, vec2, vec3, 
+#                       line_width=1, colormap='BuPu', seed_scale=2.,
+#                       #seedtype='plane',
+#                       seed_visible=False, opacity=0.9)
+    vfield = mlab.pipeline.vector_field(x, y, z, vec1, vec2, vec3, 
+                                        name=fields[-1][:-3])
+    vmag = mlab.pipeline.extract_vector_norm(vfield, name="Field line Normals")
+    field_lines = SeedStreamline(seed_points = np.array(seeds))
+    vmag.add_child(field_lines)
+#    vfield.seed.widget.enabled = False
+    field_lines.streamline_type = 'tube'
+    field_lines.module_manager.scalar_lut_manager.lut_mode = 'BuPu'
+    field_lines.module_manager.scalar_lut_manager.reverse_lut = False
+    field_lines.module_manager.scalar_lut_manager.lut.scale = 'log10'
+    field_lines.stream_tracer.integration_direction = 'downward'
+    field_lines.stream_tracer.maximum_propagation = 150
+    # Uncomment the following line if you want to hide the seed:
+    
+    # generate rear and lower background surfaces    
+    cut = mlab.pipeline.scalar_cut_plane(volfill)
+    cut.implicit_plane.normal = [1,0,0]
+    cut.implicit_plane.origin = [x.min()*0.999,0,0]
+    cut.actor.property.lighting = False
+    cut.implicit_plane.widget.enabled = False
+    cut.actor.property.opacity = 1.0
+    
+    cut2 = mlab.pipeline.scalar_cut_plane(volfill)
+    cut2.implicit_plane.origin = [0,y.max()*0.999,0]
+    cut2.implicit_plane.normal = [0,1,0]
+    cut2.actor.property.lighting = False
+    cut2.implicit_plane.widget.enabled = False
+    cut2.actor.property.opacity = 1.0
+
+    cut3 = mlab.pipeline.scalar_cut_plane(volfill)
+    cut3.implicit_plane.origin = [0,0,z.min()+.0001]
+    cut3.implicit_plane.normal = [0,0,1]
+    cut3.parent.scalar_lut_manager.lut_mode = 'YlOrBr'
+    cut3.actor.property.lighting = False
+    cut3.parent.scalar_lut_manager.lut.scale = 'log10'
+    cut3.implicit_plane.widget.enabled = False
+    cut3.parent.scalar_lut_manager.reverse_lut=False
+    cut3.actor.property.opacity = 1.0
+    
+    #Draw the axes and axis labels
+    o = mlab.outline()
+    o.manual_bounds = True
+    o.bounds = [x.min(),x.max(),y.min(),y.max(),z.min(),z.min()]
+    o.actor.property.line_width = 3
+    o.actor.property.color = (0.5,0.5,0.5)
+    o.actor.property.line_stipple_pattern = 0x0FF00
+    mlab.axes(x_axis_visibility=True,
+              y_axis_visibility=True,
+              z_axis_visibility=False,
+              zlabel=" Height\n [Mm]  ",
+              xlabel="Width\n [Mm]",
+              ylabel="Width\n [Mm]",
+              nb_labels=3,
+              extent=[x.min(),x.max(),y.min(),y.max(),z.min(),z.max()])
+    #Define the camera projection for the 3D image
+    mlab.view(view[0],view[1],view[2],view[3])
+#    mlab.view(-45.0, 90.0, 20.0,
+#              np.array([0,  0,   3.7500000e+00]))
+ 
+    #Add colorbars to left (volume fill) and right (isosurfaces)
+    label0 = str.replace(fields[0]+'_'+str(ds.index.grids[0][fields[0]].units), '_','\n')
+ #   label0 = str.replace(fields[0], '_','\n')
+    cbar0=mlab.colorbar(object=cut, title=label0, orientation='vertical', 
+              nb_labels=None, nb_colors=None, label_fmt=None)        
+    cbar0.scalar_bar_representation.position  = [0.80, 0.15]
+    cbar0.scalar_bar_representation.position2 = [0.10, 0.80]
+    label1 = str.replace(fields[1]+'_'+str(ds.index.grids[0][fields[1]].units), '_','\n')
+ #   label1 = str.replace(fields[1], '_','\n')
+    cbar1 = mlab.scalarbar(object=iso, title=label1, orientation='vertical', 
+              nb_labels=None, nb_colors=None, label_fmt=None) 
+    cbar1.scalar_bar_representation.position  = [0.01, 0.13]
+    cbar1.scalar_bar_representation.position2 = [0.10, 0.80]
+
+    mlab.savefig(figname)
+    mlab.close() 
 
 ##============================================================================
 ## Fieldline Generation
