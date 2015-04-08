@@ -464,7 +464,7 @@ def make_3d_plot(ds, figname,
     field_lines.module_manager.scalar_lut_manager.lut_mode = 'BuPu'
     field_lines.module_manager.scalar_lut_manager.reverse_lut = False
     field_lines.module_manager.scalar_lut_manager.lut.scale = 'log10'
-    field_lines.stream_tracer.integration_direction = 'downward'
+    field_lines.stream_tracer.integration_direction = 'backward'
     field_lines.stream_tracer.maximum_propagation = 150
     # Uncomment the following line if you want to hide the seed:
     
