@@ -20,10 +20,10 @@ hmi_model = {'photo_scale': 0.6*u.Mm,
              'pBplus': 4.250e-4*u.T}
 hmi_model['chratio'] = 1*u.one - hmi_model['coratio'] - hmi_model['phratio']
 
-mfe_setup = {'photo_scale': 0.6*u.Mm,
-             'chrom_scale': 0.31*u.Mm,
-             'corona_scale': 100*u.Mm,  #scale height for the corona
-             'coratio': 0.075*u.one,
+mfe_setup = {'photo_scale': 0.60*u.Mm,
+             'chrom_scale': 0.36*u.Mm,
+             'corona_scale': 5e9*u.Mm,  #scale height for the corona
+             'coratio': 0.046*u.one,
              'model': 'mfe_setup',
              'phratio': 0.0*u.one,
              'pixel': 0.36562475*u.Mm,  #(HMI pixel)
