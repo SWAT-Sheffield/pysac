@@ -14,8 +14,8 @@ l_mpi=False
 scales, physical_constants = \
     atm.get_parameters()
 #define the models required
-papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
-#papers = ['paper1']
+#papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
+papers = ['mfe_setup']
 oneD_arrays = {}
 oned_dataset = []
 #loop over all four models
@@ -61,7 +61,7 @@ for paper in papers:
                     line_density = 0.9
                 elif 'mfe' in file_:
                     aspect = 1.75
-                    line_density = 1.0
+                    line_density = 1.9
                 else:
                     aspect = 0.5
                     line_density = 1.6
@@ -104,16 +104,22 @@ for paper in papers:
                              )
     plot_label = figsdir+paper+'_axis.eps'
 #    keys = ['alfven_speed','sound_speed','mag_field_z_bg']
+    if 'mfe_setup' in paper:
+        loc_legend='lower left'
+    else:
+        loc_legend='center left'
     keys = ['thermal_pressure','mag_pressure','density','temperature']
     subkeys = ['axis']
     atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
-                      ylog = True, xlog = False, empirical=True
+                      ylog = True, xlog = False, empirical=True,
+                      loc_legend=loc_legend
                                            )
     plot_label = figsdir+paper+'_edge.eps'
     keys = ['thermal_pressure','mag_pressure','density','temperature']
     subkeys = ['edge']
     atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
-                      ylog = True, xlog = False, empirical=True
+                      ylog = True, xlog = False, empirical=True,
+                      loc_legend=loc_legend
                                            )
     plot_label = figsdir+paper+'_speeds.eps'
     keys = ['alfven_speed','sound_speed']
@@ -123,13 +129,34 @@ for paper in papers:
                                            )
     plot_label = figsdir+paper+'_meanz.eps'
     keys = ['thermal_pressure','mag_pressure','density']
+    if 'mfe_setup' in paper:
+        ylim = [1e-2,oneD_arrays['density']['max'].max()]
     subkeys = ['mean','min','max']
     atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
-                      ylog = True, xlog = False
+                      ylog = True, xlog = False, loc_legend='upper right'
                                            )
     plot_label = figsdir+paper+'_beta.eps'
     keys = ['plasma_beta','mag_pressure','thermal_pressure']
     subkeys = ['mean','min','max']
     atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
-                      ylog = True, xlog = False
+                      ylog = True, xlog = False, loc_legend='lower left'
                                            )
+    if 'mfe_setup' in paper:
+        plot_label = figsdir+paper+'_compare.eps'
+        mfe_Bz = np.load('mfe_Bz.npy')
+        mfe_Z  = np.load('mfe_zz.npy')
+        import matplotlib.pyplot as plt
+        plt.figure(figsize=[6.47,4.0])
+        plt.plot(oneD_arrays['mag_field_z_bg']['Z'].in_units('Mm'), mfe_Bz/1000.,
+                 'b-', label='numerical Bz'
+                )
+        plt.plot(oneD_arrays['mag_field_z_bg']['Z'].in_units('Mm'), 
+                 oneD_arrays['mag_field_z_bg']['axis'].in_units('T'), 'b-.', 
+                 label='analytic Bz', lw=2.0
+                )
+        plt.gca().set_yscale('log',subsy=[5,10])
+        plt.xlabel('Height [Mm]')
+        plt.ylabel(r'$B_z$ [T]')
+        plt.legend(loc='lower left')
+        plt.subplots_adjust(bottom=0.125)
+        plt.savefig(plot_label)
