@@ -26,7 +26,7 @@ def get_flux_tubes(
 
     # parameters for matching Mumford,Fedun,Erdelyi 2014
     if option_pars['l_mfe']:
-        Si = [0.15]*u.T # 150mT SI units
+        Si = [0.13]*u.T # 150mT SI units
     # parameters for matching Gent,Fedun,Mumford,Erdelyi 2014
     elif option_pars['l_single']:
         Si = [0.1]*u.T # 100mT SI units
