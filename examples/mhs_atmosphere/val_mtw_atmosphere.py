@@ -269,4 +269,3 @@ atm.save_auxilliary1D(
               coords,
               model_pars['Nxyz']
              )
-
