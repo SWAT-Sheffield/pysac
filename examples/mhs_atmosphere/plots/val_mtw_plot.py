@@ -159,4 +159,4 @@ for paper in papers:
         plt.ylabel(r'$B_z$ [T]')
         plt.legend(loc='lower left')
         plt.subplots_adjust(bottom=0.125)
-        plt.savefig(plot_label)
+	plt.savefig(plot_label)
