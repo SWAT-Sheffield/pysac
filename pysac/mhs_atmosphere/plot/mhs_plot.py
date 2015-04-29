@@ -96,7 +96,7 @@ def make_1d_zplot(f, plot_label,
                  subkeys = ['axis'],
                  figxy=[6.47,4.0],
                  ylog = True, xlog = False, loc_legend='center right',
-                 empirical = False
+                 empirical = False, ylim = (0,0), xlim = (0,0)
                 ):
     """select 1D arrays and plot appropriate slices['y',nx_2]
     f: the collated set of labelled 1D arrays
@@ -177,6 +177,11 @@ def make_1d_zplot(f, plot_label,
         plt.xlim(0,xmax)
     #tidy label string by stripping final ', ' from the end  
     plt.ylabel(ylabel[:-2])
+    # allow the axes range to be set manually if required
+    if not ylim == (0,0):
+        plt.ylim(ylim)
+    if not xlim == (0,0):
+        plt.xlim(xlim)
     #raise plot x-axis to fit x-label 
     plt.subplots_adjust(bottom=0.125)
     #consider moving legend for different plots, add a loc to function call?

@@ -107,7 +107,7 @@ for paper in papers:
     if 'mfe_setup' in paper:
         loc_legend='lower left'
     else:
-        loc_legend='center left'
+        loc_legend='center right'
     keys = ['thermal_pressure','mag_pressure','density','temperature']
     subkeys = ['axis']
     atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
@@ -138,8 +138,14 @@ for paper in papers:
     plot_label = figsdir+paper+'_beta.eps'
     keys = ['plasma_beta','mag_pressure','thermal_pressure']
     subkeys = ['mean','min','max']
-    atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
-                      ylog = True, xlog = False, loc_legend='lower left'
+    if 'mfe_setup' in paper:
+        atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+                      ylog = True, xlog = False, loc_legend='upper right',
+                      ylim = (1e-4,oneD_arrays['plasma_beta']['max'].max())
+                                           )
+    else:                                
+        atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+                      ylog = True, xlog = False, loc_legend='upper right'
                                            )
     if 'mfe_setup' in paper:
         plot_label = figsdir+paper+'_compare.eps'
