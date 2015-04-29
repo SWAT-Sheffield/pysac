@@ -63,7 +63,7 @@ paper1 = {'photo_scale': 0.6*u.Mm,
           'radial_scale': 0.044*u.Mm,
           'nftubes': 1,
           'B_corona': 2.00875e-4*u.T,
-          'pBplus': 4.250e-4*u.T}
+          'pBplus': 3.250e-4*u.T}
 paper1['chratio'] = 1*u.one - paper1['coratio'] - paper1['phratio']
 paper1['Nxyz'] = [128,128,432] # 3D grid
 paper1['xyz']  = [-1.27*u.Mm,1.27*u.Mm,-1.27*u.Mm,1.27*u.Mm,0.*u.Mm,8.62*u.Mm] #grid size

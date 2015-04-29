@@ -56,7 +56,7 @@ option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
 scales, physical_constants = \
     atm.get_parameters()
 # select the option in the next line
-option_pars['l_const'] = True
+option_pars['l_linear'] = True
 # Alfven speed constant along the axis of the flux tube
 if option_pars['l_const']:
     option_pars['l_B0_quadz'] = True
