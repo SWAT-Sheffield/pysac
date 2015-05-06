@@ -39,8 +39,8 @@ y_axis_labels = od((
                 ('mag_strength',r'$|B|$ [T], '),
                 ('tension',r'$B\cdot\nabla B/\mu_0$ [Pa m$^{-1}$], '),
                 ('beta',r'$\beta$, '),
-                ('alfven',r'$v_\mathrm{A}$ [km s$^{-1}$], '),
-                ('sound',r'$c_\mathrm{s}$ [km s$^{-1}$], ')))
+                ('alfven',r'$v_\mathrm{A}$ [m s$^{-1}$], '),
+                ('sound',r'$c_\mathrm{s}$ [m s$^{-1}$], ')))
 
 #match the field name to the appropriate line color for consitency between 
 #plots. Ordered to control option on, for example, 'mag_pressure'.
@@ -368,9 +368,9 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
             X = np.linspace(extent[0],extent[1],slc.shape[0])       
             Y = np.linspace(extent[2],extent[3],slc.shape[1])
             CS=plt.contour(X,Y,beta.T,4,
-                           levels=[beta.min(),
-                                   1e-2,1e-1,1.,1e1,1e2,
-                                   beta.max()],
+#                           levels=[1.5*beta.min(),
+#                                   1e-2,1e-1,1.,1e1,1e2,
+#                                   0.5*beta.max()],
                            linewidths=1,cmap=cm.PiYG_r,norm=LogNorm())
             if beta.min() < 1e-2:
                 fomt = '%.3f'
