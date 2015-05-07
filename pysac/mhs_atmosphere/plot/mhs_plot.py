@@ -39,8 +39,8 @@ y_axis_labels = od((
                 ('mag_strength',r'$|B|$ [T], '),
                 ('tension',r'$B\cdot\nabla B/\mu_0$ [Pa m$^{-1}$], '),
                 ('beta',r'$\beta$, '),
-                ('alfven',r'$v_\mathrm{A}$ [km s$^{-1}$], '),
-                ('sound',r'$c_\mathrm{s}$ [km s$^{-1}$], ')))
+                ('alfven',r'$v_\mathrm{A}$ [m s$^{-1}$], '),
+                ('sound',r'$c_\mathrm{s}$ [m s$^{-1}$], ')))
 
 #match the field name to the appropriate line color for consitency between 
 #plots. Ordered to control option on, for example, 'mag_pressure'.
@@ -161,6 +161,8 @@ def make_1d_zplot(f, plot_label,
                          f[key][subkey].in_units(rescale),color=color,
                          linestyle=linestyle, lw=linewidth, label=label)
     #collate labels for y-axis and apply log scale if True
+    if 'plasma_beta' in keys:
+        plt.axhline(1., color='k', ls=':')
     ylabel = ''
     for tag in tags:
         ylabel += y_axis_labels[tag]
@@ -185,7 +187,7 @@ def make_1d_zplot(f, plot_label,
     #raise plot x-axis to fit x-label 
     plt.subplots_adjust(bottom=0.125)
     #consider moving legend for different plots, add a loc to function call?
-    legend = plt.legend(loc=loc_legend)
+    plt.legend(loc=loc_legend)
     plt.savefig(plot_label)
 
 #-----------------------------------------------------------------------------
@@ -257,19 +259,12 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
     if slc.min() < 0:
         norm = colors.SymLogNorm(slc.max())
         l_norm = True
-    elif 'tension' in var_field:
+    elif slc.min() == 0:
         norm = colors.Normalize()
-        l_norm = False
+        l_norm = True
     else:
-        if slc.max()/slc.min() > 5e2:
-            norm = colors.LogNorm()
-            l_norm = True
-        else:
-            norm = colors.Normalize()
-            if slc.max() > 1e3:
-                l_norm = True
-            else:
-                l_norm = False
+        norm = colors.LogNorm()
+        l_norm = True
 
     #plot a 2D slice
     plt.imshow(slc.T, colour,
@@ -293,6 +288,8 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
     for key in y_axis_labels:
         if key in var_field:
             ylabel += y_axis_labels[key][:-2]
+#    if var_field == "mag_field_y_bg":
+#        import pdb; pdb.set_trace()
     cbar1 = plt.colorbar(format = l_f,
                        #ticks=[var.min(),1,10,100,1000,var.max()],
                         fraction=0.2)
@@ -368,15 +365,13 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
             X = np.linspace(extent[0],extent[1],slc.shape[0])       
             Y = np.linspace(extent[2],extent[3],slc.shape[1])
             CS=plt.contour(X,Y,beta.T,4,
-                           levels=[beta.min(),
-                                   1e-2,1e-1,1.,1e1,1e2,
-                                   beta.max()],
+                           levels=[1e-3,
+                                   1e-2,1e-1,1.,1e2,
+                                   1e4],
                            linewidths=1,cmap=cm.PiYG_r,norm=LogNorm())
             if beta.min() < 1e-2:
-                fomt = '%.3f'
-            elif beta.min() < 1e-1:
                 fomt = '%.2f'
-            elif beta.min() < 1:
+            elif beta.min() < 1e-1:
                 fomt = '%.1f'
             else:
                 fomt = '%.0f'

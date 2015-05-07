@@ -7,12 +7,12 @@ Created on Thu Dec 11 17:45:48 2014
 
 import numpy as np
 import astropy.units as u
-hmi_model = {'photo_scale': 0.6*u.Mm,
-             'chrom_scale': 0.31*u.Mm,
+hmi_model = {'photo_scale': 0.6*u.Mm,       #scale height for photosphere
+             'chrom_scale': 0.31*u.Mm,      #scale height for chromosphere
              'corona_scale': 100*u.Mm,      #scale height for the corona
-             'coratio': 0.06*u.one,
+             'coratio': 0.06*u.one,  #footpoint portion scaling as corona 
              'model': 'hmi_model',
-             'phratio': 0.15*u.one,
+             'phratio': 0.15*u.one,  #footpoint portion scaling as photosphere
              'pixel': 0.36562475*u.Mm,      #(HMI pixel)
              'radial_scale': 0.044*u.Mm,
              'nftubes': 1,
@@ -21,15 +21,15 @@ hmi_model = {'photo_scale': 0.6*u.Mm,
 hmi_model['chratio'] = 1*u.one - hmi_model['coratio'] - hmi_model['phratio']
 
 mfe_setup = {'photo_scale': 0.60*u.Mm,
-             'chrom_scale': 0.36*u.Mm,
-             'corona_scale': 5e9*u.Mm,  #scale height for the corona
-             'coratio': 0.046*u.one,
+             'chrom_scale': 0.385*u.Mm,
+             'corona_scale': 2*u.Mm,  #scale height for the corona
+             'coratio': 0.02*u.one,
              'model': 'mfe_setup',
              'phratio': 0.0*u.one,
              'pixel': 0.36562475*u.Mm,  #(HMI pixel)
              'radial_scale': 0.044*u.Mm,
              'nftubes': 1,
-             'B_corona': 0.*u.T,
+             'B_corona': 4.35e-4*u.T,
              'pBplus': 4.250e-4*u.T}
 mfe_setup['chratio'] = 1*u.one - mfe_setup['coratio'] - mfe_setup['phratio']
 #if 1D or 2D set unused dimensions to 0, and unrequired xyz limits to 1.
@@ -42,7 +42,7 @@ spruit = {'photo_scale': 1.5*u.Mm,
           'coratio': 0.0*u.one,
           'model': 'spruit',
           'phratio': 0.0*u.one,
-          'pixel': 0.1*u.Mm,              #(HMI pixel)
+          'pixel': 0.1*u.Mm,              
           'radial_scale': 0.075*u.Mm,
           'nftubes': 1,
           'p0': 117200.0 * u.dyne/u.cm**2,
@@ -55,15 +55,15 @@ spruit['xyz']  = [-1.27*u.Mm,1.27*u.Mm,-1.27*u.Mm,1.27*u.Mm,0.0*u.Mm,25.5*u.Mm] 
 
 paper1 = {'photo_scale': 0.6*u.Mm,
           'chrom_scale': 0.42*u.Mm,
-          'corona_scale': 175*u.Mm,         #scale height for the corona
-          'coratio': 0.0225*u.one,
+          'corona_scale': 975*u.Mm,         #scale height for the corona
+          'coratio': 0.025*u.one,
           'model': 'paper1',
           'phratio': 0.0*u.one,
           'pixel': 0.36562475*u.Mm,              #(HMI pixel)
-          'radial_scale': 0.044*u.Mm,
+          'radial_scale': 0.04*u.Mm,
           'nftubes': 1,
-          'B_corona': 2.00875e-4*u.T,
-          'pBplus': 3.250e-4*u.T}
+          'B_corona': 3.25e-4*u.T,
+          'pBplus': 3.85e-4*u.T}
 paper1['chratio'] = 1*u.one - paper1['coratio'] - paper1['phratio']
 paper1['Nxyz'] = [128,128,432] # 3D grid
 paper1['xyz']  = [-1.27*u.Mm,1.27*u.Mm,-1.27*u.Mm,1.27*u.Mm,0.*u.Mm,8.62*u.Mm] #grid size

@@ -16,6 +16,7 @@ scales, physical_constants = \
 #define the models required
 #papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
 papers = ['mfe_setup']
+#papers = ['paper1']
 oneD_arrays = {}
 oned_dataset = []
 #loop over all four models
@@ -104,6 +105,18 @@ for paper in papers:
                              )
     plot_label = figsdir+paper+'_axis.eps'
 #    keys = ['alfven_speed','sound_speed','mag_field_z_bg']
+    ymin = min(oneD_arrays['density']['axis'].in_units('kg / km**3').value.min(),
+               oneD_arrays['temperature']['edge'].value.min(),
+               oneD_arrays['temperature']['axis'].value.min(),
+               oneD_arrays['density']['edge'].in_units('kg / km**3').value.min(),
+               oneD_arrays['thermal_pressure']['edge'].value.min(),
+               oneD_arrays['thermal_pressure']['axis'].value.min())*0.5
+    ymax = max(oneD_arrays['density']['axis'].in_units('kg / km**3').value.max(),
+               oneD_arrays['temperature']['edge'].value.max(),
+               oneD_arrays['temperature']['axis'].value.max(),
+               oneD_arrays['density']['edge'].in_units('kg / km**3').value.max(),
+               oneD_arrays['thermal_pressure']['edge'].value.max(),
+               oneD_arrays['thermal_pressure']['axis'].value.max())*2.
     if 'mfe_setup' in paper:
         loc_legend='lower left'
     else:
@@ -112,27 +125,38 @@ for paper in papers:
     subkeys = ['axis']
     atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, empirical=True,
-                      loc_legend=loc_legend
+                      loc_legend=loc_legend, ylim = (ymin,ymax)
                                            )
     plot_label = figsdir+paper+'_edge.eps'
     keys = ['thermal_pressure','mag_pressure','density','temperature']
     subkeys = ['edge']
     atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, empirical=True,
-                      loc_legend=loc_legend
+                      loc_legend=loc_legend, ylim = (ymin,ymax)
                                            )
     plot_label = figsdir+paper+'_speeds.eps'
     keys = ['alfven_speed','sound_speed']
     subkeys = ['mean','min','max']
-    atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+    if 'mfe_setup' in paper:
+        atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+                          ylog = True, xlog = False, loc_legend='lower left',
+                ylim = (2e3,oneD_arrays['sound_speed']['max'].value.max())
+                                           )
+    else:
+        atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, loc_legend='lower right'
                                            )
     plot_label = figsdir+paper+'_meanz.eps'
     keys = ['thermal_pressure','mag_pressure','density']
-    if 'mfe_setup' in paper:
-        ylim = [1e-2,oneD_arrays['density']['max'].max()]
     subkeys = ['mean','min','max']
-    atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+    if 'mfe_setup' in paper:
+        ymax = oneD_arrays['density']['max'].in_units('kg / km**3').value.max()
+        atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+                      ylog = True, xlog = False, loc_legend='upper right',
+                ylim = (1e-2,1.1*ymax)
+                                           )
+    else:
+        atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, loc_legend='upper right'
                                            )
     plot_label = figsdir+paper+'_beta.eps'
@@ -141,28 +165,45 @@ for paper in papers:
     if 'mfe_setup' in paper:
         atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, loc_legend='upper right',
-                      ylim = (1e-4,oneD_arrays['plasma_beta']['max'].max())
+                      ylim = (1e-3,1.1*oneD_arrays['plasma_beta']['max'].max())
                                            )
     else:                                
         atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, loc_legend='upper right'
                                            )
+    plot_label = figsdir+paper+'_compare.eps'
+    mfe_Bz = np.load('mfe_Bz.npy')
+    mfe_Z  = np.load('mfe_zz.npy')
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=[6.47,4.0])
     if 'mfe_setup' in paper:
-        plot_label = figsdir+paper+'_compare.eps'
-        mfe_Bz = np.load('mfe_Bz.npy')
-        mfe_Z  = np.load('mfe_zz.npy')
-        import matplotlib.pyplot as plt
-        plt.figure(figsize=[6.47,4.0])
-        plt.plot(oneD_arrays['mag_field_z_bg']['Z'].in_units('Mm'), mfe_Bz/1000.,
-                 'b-', label='numerical Bz'
+        plt.plot(mfe_Z, mfe_Bz/1000.,
+                 'b-', label=r"MFE '15 $B_z$(axis)"
                 )
         plt.plot(oneD_arrays['mag_field_z_bg']['Z'].in_units('Mm'), 
-                 oneD_arrays['mag_field_z_bg']['axis'].in_units('T'), 'b-.', 
-                 label='analytic Bz', lw=2.0
+                 oneD_arrays['mag_field_z_bg']['axis'].in_units('T'), 'm-.', 
+                 label=r"GFE '15 $B_z$(axis)", lw=2.0
                 )
         plt.gca().set_yscale('log',subsy=[5,10])
         plt.xlabel('Height [Mm]')
         plt.ylabel(r'$B_z$ [T]')
         plt.legend(loc='lower left')
+        plt.ylim(4e-4,1.25e-1)
+        plt.subplots_adjust(bottom=0.125)
+        plt.savefig(plot_label)
+    else:
+        plt.plot(mfe_Z, mfe_Bz/1000.,
+                 'b-', label=r"MFE '15 $B_z$(axis)"
+                )
+        plt.plot(oneD_arrays['mag_field_z_bg']['Z'].in_units('Mm'), 
+                 oneD_arrays['mag_field_z_bg']['axis'].in_units('T'), 'm-.', 
+                 label=r"GFE '15 $B_z$(axis)", lw=2.0
+                )
+        plt.gca().set_yscale('log',subsy=[5,10])
+        plt.xlabel('Height [Mm]')
+        plt.ylabel(r'$B_z$ [T]')
+        plt.legend(loc='lower left')
+        ymin = oneD_arrays['mag_field_z_bg']['axis'].in_units('T').value.min()
+        plt.ylim(ymin,1.25e-1)
         plt.subplots_adjust(bottom=0.125)
 	plt.savefig(plot_label)
