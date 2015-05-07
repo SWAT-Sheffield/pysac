@@ -139,7 +139,7 @@ def construct_magnetic_field(
     Bf1 = model_pars['phratio']
     Bf2 = model_pars['chratio']
     Bf3 = model_pars['coratio']
-    Bbz = (model_pars['B_corona'])
+    Bbz = model_pars['B_corona']
     #define exponentials and derivatives, basis functions
     if option_pars['l_B0_expz']:
         B1z = Bf1 * np.exp(-z**2/z1**2)
@@ -191,7 +191,8 @@ def construct_magnetic_field(
     dzBy = - 2 * S * (y-y0) * (B0z*B20dz + (1. + 2.*fxyz/f02)*B10dz2)*G0
     #Magnetic Pressure and horizontal thermal pressure balance term
     pbbal= 0.5/mu0 * S**2 * G02 * (
-           f02 * B0z * B20dz + 2 * fxyz * B10dz**2 - B0z4 ) + S * Bbz * G0 * (
+           f02 * B0z * B20dz + 2 * fxyz * B10dz**2 - B0z4) - (0.5*Bbz**2 +
+           S*G0*Bbz*B0z2)/mu0 + S * Bbz * G0 * (
            f02 * B20dz / B0z + (2 * fxyz - f02) * B10dz2 / B0z2)/mu0
     #density balancing B
 #    import pdb; pdb.set_trace()
@@ -199,10 +200,10 @@ def construct_magnetic_field(
             S**2 * G02 / mu0 /g0 * (
             (0.5*f02 + 2*fxyz) * B10dz*B20dz + 0.5*f02 * B0z*B30dz
              - 2. * B0z3*B10dz
-            ) + 2 * S*Bbz * G0 * fxyz / f02 * B10dz/B0z / mu0 / g0 * (
-            f02 * B20dz/B0z + (2 * fxyz - f02) * B10dz2/B0z2) + S*Bbz * G0 * (
-            f02 * B30dz/B0z + (4*fxyz - 3*f02) * B20dz*B10dz*B0z2
-              + 2 * f02 * B10dz**3/B0z3 ) / mu0 / g0
+            ) + S*Bbz*G0/mu0/g0 * ( f02*B30dz/B0z + (2*f02 - 2*fxyz - 
+              4*fxyz**2/f02) * B10dz2*B10dz/B0z3 + 
+              3 * (2*fxyz - f02) * B20dz*B10dz/B0z2 
+              - 2 * (fxyz/f02 + 1) * B10dz*B0z )
     B2x = (Bx * dxBx + By * dyBx + Bz * dzBx)/mu0
     B2y = (Bx * dxBy + By * dyBy + Bz * dzBy)/mu0
 
@@ -233,7 +234,7 @@ def construct_pairwise_field(x, y, z,
     Bf1 = model_pars['phratio']
     Bf2 = model_pars['chratio']
     Bf3 = model_pars['coratio']
-    Bbz = (model_pars['B_corona'])
+    Bbz = model_pars['B_corona']
     #define exponentials and derivatives, basis functions
     if option_pars['l_B0_expz']:
         B1z = Bf1 * np.exp(-z**2/z1**2)
