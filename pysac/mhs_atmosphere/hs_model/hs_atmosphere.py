@@ -78,6 +78,47 @@ def read_VAL3c_MTW(VAL_file=None, MTW_file=None, mu=0.602):
 
     return data
 
+def read_dalsgaard(DAL_file=None, mu=0.602):
+    """
+    Read in the data from Table in Christensen-Dalsgaard (1996).
+
+    Parameters
+    ----------
+    DAL_file : string
+        The data file for the VAL3c atmosphere, defaults to
+        `pysac.mhs_atmosphere.hs_model.VALIIIc_data`
+
+    mu : float
+        The mean molecular weight ratio for solar interior. defaults to 0.602
+        for fully ionized plasma.
+
+    Returns
+    -------
+    data : `astropy.table.Table`
+        The combined data, sorted by Z.
+    """
+    from . import dalsgaard_data
+    if not DAL_file:
+        DAL_file = dalsgaard_data
+
+    DAL = Table.read(DAL_file, format='ascii', comment='#')
+    DAL['Z'] *= 6.96342e8 # convert from ratio of solar radius to m
+    DAL['Z'].unit = u.m
+    DAL['sound_speed'].unit = u.Unit('cm/s')
+    DAL['rho'].unit = u.Unit('g cm-3')
+    DAL['p'].unit = u.Unit('dyne/cm^2')
+    DAL['T'].unit = u.K
+    DAL['Gamma_1'].unit = u.one
+
+    # Calculate the mean molecular weight ratio
+    #VAL3c['mu'] = 4.0/(3*0.74+1+VAL3c['n_e']/VAL3c['n_i'])
+
+    data = astropy.table.vstack([VAL3c, MTW], join_type='inner')
+#    data = astropy.table.vstack([VAL3c, MTW], join_type='inner')
+    data.sort('Z')
+
+    return data
+
 #============================================================================
 # interpolate the empirical data onto a Z array
 #============================================================================

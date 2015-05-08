@@ -15,8 +15,8 @@ scales, physical_constants = \
     atm.get_parameters()
 #define the models required
 #papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
-papers = ['mfe_setup']
-#papers = ['paper1']
+#papers = ['mfe_setup']
+papers = ['paper1']
 oneD_arrays = {}
 oned_dataset = []
 #loop over all four models
@@ -65,7 +65,7 @@ for paper in papers:
                     line_density = 1.9
                 else:
                     aspect = 0.5
-                    line_density = 1.6
+                    line_density = 1.1
                 # save 2D plot in model's figures directory
                 figname  = figsdir+paper+'_'+var_field+'.eps'
                 atm.make_2d_plot(ds, var_field, figname,
