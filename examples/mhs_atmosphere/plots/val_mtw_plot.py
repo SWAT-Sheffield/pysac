@@ -206,5 +206,4 @@ for paper in papers:
         ymin = oneD_arrays['mag_field_z_bg']['axis'].in_units('T').value.min()
         plt.ylim(ymin,1.25e-1)
         plt.subplots_adjust(bottom=0.125)
-        plt.savefig(plot_label)
-        
+	plt.savefig(plot_label)
