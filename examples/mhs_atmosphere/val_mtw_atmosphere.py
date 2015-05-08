@@ -188,6 +188,7 @@ pressure, rho = atm.mhs_3D_profile(z,
 magp = (Bx**2 + By**2 + Bz**2)/(2.*physical_constants['mu0'])
 if rank ==0:
     print'max B corona = ',magp[:,:,-1].max().decompose()
+    print'min B corona = ',magp[:,:,-1].min().decompose()
 energy = atm.get_internal_energy(pressure,
                                                   magp,
                                                   physical_constants)
