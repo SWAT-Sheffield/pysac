@@ -27,6 +27,8 @@ from pysac.plot.mayavi_seed_streamlines import SeedStreamline
 #match the field name to the appropriate axis/colorbar labels. Ordered to 
 #control option on, for example, 'mag_pressure'.
 #add to the dictionary if variable not specified
+plt.ioff()
+
 y_axis_labels = od((
                 ('temp',r'$T$ [K], '),
                 ('dens',r'$\rho$ [kg km$^{-3}$], '),
@@ -38,6 +40,7 @@ y_axis_labels = od((
                 ('mag_field_z',r'$B_z$ [T], '),
                 ('mag_strength',r'$|B|$ [T], '),
                 ('tension',r'$B\cdot\nabla B/\mu_0$ [Pa m$^{-1}$], '),
+                ('balancing',r'$B\cdot\nabla B/\mu_0$ [Pa m$^{-1}$], '),
                 ('beta',r'$\beta$, '),
                 ('alfven',r'$v_\mathrm{A}$ [m s$^{-1}$], '),
                 ('sound',r'$c_\mathrm{s}$ [m s$^{-1}$], ')))
@@ -235,12 +238,14 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
     #select colour tables according to the variable being plotted
     colour = cm.YlOrBr
     if 'mag_field' in var_field:
-        colour = cm.BuPu
+        colour = cm.bwr
     if 'temperature' in var_field:
         colour = cm.RdBu_r
     if 'beta' in var_field:
         colour = cm.PiYG_r
     if 'tension' in var_field:
+        colour = cm.RdYlGn_r
+    if 'balancing' in var_field:
         colour = cm.RdYlGn_r
     if 'velocity' in var_field:
         colour = cm.RdYlGn
@@ -257,22 +262,28 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
 
     #adjust color scaling appropriate for field profiles
     if slc.min() < 0:
-        norm = colors.SymLogNorm(slc.max())
+        norm = colors.SymLogNorm(max(slc.max(),-slc.min()))
         l_norm = True
+        cmax = max(slc.max(),-slc.min())
+        cmin = -cmax
     elif slc.min() == 0:
         norm = colors.Normalize()
         l_norm = True
+        cmin = slc.min()
+        cmax = slc.max()
     else:
         norm = colors.LogNorm()
         l_norm = True
+        cmin = slc.min()
+        cmax = slc.max()
 
     #plot a 2D slice
     plt.imshow(slc.T, colour,
                extent=extent,
                norm=norm,
                origin='lower',
-               vmin=slc.min(),
-               vmax=slc.max()
+               vmin=cmin,
+               vmax=cmax
               )
     plt.axes().set_aspect(aspect=aspect)
     plt.ylabel('Height [Mm]')
@@ -351,7 +362,7 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
             Y = np.linspace(extent[2],extent[3],slc.shape[1])
             U = np.sqrt(v1**2 + v2**2)
             plt.streamplot(X.value, Y.value, v1.T, v2.T, color=U.T,
-                           cmap=cm.BuPu, density=line_density, 
+                           cmap=cm.winter, density=line_density, 
                            linewidth = 3*U.T/U.max(), minlength = 0.99
                           ) 
             #add second colorbar for field strength 
@@ -365,9 +376,9 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
             X = np.linspace(extent[0],extent[1],slc.shape[0])       
             Y = np.linspace(extent[2],extent[3],slc.shape[1])
             CS=plt.contour(X,Y,beta.T,4,
-                           levels=[1e-3,
-                                   1e-2,1e-1,1.,1e2,
-                                   1e4],
+                           levels=[
+                                   1e-2,1e-1,1.,1e1,1e2,
+                                   ],
                            linewidths=1,cmap=cm.PiYG_r,norm=LogNorm())
             if beta.min() < 1e-2:
                 fomt = '%.2f'
@@ -382,13 +393,12 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
 ## Fieldline Generation
 ##============================================================================
 def make_3d_plot(ds, figname, 
-#                 fields= ['thermal_pressure','plasma_beta',
-                 fields= ['density','alfven speed',
+                 fields= ['thermal_pressure','plasma_beta',
                            'mag_field_x','mag_field_y','mag_field_z'], 
-                figxy=[500,550],
-                view=(-45., 90., 20., np.array([0,0,3.75])),
-                seeds=np.array([[0,0,1]])
-               ):
+                 figxy=[500,550],
+                 view=(-45., 90., 20., np.array([0,0,3.75])),
+                 seeds=np.array([[0,0,1]])
+                ):
     """Make a 3D rendition of the atmosphere including volume filling, iso
     surfaces and field lines. 
     ds: gdf data set
@@ -442,16 +452,17 @@ def make_3d_plot(ds, figname,
 
     # Generate isosurfaces
     iso = mlab.pipeline.iso_surface(isosurf)
-    iso.contour.auto_contours = True
+    iso.contour.auto_contours = False
     iso.module_manager.scalar_lut_manager.lut_mode = 'PiYG'  
+    iso.module_manager.scalar_lut_manager.lut.scale = 'log10'
     iso.module_manager.scalar_lut_manager.reverse_lut = True 
-#    iso.contour.contours = [3,1.5,0,-0.25,-0.75]   
-#    iso.module_manager.scalar_lut_manager.data_range = [-1.5,3.5]          
+    iso.contour.contours = [1e-2,1e-1,1,100,10000]   
+    iso.module_manager.scalar_lut_manager.data_range = [1e-3,1e3]          
     iso.actor.property.opacity = 0.4
 
     # Plot the flow of trajectories with suitable parameters.
 #    vfield = mlab.flow(x, y, z, vec1, vec2, vec3, 
-#                       line_width=1, colormap='BuPu', seed_scale=2.,
+#                       line_width=1, colormap='winter', seed_scale=2.,
 #                       #seedtype='plane',
 #                       seed_visible=False, opacity=0.9)
     vfield = mlab.pipeline.vector_field(x, y, z, vec1, vec2, vec3, 
@@ -461,12 +472,13 @@ def make_3d_plot(ds, figname,
     vmag.add_child(field_lines)
 #    vfield.seed.widget.enabled = False
     field_lines.streamline_type = 'tube'
-    field_lines.module_manager.scalar_lut_manager.lut_mode = 'BuPu'
+    field_lines.module_manager.scalar_lut_manager.lut_mode = 'winter'
     field_lines.module_manager.scalar_lut_manager.reverse_lut = False
     field_lines.module_manager.scalar_lut_manager.lut.scale = 'log10'
     field_lines.stream_tracer.integration_direction = 'backward'
     field_lines.stream_tracer.maximum_propagation = 150
-    # Uncomment the following line if you want to hide the seed:
+    field_lines.tube_filter.radius = 0.1
+    field_lines.tube_filter.number_of_sides = 15
     
     # generate rear and lower background surfaces    
     cut = mlab.pipeline.scalar_cut_plane(volfill)
@@ -496,7 +508,7 @@ def make_3d_plot(ds, figname,
     #Draw the axes and axis labels
     o = mlab.outline()
     o.manual_bounds = True
-    o.bounds = [x.min(),x.max(),y.min(),y.max(),z.min(),z.min()]
+    o.bounds = [x.min(),x.max(),y.min(),y.max(),z.min(),z.max()]
     o.actor.property.line_width = 3
     o.actor.property.color = (0.5,0.5,0.5)
     o.actor.property.line_stipple_pattern = 0x0FF00
@@ -514,113 +526,25 @@ def make_3d_plot(ds, figname,
 #              np.array([0,  0,   3.7500000e+00]))
  
     #Add colorbars to left (volume fill) and right (isosurfaces)
-    label0 = str.replace(fields[0]+'_'+str(ds.index.grids[0][fields[0]].units), '_','\n')
+    unit_str0 = str(ds.index.grids[0][fields[0]].units)
+    if str(ds.index.grids[0][fields[0]].units) == 'dimensionless':
+        unit_str0 = ''
+    label0 = str.replace(fields[0]+'_'+unit_str0, '_','\n')
  #   label0 = str.replace(fields[0], '_','\n')
     cbar0=mlab.colorbar(object=cut, title=label0, orientation='vertical', 
               nb_labels=None, nb_colors=None, label_fmt=None)        
     cbar0.scalar_bar_representation.position  = [0.80, 0.15]
     cbar0.scalar_bar_representation.position2 = [0.10, 0.80]
-    label1 = str.replace(fields[1]+'_'+str(ds.index.grids[0][fields[1]].units), '_','\n')
+    unit_str1 = str(ds.index.grids[0][fields[1]].units)
+    if str(ds.index.grids[0][fields[1]].units) == 'dimensionless':
+        unit_str1 = ''
+    label1 = str.replace(fields[1]+'_'+unit_str1, '_','\n')
  #   label1 = str.replace(fields[1], '_','\n')
     cbar1 = mlab.scalarbar(object=iso, title=label1, orientation='vertical', 
               nb_labels=None, nb_colors=None, label_fmt=None) 
-    cbar1.scalar_bar_representation.position  = [0.01, 0.13]
+    cbar1.scalar_bar_representation.position  = [0.05, 0.15]
     cbar1.scalar_bar_representation.position2 = [0.10, 0.80]
 
     mlab.savefig(figname)
     mlab.close() 
 
-##============================================================================
-## Fieldline Generation
-##============================================================================
-##def get_seeds(model):
-#"""Depricated version to calculate field lines, subsequent to inbuilt 
-#streamlines with color and thickness analogue
-#"""
-#    
-#
-#
-#def make_field_lines(v1,v2,seeds,extent,flines_file,dS=1):
-#    """ Simple Euler fieldline integrator
-#    v1,v2 - y and x vectors*lscale
-#    seeds - array of coordinate (array indexes) pairs
-#    dS [optional] - step size
-#    """
-#    from scipy import ndimage
-#    
-#    field = []
-#    #Get extent of domain
-#    max1 = v1.shape[0]
-#    max2 = v2.shape[1]
-#    min2 = 0
-#    min1 = 0
-#    vmax = np.sqrt(np.max(v1**2+v2**2))/v1.unit_quantity
-#    #integrate for each fieldline
-#    for seed1 in seeds[1]:
-#        for seed0 in seeds[0]:
-#            c1,c2 = seed0,seed1
-#            out1 = [c1] #first point is seed
-#            out2 = [c2]
-#            coords = np.array([[c1],[c2]])
-#            v1i = ndimage.map_coordinates(v1,coords)[0]
-#            v2i = ndimage.map_coordinates(v2,coords)[0]
-#            out3 = [np.sqrt(v1i**2 + v2i**2)/vmax]
-#            cnt = 0
-#            while (c1 <= max1-0.5 and c1 >= min1+0.5) and (c2 <= max2-0.5
-#                                                    and c2 >= min2+0.25):
-#                #Interpolate the vector field to the coord downwards
-#                coords = np.array([[c1],[c2]])
-#                v1i = ndimage.map_coordinates(v1,coords)[0]
-#                v2i = ndimage.map_coordinates(v2,coords)[0]
-#                vi = np.sqrt(v1i**2 + v2i**2)
-#                d1 = ( v1i * dS )/ vi
-#                d2 = ( v2i * dS )/ vi
-#                c1 -= d1
-#                c2 -= d2
-#                c3 = vi/vmax
-#                out1.append(c1)
-#                out2.append(c2)
-#                out3.append(c3)
-#                cnt += 1
-#                if cnt > max2*5:
-#                    print "limit seeds = ",seed0,seed1
-#                    break
-##            out = np.zeros([len(out1),len(out2),len(out3)])
-##            out[0] = out1 * (extent[1] - extent[0])/(max1-1) + extent[0]
-##            out[1] = out2 * (extent[3] - extent[2])/(max2-1) + extent[2]
-##            out[2] = out3
-##            field.append(out)
-#            c1,c2 = seed0,seed1
-#            cnt = 0
-#            while (c1 <= max1-0.5 and c1 >= min1+0.5) and (c2 <= max2-0.5
-#                                                    and c2 >= min2+0.25):
-#                #Interpolate the vector field to the coord upwards
-#                coords = np.array([[c1],[c2]])
-#                v1i = ndimage.map_coordinates(v1,coords)[0]
-#                v2i = ndimage.map_coordinates(v2,coords)[0]
-#                vi = np.sqrt(v1i**2 + v2i**2)
-#                d1 = ( v1i * dS )/ vi
-#                d2 = ( v2i * dS )/ vi
-#                c1 += d1
-#                c2 += d2
-#                c3 = vi/vmax
-#                out1.append(c1)
-#                out2.append(c2)
-#                out3.append(c3)
-#                cnt += 1
-#                if cnt > max2*5:
-#                    print "limit seeds = ",seed0,seed1
-#                    break
-#            out = np.zeros([3,len(out1)])
-#            out[0] = out1 * (extent[1] - extent[0])/(max1-1) + extent[0]
-#            out[1] = out2 * (extent[3] - extent[2])/(max2-1) + extent[2]
-#            out[2] = out3
-#            field.append(out)
-##    import pdb; pdb.set_trace()
-#    np.save(flines_file, field)        
-#
-#    return np.array(field)
-
-#============================================================================
-# Fieldline Generation
-#============================================================================
