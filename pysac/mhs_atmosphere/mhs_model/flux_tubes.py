@@ -22,22 +22,22 @@ def get_flux_tubes(
     """ Obtain an array of x,y coordinates and corresponding vertical
     component value for the photospheric magnetic field  """
 
-    xi, yi, Si = [0.]*u.Mm,  [0.]*u.Mm,  [0.1]*u.T  # x,y,Bz(r=0,z=0)
+    xi, yi, Si = [[0.]]*u.Mm,  [[0.]]*u.Mm,  [[0.1]]*u.T  # x,y,Bz(r=0,z=0)
 
     # parameters for matching Mumford,Fedun,Erdelyi 2014
     if option_pars['l_mfe']:
-        Si = [0.13]*u.T # 150mT SI units
+        Si = [[0.13]]*u.T # 150mT SI units
     # parameters for matching Gent,Fedun,Mumford,Erdelyi 2014
     elif option_pars['l_single']:
-        Si = [0.1]*u.T # 100mT SI units
+        Si = [[0.1]]*u.T # 100mT SI units
     # parameters for matching Gent,Fedun,Erdelyi 2014 flux tube pair
     elif option_pars['l_tube_pair']:
         xi, yi, Si = (
                       u.Quantity([
-                                [  1.2],
-                                [  1.2],
-                                [-1.15],
-                                [-1.25]
+                                [  1.0],
+                                [  1.0],
+                                [-0.95],
+                                [-1.05]
                                ], unit=u.Mm),
                       u.Quantity([
                                 [ 0.00],
@@ -76,30 +76,35 @@ def get_flux_tubes(
                      )# 50mT SI
     elif option_pars['l_multi_netwk']:
         xi, yi, Si = (
-            u.Quantity(np.random.uniform(-0.5, 0.5, model_pars['nftubes']),
-            unit=u.Mm),
-            u.Quantity(np.random.uniform(-0.5, 0.5, model_pars['nftubes']),
-            unit=u.Mm),
-            u.Quantity(np.ones(model_pars['nftubes'])*0.33,
-            unit=u.T)
+            u.Quantity([
+                       [0.]] * model_pars['nftubes'], unit=u.Mm),
+            u.Quantity([
+                       [0.]] * model_pars['nftubes'], unit=u.Mm),
+            u.Quantity([
+                       [1.5/model_pars['nftubes']]] * model_pars['nftubes'], 
+                       unit=u.T),                       
             )
         x1 = [-1.75, -0.75, 1.25,  1.00, -0.75]
         y1 = [-1.00,  0.50, 0.50, -1.50,  1.70]
-        xi[  : 3] = xi[  : 3] + x1[0] * u.Mm
-        xi[3 : 6] = xi[ 3: 6] + x1[1] * u.Mm
-        xi[6 : 9] = xi[ 6: 9] + x1[2] * u.Mm
-        xi[9 :12] = xi[ 9:12] + x1[3] * u.Mm
-        xi[12:15] = xi[12:15] + x1[4] * u.Mm
-        yi[  : 3] = yi[  : 3] + y1[0] * u.Mm
-        yi[3 : 6] = yi[ 3: 6] + y1[1] * u.Mm
-        yi[6 : 9] = yi[ 6: 9] + y1[2] * u.Mm
-        yi[9 :12] = yi[ 9:12] + y1[3] * u.Mm
-        yi[12:15] = yi[12:15] + y1[4] * u.Mm
+        xi[  : 3] += x1[0] * u.Mm
+        xi[3 : 6] += x1[1] * u.Mm
+        xi[6 : 9] += x1[2] * u.Mm
+        xi[9 :12] += x1[3] * u.Mm
+        xi[12:15] += x1[4] * u.Mm
+        yi[  : 3] += y1[0] * u.Mm
+        yi[3 : 6] += y1[1] * u.Mm
+        yi[6 : 9] += y1[2] * u.Mm
+        yi[9 :12] += y1[3] * u.Mm
+        yi[12:15] += y1[4] * u.Mm
+        for xj in xi:
+            xj += np.random.uniform(-0.5,0.5) * u.Mm
+        for xj in yi:
+            xj += np.random.uniform(-0.5,0.5) * u.Mm
     elif option_pars['l_multi_lanes']:
         xi, yi, Si = (
-            u.Quantity(np.random.uniform(-0.3, 0.3, model_pars['nftubes']),
+            u.Quantity(np.random.uniform(-0.5, 0.5, model_pars['nftubes']),
             unit=u.Mm),
-            u.Quantity(np.random.uniform(-0.3, 0.3, model_pars['nftubes']),
+            u.Quantity(np.random.uniform(-0.5, 0.5, model_pars['nftubes']),
             unit=u.Mm),
             u.Quantity(np.ones(model_pars['nftubes'])*0.5,
             unit=u.T)
