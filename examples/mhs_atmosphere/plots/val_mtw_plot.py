@@ -16,7 +16,7 @@ scales, physical_constants = \
 #define the models required
 #papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
 #papers = ['mfe_setup']
-papers = ['paper1']
+papers = ['paper2c']
 oneD_arrays = {}
 oned_dataset = []
 #loop over all four models
@@ -52,6 +52,8 @@ for paper in papers:
                     lines, contours = False, False
                 elif '1D' in file_:
                     lines, contours = False, False
+                elif 'tension' or 'balancing' in file_:
+                    lines, contours = True, False
                 else:
                     lines, contours = True, True
                 if '2c' in file_ or '2d' in file_:
@@ -125,14 +127,14 @@ for paper in papers:
     subkeys = ['axis']
     atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, empirical=True,
-                      loc_legend=loc_legend, ylim = (ymin,ymax)
+                      loc_legend=loc_legend, ylim = (0.9*ymin,5*ymax)
                                            )
     plot_label = figsdir+paper+'_edge.eps'
     keys = ['thermal_pressure','mag_pressure','density','temperature']
     subkeys = ['edge']
     atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, empirical=True,
-                      loc_legend=loc_legend, ylim = (ymin,ymax)
+                      loc_legend=loc_legend, ylim = (0.9*ymin,5*ymax)
                                            )
     plot_label = figsdir+paper+'_speeds.eps'
     keys = ['alfven_speed','sound_speed']
@@ -167,7 +169,7 @@ for paper in papers:
                       ylog = True, xlog = False, loc_legend='upper right',
                       ylim = (1e-3,1.1*oneD_arrays['plasma_beta']['max'].max())
                                            )
-    else:                                
+    else:
         atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, loc_legend='upper right'
                                            )
@@ -180,8 +182,8 @@ for paper in papers:
         plt.plot(mfe_Z, mfe_Bz/1000.,
                  'b-', label=r"MFE '15 $B_z$(axis)"
                 )
-        plt.plot(oneD_arrays['mag_field_z_bg']['Z'].in_units('Mm'), 
-                 oneD_arrays['mag_field_z_bg']['axis'].in_units('T'), 'm-.', 
+        plt.plot(oneD_arrays['mag_field_z_bg']['Z'].in_units('Mm'),
+                 oneD_arrays['mag_field_z_bg']['axis'].in_units('T'), 'm-.',
                  label=r"GFE '15 $B_z$(axis)", lw=2.0
                 )
         plt.gca().set_yscale('log',subsy=[5,10])
@@ -195,8 +197,8 @@ for paper in papers:
         plt.plot(mfe_Z, mfe_Bz/1000.,
                  'b-', label=r"MFE '15 $B_z$(axis)"
                 )
-        plt.plot(oneD_arrays['mag_field_z_bg']['Z'].in_units('Mm'), 
-                 oneD_arrays['mag_field_z_bg']['axis'].in_units('T'), 'm-.', 
+        plt.plot(oneD_arrays['mag_field_z_bg']['Z'].in_units('Mm'),
+                 oneD_arrays['mag_field_z_bg']['axis'].in_units('T'), 'm-.',
                  label=r"GFE '15 $B_z$(axis)", lw=2.0
                 )
         plt.gca().set_yscale('log',subsy=[5,10])
@@ -204,6 +206,31 @@ for paper in papers:
         plt.ylabel(r'$B_z$ [T]')
         plt.legend(loc='lower left')
         ymin = oneD_arrays['mag_field_z_bg']['axis'].in_units('T').value.min()
-        plt.ylim(ymin,1.25e-1)
+        plt.ylim(0.05*ymin,1.25e-1)
         plt.subplots_adjust(bottom=0.125)
-	plt.savefig(plot_label)
+    plt.savefig(plot_label)
+
+    if 'paper1' in paper:
+        plt.figure(figsize=[6.47,4.0])
+        import astropy.units as u
+        from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
+        coords = atm.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
+
+        empirical_data = atm.read_VAL3c_MTW(mu=physical_constants['mu'])
+
+        table = atm.interpolate_atmosphere(empirical_data,
+                                           coords['Zext']
+                                          )
+        rho = u.Quantity(table['rho'], copy=True).to('kg km-3').value                                          
+        Z = u.Quantity(table['Z'], copy=True).to('Mm').value                                          
+        p = u.Quantity(table['p'], copy=True).to('Pa').value                                          
+        plt.plot(Z,rho,'m-.',lw=2.0,label=r"density")
+        plt.plot(Z,table['T'],'r:',lw=2.0,label=r"temperature")
+        plt.plot(Z,p,'g-',lw=2.0,label=r"pressure") 
+        plt.gca().set_yscale('log',subsy=[5,10])
+        plt.xlabel('Height [Mm]')
+        plt.ylabel(r'$p$ [Pa], $T$ [K], $\rho$ [kg km$^{-3}$]')
+        plt.legend(loc='center right')
+        plt.subplots_adjust(bottom=0.125)
+        plt.xlim(0,8.8)
+        plt.savefig(figsdir+'data_match.eps')
