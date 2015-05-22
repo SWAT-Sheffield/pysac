@@ -192,6 +192,7 @@ def make_1d_zplot(f, plot_label,
     #consider moving legend for different plots, add a loc to function call?
     plt.legend(loc=loc_legend)
     plt.savefig(plot_label)
+    plt.close()
 
 #-----------------------------------------------------------------------------
 def make_2d_plot(ds, var_field, figname, normal = ['y',64],
@@ -363,7 +364,7 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
             U = np.sqrt(v1**2 + v2**2)
             plt.streamplot(X.value, Y.value, v1.T, v2.T, color=U.T,
                            cmap=cm.winter, density=line_density, 
-                           linewidth = 3*U.T/U.max(), minlength = 0.99
+                           linewidth = 4*U.T/U.max(), minlength = 0.99
                           ) 
             #add second colorbar for field strength 
             cbar2 = plt.colorbar(format = l_f,
@@ -388,6 +389,7 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
                 fomt = '%.0f'
             plt.clabel(CS, fmt=fomt)
     plt.savefig(figname)
+    plt.close()
 
 ##============================================================================
 ## Fieldline Generation
