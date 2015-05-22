@@ -16,7 +16,7 @@ scales, physical_constants = \
 #define the models required
 #papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
 #papers = ['mfe_setup']
-papers = ['paper2c']
+papers = ['paper1']
 oneD_arrays = {}
 oned_dataset = []
 #loop over all four models
@@ -28,7 +28,8 @@ for paper in papers:
         os.makedirs(figsdir)
     #open all gdf files in the model directory
     files = glob.glob(datadir+'/*')
-    #files = glob.glob(datadir+'/'+papers[0]+'_3Daux.gdf')
+#    files = glob.glob(datadir+'/'+papers[0]+'_3Daux.gdf')
+#    files = glob.glob(datadir+'/'+papers[0]+'.gdf')
     files.sort()
 
     print(files)
@@ -47,15 +48,16 @@ for paper in papers:
                 oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
                 # select the central slice to plot normal to the y-plane
                 plane, N_2 = 'y', ds.domain_dimensions[1]/2
-                lines, contours = True, True
-                if '_HS' in var_field:
+#                lines, contours = True, True
+                if '1D' in file_:
                     lines, contours = False, False
-                elif '1D' in file_:
-                    lines, contours = False, False
-                elif 'tension' or 'balancing' in file_:
-                    lines, contours = True, False
                 else:
-                    lines, contours = True, True
+                    if '_HS' in var_field:
+                        lines, contours = False, False
+                    elif 'tension' in var_field or 'balancing' in var_field:
+                        lines, contours = True, False
+                    else:
+                        lines, contours = True, True
                 if '2c' in file_ or '2d' in file_:
                     aspect = 2.5
                     line_density = 0.7
