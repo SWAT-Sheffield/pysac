@@ -183,7 +183,7 @@ def construct_magnetic_field(
     f02 = f0*f0
     G02 = G0*G0
     B0z3 = B0z2*B0z
-    B0z4 = B0z3*B0z
+#    B0z4 = B0z3*B0z
     B10dz2 = B10dz**2
     #Define derivatives of Bx
     dxBx = - S * (B10dz * B0z * G0) + 2 * S * (x-x0)**2 * B10dz * B0z3 * G0/f02
@@ -195,17 +195,15 @@ def construct_magnetic_field(
     dxBy =   2 * S * (x-x0) * (y-y0) * B10dz * B0z3 * G0/f02
     dzBy = - 2 * S * (y-y0) * (B0z*B20dz + (1. + 2.*fxyz/f02)*B10dz2)*G0
     #Magnetic Pressure and horizontal thermal pressure balance term
-    pbbal= 0.5/mu0 * S**2 * G02 * (
-           f02 * B0z * B20dz + 2 * fxyz * B10dz2 - B0z4) - (0.5*Bbz**2 +
-           S*G0*Bbz*B0z2)/mu0 + S * Bbz * G0 * (
-           f02 * B20dz / B0z + (2 * fxyz - f02) * B10dz2 / B0z2)/mu0
-    #density balancing B
+    pbbal= -0.5*Bz**2/mu0 + 0.5/mu0 * S**2 * G02 * (
+           f02 * B0z * B20dz + 2 * fxyz * B10dz2) + S*Bbz*G0/mu0 * (
+           f02 * B20dz / B0z + (2 * fxyz - f02) * B10dz2 / B0z2)
+#density balancing B
 #    import pdb; pdb.set_trace()
-    rho_1 = \
-            S**2 * G02 / mu0 /g0 * (
+    rho_1 = S**2*G02/(mu0*g0) * (
             (0.5*f02 + 2*fxyz) * B10dz*B20dz + 0.5*f02 * B0z*B30dz
              - 2. * B0z3*B10dz
-            ) + S*Bbz*G0/mu0/g0 * ( f02*B30dz/B0z + (2*f02 - 2*fxyz + 
+            ) + S*Bbz*G0/(mu0*g0) * (f02*B30dz/B0z + (2*f02 - 2*fxyz + 
               4*fxyz**2/f02) * B10dz2*B10dz/B0z3 + 
               3 * (2*fxyz - f02) * B20dz*B10dz/B0z2 
               - 2 * (fxyz/f02 + 1) * B10dz*B0z )
@@ -263,16 +261,15 @@ def construct_pairwise_field(x, y, z,
     BB10dz = B10dz*B0z
     BB10dz2 = BB10dz**2
     BB20dz = B20dz*B0z
+    B0z2 = B0z*B0z
 #    B30dz= -B1z/z1**3 - B2z/z2**3
     ri= np.sqrt((x-xi)**2 + (y-yi)**2)
     rj= np.sqrt((x-xj)**2 + (y-yj)**2)
     ri2 = ri**2
     rj2 = rj**2
-    ri4 = ri2**2
-    rj4 = rj2**2
     #self similarity functions
-    fxyzi= -ri2 * B0z**2/2.
-    fxyzj= -rj2 * B0z**2/2.
+    fxyzi= -ri2 * B0z2/2.
+    fxyzj= -rj2 * B0z2/2.
     f02 = f0*f0
     G0i = np.exp(fxyzi/f02)
     G0j = np.exp(fxyzj/f02)
@@ -285,38 +282,35 @@ def construct_pairwise_field(x, y, z,
     Byj = -Sj * (y-yj) * (B10dz * B0z * G0j)
     Bzj =  Sj * B0z**2 * G0j + Bbz
 
-    B0z2 = B0z*B0z
     B0z3 = B0z2*B0z
     B0z4 = B0z3*B0z
-
+    BdB2 = B10dz2/B0z2
+    B2dB = B20dz/B0z
 
         #Magnetic Pressure and horizontal thermal pressure balance term
-    pbbal= (0.5 * Si*Sj*G0ij * (f02*(B10dz2 + B0z*B20dz) - B0z4)
-           -0.5 * Bbz*B10dz2 * (Si*ri2*G0i + Sj*rj2*G0j)
-           +      Bbz*B20dz/B0z*f02 * (Si*G0i + Sj*G0j)      )/mu0
+    pbbal= - Bzi*Bzj/mu0  - Si*Sj*G0ij*f02*(B10dz2 + BB20dz)/mu0 \
+           + Bbz*Si*G0i * ((2*fxyzi - f02) * BdB2 + f02 * B2dB) /mu0 \
+           + Bbz*Sj*G0j * ((2*fxyzj - f02) * BdB2 + f02 * B2dB) /mu0
 
         #density balancing B
     rho_1 = \
-            2.*Si*Sj*G0ij*BB10dz*(
-            + (fxyzi + fxyzj) * (B10dz2/B0z2 + B20dz/B0z)
+            2.*Si*Sj*G0ij*BB10dz/(mu0*g0)*(
+            + (fxyzi + fxyzj) * (BdB2 + B2dB)
             - ((fxyzi + fxyzj)/f02 + 2.) * B0z2
-            + 0.5*f02 * (3.*B20dz/B0z + B30dz/B10dz)
+            + 0.5*f02 * (3.*B2dB + B30dz/B10dz)
             +((x-xi)*(x-xj) + (y-yi)*(y-yj)) * ((
             1. + (fxyzi + fxyzj)/f02) * B10dz2 + BB20dz - B0z4/f02)
-            ) + Bbz * Si*G0i * (B30dz/B0z*f02 - ri2*B20dz*B10dz
-              - 0.5*B10dz2*BB10dz*ri4/f02 + (ri2-f02/B0z2)*B20dz*B10dz
-            ) + Bbz * Sj*G0j * (B30dz/B0z*f02 - rj2*B20dz*B10dz
-              - 0.5*B10dz2*BB10dz*rj4/f02 + (rj2-f02/B0z2)*B20dz*B10dz
+            ) + Bbz*Si*G0i/(mu0*g0) * (B30dz/B0z*f02 - 2*(fxyzi/f02 + 1) *
+            BB10dz + (4*fxyzi**2/f02 - 2*fxyzi + 2*f02) * B10dz2*B10dz/B0z3
+            + (6*fxyzi - 3*f02) * B10dz*B20dz/B0z2
+            ) + Bbz*Sj*G0j/(mu0*g0) * (B30dz/B0z*f02 - 2*(fxyzj/f02 + 1) *
+            BB10dz + (4*fxyzj**2/f02 - 2*fxyzj + 2*f02) * B10dz2*B10dz/B0z3
+            + (6*fxyzj - 3*f02) * B10dz*B20dz/B0z2
             )
-    rho_1 /= (g0 * mu0)
-    Fx   = - 2*Si*Sj/mu0 * G0ij*BB10dz2*B0z2 * (
-               (x-xi) * fxyzi/f02
-             + (x-xj) * fxyzj/f02
-                                               )
-    Fy   = - 2*Si*Sj/mu0 * G0ij*BB10dz2*B0z2 * (
-               (y-yi) * fxyzi/f02
-             + (y-yj) * fxyzj/f02
-                                               )
+    Fx   = - 2*Si*Sj/mu0 * G0ij*BB10dz2/f02 * (
+               (x-xi) * fxyzi + (x-xj) * fxyzj )
+    Fy   = - 2*Si*Sj/mu0 * G0ij*BB10dz2/f02 * (
+               (y-yi) * fxyzi + (y-yj) * fxyzj )
     #Define derivatives of Bx
     dxiBx = - Si * (BB10dz * G0i) \
             + 2 * Si * (x-xi)**2       * B10dz * B0z3 * G0i/f02
