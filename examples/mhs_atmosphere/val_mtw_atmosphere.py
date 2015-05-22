@@ -29,7 +29,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
-from pysac.mhs_atmosphere.parameters.model_pars import paper2c as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -88,6 +88,7 @@ pressure_Z, rho_Z, Rgas_Z = atm.vertical_profile(
 # load flux tube footpoint parameters
 #==============================================================================
 # axial location and value of Bz at each footpoint
+model_pars['B_corona']/=model_pars['nftubes']
 xi, yi, Si = atm.get_flux_tubes(
                                 model_pars,
                                 coords,
