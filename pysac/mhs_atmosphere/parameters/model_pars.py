@@ -65,20 +65,20 @@ paper1 = {'photo_scale': 0.6*u.Mm,
           'B_corona': 9.2e-4*u.T,
           'pBplus': 1e-3*u.T}
 paper1['chratio'] = 1*u.one - paper1['coratio'] - paper1['phratio']
-paper1['Nxyz'] = [129,129,432] # 3D grid
+paper1['Nxyz'] = [128,128,432] # 3D grid
 paper1['xyz']  = [-1.27*u.Mm,1.27*u.Mm,-1.27*u.Mm,1.27*u.Mm,0.*u.Mm,8.62*u.Mm] #grid size
 
 paper2a = {'photo_scale': 0.6*u.Mm,
            'chrom_scale': 0.1*u.Mm,
-           'corona_scale': 9.5e2*u.Mm,         #scale height for the corona
-           'coratio': 0.012*u.one,
+           'corona_scale': 2.5e3*u.Mm,         #scale height for the corona
+           'coratio': 0.025*u.one,
            'model': 'paper2a',
            'phratio': 0.0*u.one,
            'pixel': 0.36562475*u.Mm,              #(HMI pixel)
            'radial_scale': 0.10979002*u.Mm,
            'nftubes': 4,
-           'B_corona': 9.4e-4*u.T,
-           'pBplus': 1.0e-3*u.T}
+           'B_corona': 9.2e-4*u.T,
+           'pBplus': 1e-3*u.T}
 paper2a['chratio'] = 1*u.one - paper2a['coratio'] - paper2a['phratio']
 paper2a['Nxyz'] = [160,80,432] # 3D grid
 paper2a['xyz']  = [-1.59*u.Mm,1.59*u.Mm,-0.79*u.Mm,0.79*u.Mm,0.*u.Mm,8.62*u.Mm] #grid size

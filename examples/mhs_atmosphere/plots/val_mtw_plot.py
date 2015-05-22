@@ -16,7 +16,7 @@ scales, physical_constants = \
 #define the models required
 #papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
 #papers = ['mfe_setup']
-papers = ['paper1']
+papers = ['paper2a']
 oneD_arrays = {}
 oned_dataset = []
 #loop over all four models
