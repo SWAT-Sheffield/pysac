@@ -8,7 +8,7 @@ import os
 import numpy as np
 import pysac.yt as sacyt
 import pysac.mhs_atmosphere as atm
-from pysac.mhs_atmosphere.parameters.model_pars import paper2c as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import paper2a as model_pars
 import astropy.units as u
 
 l_mpi=False
@@ -19,7 +19,7 @@ if not os.path.exists(figsdir):
     os.makedirs(figsdir)
 file_ = datadir+paper+'.gdf'
 ds = sacyt.SACGDFDataset(file_)
-figname = figsdir+paper+'_3dplot.png'
+figname = figsdir+paper+'_3dplot.jpg'
 fkeys = ['thermal_pressure','plasma_beta',
          'mag_field_x','mag_field_y','mag_field_z']
 
@@ -28,12 +28,12 @@ coords = atm.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
 xc, yc, S = atm.get_flux_tubes(model_pars, coords, option_pars)
 maxz = ds.domain_right_edge[2].in_units('Mm').value
 if 'paper1' in file_:
-    figxy = [500,550]
-    view = (-55.0, 90.0, 22.0, np.array([0,0,4.25]))   
+    figxy = [1000,2000]
+    view = (-55.0, 90.0, 21.0, np.array([0,0,4.25]))   
     nrad, nangle = 7, 4
     maxr = ds.domain_right_edge[1].in_units('Mm').value
 if 'paper2a' in file_:
-    figxy = [550,750]
+    figxy = [1100,2000]
     view = (-60.0, 90.0, 20.0, np.array([0,0,4.25]))
     nrad, nangle = 4, 4
     maxr = ds.domain_right_edge[1].in_units('Mm').value*2.5
@@ -71,7 +71,7 @@ if nix[0].size > 0:
     seeds.T[0][nix] =   maxr * 2
 nix = np.where(seeds.T[0] < - maxr * 2)
 if nix[0].size > 0:
-    seeds.T[1][nix] = - maxr * 2
+    seeds.T[0][nix] = - maxr * 2
 nix = np.where(seeds.T[1] >   maxr * 2)
 if nix[0].size > 0:
     seeds.T[1][nix] =   maxr * 2
