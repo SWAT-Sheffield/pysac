@@ -71,13 +71,13 @@ paper1['xyz']  = [-1.27*u.Mm,1.27*u.Mm,-1.27*u.Mm,1.27*u.Mm,0.*u.Mm,8.62*u.Mm] #
 paper2a = {'photo_scale': 0.6*u.Mm,
            'chrom_scale': 0.1*u.Mm,
            'corona_scale': 2.5e3*u.Mm,         #scale height for the corona
-           'coratio': 0.025*u.one,
+           'coratio': 0.03*u.one,
            'model': 'paper2a',
            'phratio': 0.0*u.one,
            'pixel': 0.36562475*u.Mm,              #(HMI pixel)
            'radial_scale': 0.10979002*u.Mm,
            'nftubes': 4,
-           'B_corona': 9.2e-4*u.T,
+           'B_corona': 8.4e-4*u.T,
            'pBplus': 1e-3*u.T}
 paper2a['chratio'] = 1*u.one - paper2a['coratio'] - paper2a['phratio']
 paper2a['Nxyz'] = [160,80,432] # 3D grid
