@@ -467,20 +467,24 @@ def make_3d_plot(ds, figname,
 #                       line_width=1, colormap='winter', seed_scale=2.,
 #                       #seedtype='plane',
 #                       seed_visible=False, opacity=0.9)
-    vfield = mlab.pipeline.vector_field(x, y, z, vec1, vec2, vec3, 
+    vecfield = mlab.pipeline.vector_field(x, y, z, vec1, vec2, vec3, 
                                         name=fields[-1][:-3])
-    vmag = mlab.pipeline.extract_vector_norm(vfield, name="Field line Normals")
+    vecmag = mlab.pipeline.extract_vector_norm(vecfield, name="Field line Normals")
     field_lines = SeedStreamline(seed_points = np.array(seeds))
-    vmag.add_child(field_lines)
+    vecmag.add_child(field_lines)
 #    vfield.seed.widget.enabled = False
-    field_lines.streamline_type = 'tube'
     field_lines.module_manager.scalar_lut_manager.lut_mode = 'winter'
     field_lines.module_manager.scalar_lut_manager.reverse_lut = False
     field_lines.module_manager.scalar_lut_manager.lut.scale = 'log10'
-    field_lines.stream_tracer.integration_direction = 'backward'
-    field_lines.stream_tracer.maximum_propagation = 150
-    field_lines.tube_filter.radius = 0.1
-    field_lines.tube_filter.number_of_sides = 15
+#    field_lines.stream_tracer.integration_direction = 'backward'
+#    field_lines.stream_tracer.maximum_propagation = 150
+#    field_lines.streamline_type = 'tube'
+##    field_lines.ribbon_filter.vary_width = True
+##    field_lines.ribbon_filter.width_factor = 0.01
+#    field_lines.tube_filter.radius_factor = 0.1
+#    field_lines.tube_filter.vary_radius = True
+#    field_lines.tube_filter.number_of_sides = 3
+##    field_lines.streamline_type = 'tube'
     
     # generate rear and lower background surfaces    
     cut = mlab.pipeline.scalar_cut_plane(volfill)
@@ -533,7 +537,7 @@ def make_3d_plot(ds, figname,
         unit_str0 = ''
     label0 = str.replace(fields[0]+'_'+unit_str0, '_','\n')
  #   label0 = str.replace(fields[0], '_','\n')
-    cbar0=mlab.colorbar(object=cut, title=label0, orientation='vertical', 
+    cbar0=mlab.scalarbar(object=cut, title=label0, orientation='vertical', 
               nb_labels=None, nb_colors=None, label_fmt=None)        
     cbar0.scalar_bar_representation.position  = [0.80, 0.15]
     cbar0.scalar_bar_representation.position2 = [0.10, 0.80]
