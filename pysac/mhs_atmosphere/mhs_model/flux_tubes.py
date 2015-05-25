@@ -10,6 +10,13 @@ Created on Thu Dec 11 11:37:39 2014
 """
 import numpy as np
 import astropy.units as u
+from sunpy.net import vso
+import sunpy.map
+import os
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib import cm
+from scipy.interpolate import RectBivariateSpline
 
 #============================================================================
 # locate flux tubes and footpoint strength
@@ -337,3 +344,69 @@ def construct_pairwise_field(x, y, z,
     print"pbbal.max() = ",pbbal.max()
     return pbbal, rho_1, Fx, Fy, B2x, B2y
 
+#-----------------------------------------------------------------------------
+#
+#def get_hmi_map(
+#                indx, 
+#                dataset = 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits', 
+#                l_newdata = False
+#               ):
+#    """ indx is 4 integers 
+#    dataset of the form 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits'
+#    """
+#    client = vso.VSOClient()
+#    results = client.query(vso.attrs.Time("2014/07/05 23:59:50",
+#                                          "2014/07/05 23:59:55"), 
+#                           vso.attrs.Instrument('HMI'),
+#                           vso.attrs.Physobs('LOS_magnetic_field'))
+#    #print results.show()                       
+#
+#    if l_newdata:
+#        client.get(results).wait(progress=True)
+#    homedir = os.environ['HOME']
+#    sunpydir = homedir+'/sunpy/data/'
+#    savedir = homedir+'/figs/hmi/'
+#
+#    hmi_map = sunpy.map.Map(sunpydir+dataset)
+#    #hmi_map = hmi_map.rotate()
+#    #hmi_map.peek()
+#    s = hmi_map.data[indx[0]:indx[1],indx[2]:indx[3]] #units of Gauss Bz
+#    nx = s.shape[0]
+#    ny = s.shape[1]
+#    nx2, ny2 = 2*nx, 2*ny # size of interpolant 
+#    #pixel size in arc seconds
+#    dx, dy = hmi_map.scale.items()[0][1],hmi_map.scale.items()[1][1] 
+#    x, y = np.mgrid[
+#             hmi_map.xrange[0]+indx[0]*dx:hmi_map.xrange[0]+indx[1]*dx:1j*nx2,
+#             hmi_map.xrange[0]+indx[2]*dy:hmi_map.xrange[0]+indx[3]*dy:1j*ny2
+#                     ]
+#    #arrays to interpolate s from/to
+#    fx = np.linspace(x.min(),x.max(),nx)
+#    fy = np.linspace(y.min(),y.max(),ny)
+#    xnew = np.linspace(x.min(),x.max(),nx2)
+#    ynew = np.linspace(y.min(),y.max(),ny2)
+#    f  = RectBivariateSpline(fx,fy,s)
+#    s_SI  = f(xnew,ynew)  * 1e-4 #interpolate s and convert units to Tesla
+#    s_SI /= 4. # rescale s as extra pixels will sum over FWHM
+#    x_SI  = x  * 7.25e5    #convert units to metres
+#    y_SI  = y  * 7.25e5
+#    dx_SI = dx * 7.25e5
+#    dy_SI = dy * 7.25e5 
+#    FWHM  = 0.5*(dx_SI+dy_SI)
+#    smax  = max(abs(s.min()),abs(s.max())) # set symmetric plot scale
+#    cmin  = -smax*1e-4
+#    cmax  =  smax*1e-4
+#    
+#    filename = 'hmi_map'
+#    import loop_plots as mhs
+#    mhs.plot_hmi(
+#             s*1e-4,x_SI.min(),x_SI.max(),y_SI.min(),y_SI.max(),
+#             cmin,cmax,filename,savedir,annotate = '(a)'
+#            )
+#    filename = 'hmi_2x2_map'
+#    mhs.plot_hmi(
+#             s_SI*4,x_SI.min(),x_SI.max(),y_SI.min(),y_SI.max(),
+#             cmin,cmax,filename,savedir,annotate = '(a)'
+#            )
+#
+#    return s_SI, x_SI, y_SI, nx2, ny2, dx_SI, dy_SI, cmin, cmax, FWHM
