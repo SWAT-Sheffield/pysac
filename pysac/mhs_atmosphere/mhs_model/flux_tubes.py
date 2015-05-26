@@ -10,8 +10,6 @@ Created on Thu Dec 11 11:37:39 2014
 """
 import numpy as np
 import astropy.units as u
-from sunpy.net import vso
-import sunpy.map
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -346,26 +344,32 @@ def construct_pairwise_field(x, y, z,
 
 #-----------------------------------------------------------------------------
 #
-#def get_hmi_map(
-#                indx, 
-#                dataset = 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits', 
-#                l_newdata = False
-#               ):
-#    """ indx is 4 integers 
+def get_hmi_map(
+                indx, 
+                dataset = 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits', 
+                sunpydir = os.path.expanduser('~/sunpy/data/'),
+                savedir = os.path.expanduser('~/figs/hmi/'),
+                l_newdata = False
+               ):
+    """ indx is 4 integers 
 #    dataset of the form 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits'
 #    """
-#    client = vso.VSOClient()
-#    results = client.query(vso.attrs.Time("2014/07/05 23:59:50",
-#                                          "2014/07/05 23:59:55"), 
-#                           vso.attrs.Instrument('HMI'),
-#                           vso.attrs.Physobs('LOS_magnetic_field'))
+    from sunpy.net import vso
+    import sunpy.map
+    client = vso.VSOClient()
+    results = client.query(vso.attrs.Time("2014/07/05 23:59:50",
+                                          "2014/07/05 23:59:55"), 
+                           vso.attrs.Instrument('HMI'),
+                           vso.attrs.Physobs('LOS_magnetic_field'))
 #    #print results.show()                       
 #
-#    if l_newdata:
-#        client.get(results).wait(progress=True)
-#    homedir = os.environ['HOME']
-#    sunpydir = homedir+'/sunpy/data/'
-#    savedir = homedir+'/figs/hmi/'
+    if l_newdata:
+        if not os.path.exits(sunpydir):
+            raise ValueError("in get_hmi_map set 'sunpy' dir for vso data\n"+ 
+        "for large files you may want link to local drive rather than network")
+        client.get(results).wait(progress=True)
+    if not os.path.exits(savedir):
+        os.makedirs(savedir)
 #
 #    hmi_map = sunpy.map.Map(sunpydir+dataset)
 #    #hmi_map = hmi_map.rotate()
