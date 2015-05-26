@@ -8,16 +8,16 @@ Created on Thu Dec 11 17:45:48 2014
 import numpy as np
 import astropy.units as u
 hmi_model = {'photo_scale': 0.6*u.Mm,       #scale height for photosphere
-             'chrom_scale': 0.31*u.Mm,      #scale height for chromosphere
-             'corona_scale': 100*u.Mm,      #scale height for the corona
-             'coratio': 0.06*u.one,  #footpoint portion scaling as corona 
+             'chrom_scale': 0.1*u.Mm,      #scale height for chromosphere
+             'corona_scale': 2.5e3*u.Mm,      #scale height for the corona
+             'coratio': 0.03*u.one,  #footpoint portion scaling as corona 
              'model': 'hmi_model',
              'phratio': 0.15*u.one,  #footpoint portion scaling as photosphere
              'pixel': 0.36562475*u.Mm,      #(HMI pixel)
-             'radial_scale': 0.044*u.Mm,
+             'radial_scale': 0.18281237*u.Mm,
              'nftubes': 1,
              'B_corona': 0.*u.T,
-             'pBplus': 4.250e-4*u.T}
+             'pBplus': 1e-3*u.T}
 hmi_model['chratio'] = 1*u.one - hmi_model['coratio'] - hmi_model['phratio']
 
 mfe_setup = {'photo_scale': 0.60*u.Mm,
@@ -99,15 +99,15 @@ paper2b['Nxyz'] = [50,50,140] # 3D grid
 paper2b['xyz']  = [-0.49*u.Mm,0.49*u.Mm,-0.49*u.Mm,0.49*u.Mm,0*u.Mm,2.78*u.Mm] #grid size
 
 paper2c = {'photo_scale': 0.6*u.Mm,
-           'chrom_scale': 0.32*u.Mm,
-           'corona_scale': 8.5e6*u.Mm,         #scale height for the corona
-           'coratio': 0.045*u.one,
+           'chrom_scale': 0.1*u.Mm,
+           'corona_scale': 5e3*u.Mm,         #scale height for the corona
+           'coratio': 0.03*u.one,
            'model': 'paper2c',
            'phratio': 0.0*u.one,
            'pixel': 0.36562475*u.Mm,              #(HMI pixel)
-           'radial_scale': 0.06*u.Mm,
+           'radial_scale': 0.10979002*u.Mm,
            'nftubes': 15,
-           'B_corona': 9.7e-4*u.T,
+           'B_corona': 5.95e-4*u.T,
            'pBplus': 1.0e-3*u.T}
 paper2c['chratio'] = 1*u.one - paper2c['coratio'] - paper2c['phratio']
 paper2c['Nxyz'] = [224,224,140] # 3D grid

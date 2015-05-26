@@ -43,17 +43,17 @@ if 'paper2b' in file_:
     nrad, nangle = 5, 4
     maxr = ds.domain_right_edge[1].in_units('Mm').value
 if 'paper2c' in file_:
-    figxy = [1050,550]
-    view = (-45., 90., 10., np.array([0,0,1.35]))
+    figxy = [2200,1400]
+    view = (-45., 90., 14., np.array([0,0,1.35]))
     nrad, nangle = 4, 4
-    maxr = ds.domain_right_edge[1].in_units('Mm').value*2.5
+    maxr = ds.domain_right_edge[1].in_units('Mm').value
 if 'paper2d' in file_:
     figxy = [500,750]
     view = (-45., 90., 20., np.array([0,0,3.75]))
     maxr = ds.domain_right_edge[1].in_units('Mm').value
     nrad, nangle = 4 , 4
 if 'mfe_setup' in file_:
-    figxy = [500,750]
+    figxy = [1500,2250]
     view = (-45., 90., 20., np.array([0,0,3.75]))
     maxr = ds.domain_right_edge[1].in_units('Mm').value
     nrad, nangle = 7 , 6
