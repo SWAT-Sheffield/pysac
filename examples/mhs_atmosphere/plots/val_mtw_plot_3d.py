@@ -8,7 +8,7 @@ import os
 import numpy as np
 import pysac.yt as sacyt
 import pysac.mhs_atmosphere as atm
-from pysac.mhs_atmosphere.parameters.model_pars import paper2a as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import paper2c as model_pars
 import astropy.units as u
 
 l_mpi=False
@@ -38,9 +38,9 @@ if 'paper2a' in file_:
     nrad, nangle = 4, 4
     maxr = ds.domain_right_edge[1].in_units('Mm').value*2.5
 if 'paper2b' in file_:
-    figxy = [500,550]
+    figxy = [1200,2000]
     view = (-45., 90., 7., np.array([0,0,1.35]))
-    nrad, nangle = 7, 4
+    nrad, nangle = 5, 4
     maxr = ds.domain_right_edge[1].in_units('Mm').value
 if 'paper2c' in file_:
     figxy = [1050,550]
@@ -66,17 +66,18 @@ for ix in range(0,xc.size):
                           r * np.sin(theta + r + 0.5 * ti + 
                           np.random.uniform()) + yc[ix].value, maxz])
 seeds = np.array(seeds)
-nix = np.where(seeds.T[0] >   maxr * 2)
+# ensure all seeds are located inside the computational domain
+nix = np.where(seeds.T[0] >   maxr * .99)
 if nix[0].size > 0:
-    seeds.T[0][nix] =   maxr * 2
-nix = np.where(seeds.T[0] < - maxr * 2)
+    seeds.T[0][nix] =   maxr * .99
+nix = np.where(seeds.T[0] < - maxr * .99)
 if nix[0].size > 0:
-    seeds.T[0][nix] = - maxr * 2
-nix = np.where(seeds.T[1] >   maxr * 2)
+    seeds.T[0][nix] = - maxr * .99
+nix = np.where(seeds.T[1] >   maxr * .99)
 if nix[0].size > 0:
-    seeds.T[1][nix] =   maxr * 2
-nix = np.where(seeds.T[1] < - maxr * 2)
+    seeds.T[1][nix] =   maxr * .99
+nix = np.where(seeds.T[1] < - maxr * .99)
 if nix[0].size > 0:
-    seeds.T[1][nix] = - maxr * 2
+    seeds.T[1][nix] = - maxr * .99
 atm.make_3d_plot(ds, figname, fields=fkeys, figxy=figxy, view=view, 
                  seeds=seeds)
