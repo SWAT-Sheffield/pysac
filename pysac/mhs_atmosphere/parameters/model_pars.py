@@ -84,19 +84,19 @@ paper2a['Nxyz'] = [160,80,432] # 3D grid
 paper2a['xyz']  = [-1.59*u.Mm,1.59*u.Mm,-0.79*u.Mm,0.79*u.Mm,0.*u.Mm,8.62*u.Mm] #grid size
 
 paper2b = {'photo_scale': 0.6*u.Mm,
-           'chrom_scale': 0.42*u.Mm,
-           'corona_scale': 175*u.Mm,         #scale height for the corona
-           'coratio': 0.0225*u.one,
+           'chrom_scale': 0.1*u.Mm,
+           'corona_scale': 2.5e3*u.Mm,         #scale height for the corona
+           'coratio': 0.03*u.one,
            'model': 'paper2b',
            'phratio': 0.0*u.one,
            'pixel': 0.36562475*u.Mm,              #(HMI pixel)
-           'radial_scale': 0.044*u.Mm,
+           'radial_scale': 0.10979002*u.Mm,
            'nftubes': 4,
-           'B_corona': 9.7e-4*u.T,
+           'B_corona': 8.2e-4*u.T,
            'pBplus': 1.0e-3*u.T}
 paper2b['chratio'] = 1*u.one - paper2b['coratio'] - paper2b['phratio']
-paper2b['Nxyz'] = [48,48,140] # 3D grid
-paper2b['xyz']  = [-0.47*u.Mm,0.47*u.Mm,-0.47*u.Mm,0.47*u.Mm,0*u.Mm,2.78*u.Mm] #grid size
+paper2b['Nxyz'] = [50,50,140] # 3D grid
+paper2b['xyz']  = [-0.49*u.Mm,0.49*u.Mm,-0.49*u.Mm,0.49*u.Mm,0*u.Mm,2.78*u.Mm] #grid size
 
 paper2c = {'photo_scale': 0.6*u.Mm,
            'chrom_scale': 0.32*u.Mm,
