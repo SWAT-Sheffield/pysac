@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Dec 11 13:55:17 2014
+Created on Wed 27th May 14:36:00 2015
 
 @author: sm1fg
 
 This is the main module to construct a magnetohydrostatic solar atmosphere,
-given a specified magnetic network of self-similar magnetic flux tubes and
+given a magnetic network of self-similar magnetic flux tubes based on an HMI
+data set of the line of sight magnetic field component and 
 save the output to gdf format.
 
 To select an existing configuration change the import as model_pars, set Nxyz,
@@ -29,7 +30,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
-from pysac.mhs_atmosphere.parameters.model_pars import paper2d as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import hmi_model as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -57,7 +58,10 @@ scales, physical_constants = \
     atm.get_parameters()
 
 #obtain code coordinates and model parameters in astropy units
-coords = atm.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
+coords = atm.get_hmi_map(model_pars, option_pars, indx = [1787,1798,1818,1822], 
+                dataset = 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits',
+                l_newdata = True
+               )
 
 #interpolate the hs 1D profiles from empirical data source[s]
 empirical_data = atm.read_VAL3c_MTW(mu=physical_constants['mu'])

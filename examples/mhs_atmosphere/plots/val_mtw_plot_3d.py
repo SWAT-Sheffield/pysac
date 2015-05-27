@@ -48,7 +48,7 @@ if 'paper2c' in file_:
     nrad, nangle = 2, 4
     maxr = ds.domain_right_edge[1].in_units('Mm').value 
 if 'paper2d' in file_:
-    figxy = [500,750]
+    figxy = [1500,2000]
     view = (-45., 90., 20., np.array([0,0,3.75]))
     maxr = ds.domain_right_edge[1].in_units('Mm').value
     nrad, nangle = 4 , 4
