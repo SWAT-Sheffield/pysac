@@ -107,19 +107,25 @@ def get_flux_tubes(
             xj += np.random.uniform(-0.5,0.5) * u.Mm
     elif option_pars['l_multi_lanes']:
         xi, yi, Si = (
-            u.Quantity(np.random.uniform(-0.5, 0.5, model_pars['nftubes']),
-            unit=u.Mm),
-            u.Quantity(np.random.uniform(-0.5, 0.5, model_pars['nftubes']),
-            unit=u.Mm),
-            u.Quantity(np.ones(model_pars['nftubes'])*0.5,
-            unit=u.T)
+            u.Quantity([
+                       [0.]] * model_pars['nftubes'], unit=u.Mm),
+            u.Quantity([
+                       [0.]] * model_pars['nftubes'], unit=u.Mm),
+            u.Quantity([
+                       [0.54/model_pars['nftubes']]] * model_pars['nftubes'], 
+                       unit=u.T),                       
             )
-        xi[  : 3] = xi[  : 3] - 1.875 * u.Mm
-        xi[3 : 6] = xi[ 3: 6] - 1.125 * u.Mm
-        xi[6 : 9] = xi[ 6: 9] - 0.375 * u.Mm
-        xi[9 :12] = xi[ 9:12] + 0.375 * u.Mm
-        xi[12:15] = xi[12:15] + 1.125 * u.Mm
-        xi[15:18] = xi[15:18] + 1.875 * u.Mm
+        x1 = [-1.875, -1.125, -0.375, 0.375,  1.125, 1.875]
+        xi[  : 3] += x1[0] * u.Mm
+        xi[3 : 6] += x1[1] * u.Mm
+        xi[6 : 9] += x1[2] * u.Mm
+        xi[9 :12] += x1[3] * u.Mm
+        xi[12:15] += x1[4] * u.Mm
+        xi[16:18] += x1[5] * u.Mm
+        for xj in xi:
+            xj += np.random.uniform(-0.5,0.5) * u.Mm
+        for xj in yi:
+            xj += np.random.uniform(-0.5,0.5) * u.Mm
     else:
         raise ValueError("in get_flux_tubes axial parameters need to be defined")
 
@@ -127,7 +133,7 @@ def get_flux_tubes(
 
 #-----------------------------------------------------------------------------
 #
-def get_hmi_map(
+def get_hmi_flux_tubes(
                 model_pars, option_pars,
                 indx, 
                 dataset = 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits', 
@@ -179,12 +185,12 @@ def get_hmi_map(
     #Cartesian map is applied here. Consideration may be required if larger
     #regions are of interest, where curvature or orientation near the lim
     #of the surface is significant. 
-    s_SI  = f(xnew,ynew) #interpolate s and convert units to Tesla
-    s_SI /= 4. # rescale s as extra pixels will sum over FWHM
-    x_SI  = x  * 7.25e5 * u.m    #convert units to metres
-    y_SI  = y  * 7.25e5 * u.m
-    dx_SI = dx * 7.25e5 * u.m
-    dy_SI = dy * 7.25e5 * u.m 
+    s_int  = f(xnew,ynew) #interpolate s and convert units to Tesla
+    s_int /= 4. # rescale s as extra pixels will sum over FWHM
+    x_int  = x  * 7.25e5 * u.m    #convert units to metres
+    y_int  = y  * 7.25e5 * u.m
+    dx_int = dx * 7.25e5 * u.m
+    dy_int = dy * 7.25e5 * u.m 
     FWHM  = 0.5*(dx_SI+dy_SI)
     smax  = max(abs(s.min()),abs(s.max())) # set symmetric plot scale
     cmin  = -smax*1e-4
