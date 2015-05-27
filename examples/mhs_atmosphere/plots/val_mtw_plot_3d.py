@@ -36,17 +36,17 @@ if 'paper2a' in file_:
     figxy = [1100,2000]
     view = (-60.0, 90.0, 20.0, np.array([0,0,4.25]))
     nrad, nangle = 4, 4
-    maxr = ds.domain_right_edge[1].in_units('Mm').value*2.5
+    maxr = ds.domain_right_edge[1].in_units('Mm').value
 if 'paper2b' in file_:
     figxy = [1200,2000]
     view = (-45., 90., 7., np.array([0,0,1.35]))
     nrad, nangle = 5, 4
     maxr = ds.domain_right_edge[1].in_units('Mm').value
 if 'paper2c' in file_:
-    figxy = [2200,1400]
-    view = (-45., 90., 14., np.array([0,0,1.35]))
-    nrad, nangle = 4, 4
-    maxr = ds.domain_right_edge[1].in_units('Mm').value
+    figxy = [2000,2000]
+    view = (-45., 90., 12.5, np.array([0,0,1.35]))
+    nrad, nangle = 2, 4
+    maxr = ds.domain_right_edge[1].in_units('Mm').value 
 if 'paper2d' in file_:
     figxy = [500,750]
     view = (-45., 90., 20., np.array([0,0,3.75]))
