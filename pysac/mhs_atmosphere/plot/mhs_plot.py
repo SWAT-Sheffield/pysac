@@ -476,7 +476,7 @@ def make_3d_plot(ds, figname,
     field_lines.module_manager.scalar_lut_manager.lut_mode = 'winter'
     field_lines.module_manager.scalar_lut_manager.reverse_lut = False
     field_lines.module_manager.scalar_lut_manager.lut.scale = 'log10'
-#    field_lines.stream_tracer.integration_direction = 'backward'
+    field_lines.stream_tracer.integration_direction = 'both'
 #    field_lines.stream_tracer.maximum_propagation = 150
 #    field_lines.streamline_type = 'tube'
 ##    field_lines.ribbon_filter.vary_width = True
