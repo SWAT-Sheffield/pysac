@@ -116,7 +116,7 @@ paper2c['xyz']  = [-2.23*u.Mm,2.23*u.Mm,-2.23*u.Mm,2.23*u.Mm,0*u.Mm,2.78*u.Mm] #
 
 paper2d = {'photo_scale': 0.6*u.Mm,
            'chrom_scale': 0.1*u.Mm,
-           'corona_scale': 2.5*u.Mm,         #scale height for the corona
+           'corona_scale': 5e3*u.Mm,         #scale height for the corona
            'coratio': 0.03*u.one,
            'model': 'paper2d',
            'phratio': 0.0*u.one,
