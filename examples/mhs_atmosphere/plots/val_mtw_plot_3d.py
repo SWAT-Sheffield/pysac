@@ -8,7 +8,7 @@ import os
 import numpy as np
 import pysac.yt as sacyt
 import pysac.mhs_atmosphere as atm
-from pysac.mhs_atmosphere.parameters.model_pars import paper2c as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import paper2d as model_pars
 import astropy.units as u
 
 l_mpi=False
@@ -52,7 +52,7 @@ if 'paper2c' in file_:
     maxz = [0.15,ds.domain_right_edge[2].in_units('Mm').value*0.5]
 if 'paper2d' in file_:
     figxy = [2000,2000]
-    view = (-45., 90., 12., np.array([0,0,1.75]))
+    view = (-45., 90., 9.5, np.array([0,0,1.35]))
     maxr = ds.domain_right_edge[0].in_units('Mm').value# * 3.
     maxz = [0.15,ds.domain_right_edge[2].in_units('Mm').value*0.5]
     nrad, nangle = 2 , 3
