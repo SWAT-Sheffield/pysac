@@ -112,10 +112,10 @@ def get_flux_tubes(
             u.Quantity([
                        [0.]] * model_pars['nftubes'], unit=u.Mm),
             u.Quantity([
-                       [0.54/model_pars['nftubes']]] * model_pars['nftubes'], 
+                       [0.475/model_pars['nftubes']]] * model_pars['nftubes'], 
                        unit=u.T),                       
             )
-        x1 = [-1.875, -1.125, -0.375, 0.375,  1.125, 1.875]
+        x1 = [-2., -1.2, -0.4, 0.4,  1.2, 2.]
         xi[  : 3] += x1[0] * u.Mm
         xi[3 : 6] += x1[1] * u.Mm
         xi[6 : 9] += x1[2] * u.Mm
@@ -125,7 +125,7 @@ def get_flux_tubes(
         for xj in xi:
             xj += np.random.uniform(-0.5,0.5) * u.Mm
         for xj in yi:
-            xj += np.random.uniform(-0.5,0.5) * u.Mm
+            xj += np.random.uniform(-0.25,0.25) * u.Mm
     else:
         raise ValueError("in get_flux_tubes axial parameters need to be defined")
 
