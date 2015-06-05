@@ -59,7 +59,6 @@ def read_VAL3c_MTW(VAL_file=None, MTW_file=None, mu=0.602):
     VAL3c['T'].unit = u.K
     VAL3c['n_i'].unit = u.one/u.cm**3
     VAL3c['n_e'].unit = u.one/u.cm**3
-
     # Calculate the mean molecular weight ratio
     VAL3c['mu'] = 4.0/(3*0.74+1+VAL3c['n_e']/VAL3c['n_i'])
 #    VAL3c['mu'] = 4.0/(3*0.74+1+VAL3c['n_e'].quantity/VAL3c['n_i'].quantity)
