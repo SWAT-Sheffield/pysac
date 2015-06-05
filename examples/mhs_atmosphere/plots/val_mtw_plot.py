@@ -12,11 +12,11 @@ import pysac.mhs_atmosphere as atm
 
 l_mpi=False
 scales, physical_constants = \
-    atm.get_parameters()
+    atm.units_const.get_parameters()
 #define the models required
 #papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
 #papers = ['mfe_setup']
-papers = ['paper2d']
+papers = ['paper1']
 oneD_arrays = {}
 oned_dataset = []
 #loop over all four models
@@ -45,7 +45,7 @@ for paper in papers:
             var = ds.index.grids[0][var_field]
             if max_var > 0.:
                 # save 1D slices from each variable for plotting
-                oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
+                oneD_arrays = atm.mhs_plot.make_1d_slices(ds, var_field, oneD_arrays)
                 # select the central slice to plot normal to the y-plane
                 plane, N_2 = 'y', ds.domain_dimensions[1]/2
 #                lines, contours = True, True
@@ -72,7 +72,7 @@ for paper in papers:
                     line_density = 1.1
                 # save 2D plot in model's figures directory
                 figname  = figsdir+paper+'_'+var_field+'.eps'
-                atm.make_2d_plot(ds, var_field, figname,
+                atm.mhs_plot.make_2d_plot(ds, var_field, figname,
                                  normal=[plane,N_2],
                                  aspect=aspect, lines=lines,
                                  contours=contours,
@@ -81,14 +81,14 @@ for paper in papers:
                                  )
         if ('gas','density') in ds.derived_field_list:
             var_field = 'density'
-            oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
+            oneD_arrays = atm.mhs_plot.make_1d_slices(ds, var_field, oneD_arrays)
 
         if ('gas','thermal_pressure') in ds.derived_field_list:
             var_field = 'thermal_pressure'
-            oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
+            oneD_arrays = atm.mhs_plot.make_1d_slices(ds, var_field, oneD_arrays)
             figname  = figsdir+paper+'_'+var_field+'.eps'
             lines, contours = True, True
-            atm.make_2d_plot(ds, var_field, figname,
+            atm.mhs_plot.make_2d_plot(ds, var_field, figname,
                              normal=[plane,N_2],
                              aspect=aspect, lines=lines,
                              contours=contours,
@@ -97,10 +97,10 @@ for paper in papers:
                              )
         if ('gas','mag_pressure') in ds.derived_field_list:
             var_field = 'mag_pressure'
-            oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
+            oneD_arrays = atm.mhs_plot.make_1d_slices(ds, var_field, oneD_arrays)
             figname  = figsdir+paper+'_'+var_field+'.eps'
             lines, contours = True, True
-            atm.make_2d_plot(ds, var_field, figname,
+            atm.mhs_plot.make_2d_plot(ds, var_field, figname,
                              normal=[plane,N_2],
                              aspect=aspect, lines=lines,
                              contours=contours,
@@ -127,14 +127,14 @@ for paper in papers:
         loc_legend='center right'
     keys = ['thermal_pressure','mag_pressure','density','temperature']
     subkeys = ['axis']
-    atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+    atm.mhs_plot.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, empirical=True,
                       loc_legend=loc_legend, ylim = (0.9*ymin,5*ymax)
                                            )
     plot_label = figsdir+paper+'_edge.eps'
     keys = ['thermal_pressure','mag_pressure','density','temperature']
     subkeys = ['edge']
-    atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+    atm.mhs_plot.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, empirical=True,
                       loc_legend=loc_legend, ylim = (0.9*ymin,5*ymax)
                                            )
@@ -142,12 +142,12 @@ for paper in papers:
     keys = ['alfven_speed','sound_speed']
     subkeys = ['mean','min','max']
     if 'mfe_setup' in paper:
-        atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+        atm.mhs_plot.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                           ylog = True, xlog = False, loc_legend='lower left',
                 ylim = (2e3,oneD_arrays['sound_speed']['max'].value.max())
                                            )
     else:
-        atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+        atm.mhs_plot.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, loc_legend='lower right'
                                            )
     plot_label = figsdir+paper+'_meanz.eps'
@@ -155,24 +155,24 @@ for paper in papers:
     subkeys = ['mean','min','max']
     if 'mfe_setup' in paper:
         ymax = oneD_arrays['density']['max'].in_units('kg / km**3').value.max()
-        atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+        atm.mhs_plot.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, loc_legend='upper right',
                 ylim = (1e-2,1.1*ymax)
                                            )
     else:
-        atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+        atm.mhs_plot.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, loc_legend='upper right'
                                            )
     plot_label = figsdir+paper+'_beta.eps'
     keys = ['plasma_beta','mag_pressure','thermal_pressure']
     subkeys = ['mean','min','max']
     if 'mfe_setup' in paper:
-        atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+        atm.mhs_plot.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, loc_legend='upper right',
                       ylim = (1e-3,1.1*oneD_arrays['plasma_beta']['max'].max())
                                            )
     else:
-        atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+        atm.mhs_plot.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = False, loc_legend='upper right'
                                            )
     plot_label = figsdir+paper+'_compare.eps'
@@ -215,12 +215,12 @@ for paper in papers:
     if 'paper1' in paper:
         plt.figure(figsize=[6.47,4.0])
         import astropy.units as u
-        from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
-        coords = atm.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
+        from atm.model_pars import paper1 as model_pars
+        coords = atm.model_pars.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
 
-        empirical_data = atm.read_VAL3c_MTW(mu=physical_constants['mu'])
+        empirical_data = atm.hs_atmosphere.read_VAL3c_MTW(mu=physical_constants['mu'])
 
-        table = atm.interpolate_atmosphere(empirical_data,
+        table = atm.hs_atmosphere.interpolate_atmosphere(empirical_data,
                                            coords['Zext']
                                           )
         rho = u.Quantity(table['rho'], copy=True).to('kg km-3').value                                          

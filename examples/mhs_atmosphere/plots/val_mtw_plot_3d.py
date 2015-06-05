@@ -8,7 +8,7 @@ import os
 import numpy as np
 import pysac.yt as sacyt
 import pysac.mhs_atmosphere as atm
-from pysac.mhs_atmosphere.parameters.model_pars import paper2d as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
 import astropy.units as u
 
 l_mpi=False
@@ -23,9 +23,9 @@ figname = figsdir+paper+'_3dplot.jpg'
 fkeys = ['thermal_pressure','plasma_beta',
          'mag_field_x','mag_field_y','mag_field_z']
 
-option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
-coords = atm.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
-xc, yc, S = atm.get_flux_tubes(model_pars, coords, option_pars)
+option_pars = atm.options.set_options(model_pars, l_mpi, l_gdf=True)
+coords = atm.model_pars.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
+xc, yc, S = atm.flux_tubes.get_flux_tubes(model_pars, coords, option_pars)
 if 'paper1' in file_:
     figxy = [1000,2000]
     view = (-55.0, 90.0, 21.0, np.array([0,0,4.25]))   
@@ -85,5 +85,5 @@ if nix[0].size > 0:
 nix = np.where(seeds.T[1] < - maxr * .99)
 if nix[0].size > 0:
     seeds.T[1][nix] = - maxr * .99
-atm.make_3d_plot(ds, figname, fields=fkeys, figxy=figxy, view=view, 
+atm.mhs_plot.make_3d_plot(ds, figname, fields=fkeys, figxy=figxy, view=view, 
                  seeds=seeds)
