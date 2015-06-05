@@ -1,6 +1,6 @@
 """
 A set of dervied fields for yt 2.x which combine pertubation and background components
-and define magnitudes, as well as calculate things like charaistic speeds.
+and define magnitudes, as well as calculate things like characteristic speeds.
 
 Note: These use yt 3.x like field naming conventions
 """
@@ -20,7 +20,7 @@ if yt.__version__.startswith('2'):
 
     #mu0 = 1.25663706e-6
     mu0 = np.pi * 4
-    gamma = 1.6666
+    gamma = 5./3.
 
     @yt.derived_field(take_log=False, units=r'g cm^{-3}')
     def density(field, data):

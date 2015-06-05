@@ -37,7 +37,7 @@ def convert_w_3D(w, w_):
 
     sac_gdf_output['density_pert'] = {
                     'field': w[w_['h']] * u.Unit('kg/m^3'),
-                    'field_name': 'pertubation density',
+                    'field_name': 'perturbation density',
                     'staggering': 0
                     }
     sac_gdf_output['density_bg'] = {
@@ -62,17 +62,17 @@ def convert_w_3D(w, w_):
                     }
     sac_gdf_output['mag_field_x_pert'] = {
                     'field':u.Quantity(w[w_['b2']], unit=u.T),
-                    'field_name':'pertubation magnetic field x component',
+                    'field_name':'perturbation magnetic field x component',
                     'staggering':0
                     }
     sac_gdf_output['mag_field_y_pert'] = {
                     'field': w[w_['b3']] * u.T,
-                    'field_name':'pertubation magnetic field y component',
+                    'field_name':'perturbation magnetic field y component',
                     'staggering':0
                     }
     sac_gdf_output['mag_field_z_pert'] = {
                     'field': w[w_['b1']] * u.T,
-                    'field_name': 'pertubation magnetic field z component',
+                    'field_name': 'perturbation magnetic field z component',
                     'staggering': 0
                     }
     sac_gdf_output['mag_field_x_bg'] = {
@@ -92,7 +92,7 @@ def convert_w_3D(w, w_):
                     }
     sac_gdf_output['internal_energy_pert'] = {
                     'field': w[w_['e']] * u.Pa,
-                    'field_name':'pertubation internal energy',
+                    'field_name':'perturbation internal energy',
                     'staggering':0
                     }
     sac_gdf_output['internal_energy_bg'] = {
@@ -128,7 +128,7 @@ def convert_w_2D(w, w_):
 
     sac_gdf_output['density_pert'] = {
                     'field': w[w_['h']] * u.Unit('kg/m^3'),
-                    'field_name': 'pertubation density',
+                    'field_name': 'perturbation density',
                     'staggering': 0
                     }
     sac_gdf_output['density_bg'] = {
@@ -148,12 +148,12 @@ def convert_w_2D(w, w_):
                     }
     sac_gdf_output['mag_field_x_pert'] = {
                     'field':u.Quantity(w[w_['b2']], unit=u.T),
-                    'field_name':'pertubation magnetic field x component',
+                    'field_name':'perturbation magnetic field x component',
                     'staggering':0
                     }
     sac_gdf_output['mag_field_z_pert'] = {
                     'field': w[w_['b1']] * u.T,
-                    'field_name': 'pertubation magnetic field z component',
+                    'field_name': 'perturbation magnetic field z component',
                     'staggering': 0
                     }
     sac_gdf_output['mag_field_x_bg'] = {
@@ -168,7 +168,7 @@ def convert_w_2D(w, w_):
                     }
     sac_gdf_output['internal_energy_pert'] = {
                     'field': w[w_['e']] * u.Pa,
-                    'field_name':'pertubation internal energy',
+                    'field_name':'perturbation internal energy',
                     'staggering':0
                     }
     sac_gdf_output['internal_energy_bg'] = {
