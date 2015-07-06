@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Dec 11 13:55:17 2014
+Created on Wed 27th May 14:36:00 2015
 
 @author: sm1fg
 
 This is the main module to construct a magnetohydrostatic solar atmosphere,
-given a specified magnetic network of self-similar magnetic flux tubes and
+given a magnetic network of self-similar magnetic flux tubes based on an HMI
+data set of the line of sight magnetic field component and 
 save the output to gdf format.
 
 To select an existing configuration change the import as model_pars, set Nxyz,
@@ -29,7 +30,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
-from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import hmi_model as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -51,19 +52,22 @@ except ImportError:
 #==============================================================================
 local_procs=1
 #standard set of logical switches
-option_pars = atm.options.set_options(model_pars, l_mpi, l_gdf=True)
+option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
 #standard conversion to dimensionless units and physical constants
 scales, physical_constants = \
-    atm.units_const.get_parameters()
+    atm.get_parameters()
 
 #obtain code coordinates and model parameters in astropy units
-coords = atm.model_pars.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
+coords = atm.get_hmi_map(model_pars, option_pars, indx = [1787,1798,1818,1822], 
+                dataset = 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits',
+                l_newdata = True
+               )
 
 #interpolate the hs 1D profiles from empirical data source[s]
-empirical_data = atm.hs_atmosphere.read_VAL3c_MTW(mu=physical_constants['mu'])
+empirical_data = atm.read_VAL3c_MTW(mu=physical_constants['mu'])
 
 table = \
-        atm.hs_atmosphere.interpolate_atmosphere(empirical_data,
+        atm.interpolate_atmosphere(empirical_data,
                                    coords['Zext']
                                   )
 
@@ -76,7 +80,7 @@ table = \
 magp_meanz = np.ones(len(coords['Z'])) * u.one
 magp_meanz *= model_pars['pBplus']**2/(2*physical_constants['mu0'])
 
-pressure_Z, rho_Z, Rgas_Z = atm.hs_atmosphere.vertical_profile(
+pressure_Z, rho_Z, Rgas_Z = atm.vertical_profile(
                                                  coords['Z'],
                                                  table,
                                                  magp_meanz,
@@ -89,7 +93,7 @@ pressure_Z, rho_Z, Rgas_Z = atm.hs_atmosphere.vertical_profile(
 #==============================================================================
 # axial location and value of Bz at each footpoint
 model_pars['B_corona']/=model_pars['nftubes']
-xi, yi, Si = atm.flux_tubes.get_flux_tubes(
+xi, yi, Si = atm.get_flux_tubes(
                                 model_pars,
                                 coords,
                                 option_pars
@@ -139,7 +143,7 @@ for i in range(0,model_pars['nftubes']):
             print'calculating ij-pair:',i,j
         if i == j:
             pressure_mi, rho_mi, Bxi, Byi ,Bzi, B2x, B2y =\
-                atm.flux_tubes.construct_magnetic_field(
+                atm.construct_magnetic_field(
                                              x, y, z,
                                              xi[i], yi[i], Si[i],
                                              model_pars, option_pars,
@@ -153,7 +157,7 @@ for i in range(0,model_pars['nftubes']):
             rho_m += rho_mi
         else:
             pressure_mi, rho_mi, Fxi, Fyi, B2x, B2y =\
-                atm.flux_tubes.construct_pairwise_field(
+                atm.construct_pairwise_field(
                                              x, y, z,
                                              xi[i], yi[i],
                                              xi[j], yi[j], Si[i], Si[j],
@@ -180,7 +184,7 @@ indz = np.where(coords['Z'] >= z.min()-0.1*coords['dz']) and \
        np.where(coords['Z'] <= z.max()+0.1*coords['dz'])
 pressure_z, rho_z, Rgas_z = pressure_Z[indz], rho_Z[indz], Rgas_Z[indz]
 # local proc 3D mhs arrays
-pressure, rho = atm.mhs_3D.mhs_3D_profile(z,
+pressure, rho = atm.mhs_3D_profile(z,
                                    pressure_z,
                                    rho_z,
                                    pressure_m,
@@ -190,7 +194,7 @@ magp = (Bx**2 + By**2 + Bz**2)/(2.*physical_constants['mu0'])
 if rank ==0:
     print'max B corona = ',magp[:,:,-1].max().decompose()
     print'min B corona = ',magp[:,:,-1].min().decompose()
-energy = atm.mhs_3D.get_internal_energy(pressure,
+energy = atm.get_internal_energy(pressure,
                                                   magp,
                                                   physical_constants)
 #============================================================================
@@ -207,7 +211,7 @@ aux3D = datadir + model_pars['model'] + '_3Daux' + option_pars['suffix']
 aux1D = datadir + model_pars['model'] + '_1Daux' + option_pars['suffix']
 
 # save the variables for the initialisation of a SAC simulation
-atm.mhs_snapshot.save_SACvariables(
+atm.save_SACvariables(
               filename,
               rho,
               Bx,
@@ -220,7 +224,7 @@ atm.mhs_snapshot.save_SACvariables(
               model_pars['Nxyz']
              )
 # save the balancing forces as the background source terms for SAC simulation
-atm.mhs_snapshot.save_SACsources(
+atm.save_SACsources(
               sourcefile,
               Fx,
               Fy,
@@ -246,7 +250,7 @@ alfven = np.sqrt(2.*magp/rho)
 #    alfven[model_pars['Nxyz'][0]/2,model_pars['Nxyz'][1]/2, 0].decompose(),\
 #    alfven[model_pars['Nxyz'][0]/2,model_pars['Nxyz'][1]/2,-1].decompose()
 cspeed = np.sqrt(physical_constants['gamma']*pressure/rho)
-atm.mhs_snapshot.save_auxilliary3D(
+atm.save_auxilliary3D(
               aux3D,
               pressure_m,
               rho_m,
@@ -261,7 +265,7 @@ atm.mhs_snapshot.save_auxilliary3D(
               coords,
               model_pars['Nxyz']
              )
-atm.mhs_snapshot.save_auxilliary1D(
+atm.save_auxilliary1D(
               aux1D,
               pressure_Z,
               rho_Z,

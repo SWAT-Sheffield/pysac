@@ -1,1 +1,2 @@
-from mhs_snapshot import *
+#from mhs_snapshot import *
+import mhs_snapshot

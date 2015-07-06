@@ -312,8 +312,8 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
     # for use in plots for other variables - magnetic field must data must be
     # included in gdf file of first run.
     if lines or contours:
-        warnings.warn("magnetic field data required for first run to obtain"+
-                      "field lines or Beta contours", Warning)
+        warnings.warn("magnetic field data required for first run to \n"
+                     +"obtain field lines or Beta contours", Warning)
         #set up files where magnetic and beta slices will be stored
         if len(model) == 0:
             raise ValueError("in plot.mhs_plot.make_2d_plot specify the model")
@@ -476,7 +476,7 @@ def make_3d_plot(ds, figname,
     field_lines.module_manager.scalar_lut_manager.lut_mode = 'winter'
     field_lines.module_manager.scalar_lut_manager.reverse_lut = False
     field_lines.module_manager.scalar_lut_manager.lut.scale = 'log10'
-#    field_lines.stream_tracer.integration_direction = 'backward'
+    field_lines.stream_tracer.integration_direction = 'both'
 #    field_lines.stream_tracer.maximum_propagation = 150
 #    field_lines.streamline_type = 'tube'
 ##    field_lines.ribbon_filter.vary_width = True
