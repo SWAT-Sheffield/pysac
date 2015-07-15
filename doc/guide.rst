@@ -39,13 +39,9 @@ Basic Usage
 -----------
 
 Once installed pySAC can be used by importing the component you wish to use in
-a python script or interpreter::
+a python script or interpreter to open a SAC file you can now do::
 
-    >>> import pysac.io
-
-to open a SAC file you can no do::
-
-    >>> myfile = pysac.io.SACdata("mysacfile.h5")
+    myfile = pysac.io.SACfile("mysacfile.out")
 
 myfile now contains various routines to read the data in the file, as we shall 
 see in more detail later.
@@ -130,99 +126,7 @@ for each time step stored a header of the following form preceeds the data:
 - x array
 - w array
 
-SAC HDF5 File Specification
-===========================
-A new file format to replace the unformatted FORTRAN binary files has been developed.
-The advantages of HDF5 are that it is a modern portable binary data format, that is well specified and has bany bindings for many different languages.
-The structure of a HDF5 file is very similar to a UNIX file system, where you have constructs like directories, each can contain sub-directories and also have metadata associated with them.
-
-Below is the file structure for a SAC HDF5 file, attributes (metadata) are indicated with a - and data arrays are indicated with a +.
-
-.. code-block:: none
-
-    /
-        -filehead
-	-filedesc
-    
-    /SACdata
-        -eqpar
-	-final t
-	-ndim
-	-neqpar
-	-nt
-	-nx
-    
-	+x
-    
-	    /SACdata/wseries
-		-nw
-		-varnames
-    
-		+w00001
-		-it
-		-t
-		...
-		+w0000n
-		-it
-		-t
-		...
-
-It should be noted that any code written for this file structure should not use the names of the w arrays for any reason, they should be read with the sequential operators of the HDF5 library because there is no specification reason why they have to be numbered, and could definatley exceed 99999.
-
-Input
------
-
-In this section we shall look at reading files using pySAC
-
-VAC FORTRAN Files
-=================
-
 These are the defualt binary file type that VAC/SAC uses.
 
 WARNING: These files are compiler and machine dependant, they are not portable
 and should not be used over the far superior HDF5 files.
-
-SAC HDF5 Files
-==============
-
-This file type has been added to SAC to make the output standard and portable,
-also to enable parallel I/O.
-
-Output
-------
-
-Output in pySAC.io is done by writing out the current state of the VACdata 
-object. To create a new file with data from elsewhere you would create a VACdata
-object with mode='w' and then assign data and the header::
-    
-    myfile = sacio.VACdata("myoutfile.h5")
-    myfile.header = header
-    myfile.w = w_arr
-    myfile.x = x_arr
-
-Each time step can then be written by a call to write_step::
-    
-    myfile.write_step()
-
-remember to close the file when you are done::
-    
-    myfile.close()
-
-for hdf5 files, close writes extra meta information to the file, so it is 
-very important that it is called.
-
-The output routines will automatically determine the file type.
-
-It is also possible to save out to a different file, or file_type by first 
-reading in a file::
-
-    myfile = sacio.VACdata("myinfile.h5")
-
-then calling init_file() and write_step() for each iteration in the file::
-
-    myfile.init_file("myoutfile.out")
-    for i in range(num_records):
-        myfile.read_timestep(i)
-        myfile.write_step()
-    myfile.close()
-

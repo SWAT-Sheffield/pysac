@@ -14,3 +14,4 @@ Contents
     io   
     plotting
     analysis
+    mhs_atmosphere

@@ -47,9 +47,19 @@ class SACGDFFieldInfo(GDFFieldInfo):
         self.add_field(('gas','mag_pressure'), function=mag_pressure, units='Pa',
                        force_override=True)
 
+        def mag_magnitude(field, data):
+            if data.ds.dimensionality == 2:
+                return np.sqrt(data['mag_field_x']**2 +
+                        data['mag_field_y']**2)
+            if data.ds.dimensionality == 3:
+                return np.sqrt(data['mag_field_x']**2 + data['mag_field_y']**2 +
+                        data['mag_field_z']**2)
+        self.add_field(('gas','mag_magnitude'), function=mag_magnitude, units='T',
+                       force_override=True)
+
         def thermal_pressure(field, data):
             #p = (\gamma -1) ( e - \rho v^2/2 - B^2/2)
-            g1 = data.ds.parameters.get('gamma',[1.66666])[0] -1
+            g1 = data.ds.parameters.get('gamma', 5./3.) -1
             if data.ds.dimensionality == 2:
                 kp = (data['density'] * (data['velocity_x']**2 +
                                          data['velocity_y']**2))/2.
@@ -72,12 +82,12 @@ class SACGDFFieldInfo(GDFFieldInfo):
                        units=r'm/s', force_override=True)
 
         def sound_speed(field, data):
-            gamma = data.ds.parameters.get('gamma',[1.66666])[0]
+            gamma = data.ds.parameters.get('gamma', 5./3.)
             return np.sqrt((gamma * data['thermal_pressure']) / data['density'])
         self.add_field(('gas','sound_speed'), function=sound_speed,
                        units=r'm/s', force_override=True)
 
         def plasma_beta(field, data):
-            return data['mag_pressure'] / data['thermal_pressure']
+            return data['thermal_pressure'] / data['mag_pressure']
         self.add_field(('gas','plasma_beta'), function=plasma_beta,
                        units=r'dimensionless', force_override=True)
