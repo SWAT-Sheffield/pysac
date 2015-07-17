@@ -36,7 +36,8 @@ def read_VAL3c_MTW(VAL_file=None, MTW_file=None, mu=0.602):
 
     MTW_file : string
         The data file for the McWhirter atmosphere, defaults to
-        `pysac.mhs_atmosphere.hs_model.MTWcorona_data`
+        `pysac.mhs_atmosphere.hs_model.MTWcorona_data`, if ``False`` is specified
+        only the VAL atmosphere is returned.
 
     mu : float
         The mean molecular weight ratio for the corona. defaults to 0.6.
@@ -49,7 +50,7 @@ def read_VAL3c_MTW(VAL_file=None, MTW_file=None, mu=0.602):
     from . import VALIIIc_data, MTWcorona_data
     if not VAL_file:
         VAL_file = VALIIIc_data
-    if not MTW_file:
+    if MTW_file is None:
         MTW_file = MTWcorona_data
 
     VAL3c = Table.read(VAL_file, format='ascii', comment='#')
@@ -63,16 +64,21 @@ def read_VAL3c_MTW(VAL_file=None, MTW_file=None, mu=0.602):
     VAL3c['mu'] = 4.0/(3*0.74+1+VAL3c['n_e']/VAL3c['n_i'])
 #    VAL3c['mu'] = 4.0/(3*0.74+1+VAL3c['n_e'].quantity/VAL3c['n_i'].quantity)
 
-    MTW = Table.read(MTW_file, format='ascii', comment='#')
-    MTW['Z'].unit = u.km
-    MTW['T'].unit = u.K
-    MTW['p'].unit = u.Unit('dyne cm-2')
-    MTW['rho'] = (MTW['p'] / k_B / MTW['T'] * m_p * mu).to('g cm-3')
+    if MTW_file:
+        MTW = Table.read(MTW_file, format='ascii', comment='#')
+        MTW['Z'].unit = u.km
+        MTW['T'].unit = u.K
+        MTW['p'].unit = u.Unit('dyne cm-2')
+        MTW['rho'] = (MTW['p'] / k_B / MTW['T'] * m_p * mu).to('g cm-3')
 
-    MTW['mu'] = mu
+        MTW['mu'] = mu
 
-    data = astropy.table.vstack([VAL3c, MTW], join_type='inner')
-#    data = astropy.table.vstack([VAL3c, MTW], join_type='inner')
+        data = astropy.table.vstack([VAL3c, MTW], join_type='inner')
+        #    data = astropy.table.vstack([VAL3c, MTW], join_type='inner')
+
+    else:
+        data = VAL3c
+
     data.sort('Z')
 
     return data
