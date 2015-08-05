@@ -111,7 +111,7 @@ def make_1d_zplot(f, plot_label,
     plt.figure(figsize = figxy)
     if empirical:
         import pysac.mhs_atmosphere as atm
-        table = atm.read_VAL3c_MTW()
+        table = atm.hs_atmosphere.read_VAL3c_MTW()
         table_keys = ['p','rho','T']
         table_sym = ['g*','m+','rx']
         table_units = ['Pa','kg/km3','K']
