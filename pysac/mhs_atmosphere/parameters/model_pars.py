@@ -68,6 +68,9 @@ paper1 = {'photo_scale': 0.6*u.Mm,
 paper1['chratio'] = 1*u.one - paper1['coratio'] - paper1['phratio']
 paper1['Nxyz'] = [128,128,432] # 3D grid
 paper1['xyz']  = [-1.27*u.Mm,1.27*u.Mm,-1.27*u.Mm,1.27*u.Mm,0.*u.Mm,8.62*u.Mm] #grid size
+# uncomment to produce comaparable data to mfe_setup
+#paper1['Nxyz'] = [127,128,128] # 3D grid
+#paper1['xyz']  = [-1*u.Mm,1*u.Mm,-1*u.Mm,1*u.Mm,3.5e-2*u.Mm,1.6*u.Mm] #grid size
 
 paper2a = {'photo_scale': 0.6*u.Mm,
            'chrom_scale': 0.1*u.Mm,
