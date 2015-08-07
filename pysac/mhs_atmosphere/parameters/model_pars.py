@@ -22,16 +22,16 @@ hmi_model = {'photo_scale': 0.6*u.Mm,       #scale height for photosphere
 hmi_model['chratio'] = 1*u.one - hmi_model['coratio'] - hmi_model['phratio']
 
 mfe_setup = {'photo_scale': 0.60*u.Mm,
-             'chrom_scale': 0.385*u.Mm,
-             'corona_scale': 2*u.Mm,  #scale height for the corona
-             'coratio': 0.02*u.one,
+             'chrom_scale': 0.4*u.Mm,
+             'corona_scale': 0.25*u.Mm,  #scale height for the corona
+             'coratio': 0.0*u.one,
              'model': 'mfe_setup',
              'phratio': 0.0*u.one,
              'pixel': 0.36562475*u.Mm,  #(HMI pixel)
-             'radial_scale': 0.044*u.Mm,
+             'radial_scale': 0.14*u.Mm,
              'nftubes': 1,
-             'B_corona': 4.35e-4*u.T,
-             'pBplus': 4.250e-4*u.T}
+             'B_corona': 4.85e-4*u.T,
+             'pBplus': 0.0e-4*u.T}
 mfe_setup['chratio'] = 1*u.one - mfe_setup['coratio'] - mfe_setup['phratio']
 #if 1D or 2D set unused dimensions to 0, and unrequired xyz limits to 1.
 mfe_setup['Nxyz'] = [128,128,128] # 3D grid
