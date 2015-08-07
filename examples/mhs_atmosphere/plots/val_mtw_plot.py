@@ -70,6 +70,9 @@ for paper in papers:
                 else:
                     aspect = 0.5
                     line_density = 1.1
+#  uncmomment below to plot figures camparble to mfe        
+#                    aspect = 1.75
+#                    line_density = 1.9
                 # save 2D plot in model's figures directory
                 figname  = figsdir+paper+'_'+var_field+'.eps'
                 atm.mhs_plot.make_2d_plot(ds, var_field, figname,
@@ -215,8 +218,8 @@ for paper in papers:
     if 'paper1' in paper:
         plt.figure(figsize=[6.47,4.0])
         import astropy.units as u
-        from atm.model_pars import paper1 as model_pars
-        coords = atm.model_pars.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
+        from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
+        coords = atm.parameters.model_pars.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
 
         empirical_data = atm.hs_atmosphere.read_VAL3c_MTW(mu=physical_constants['mu'])
 

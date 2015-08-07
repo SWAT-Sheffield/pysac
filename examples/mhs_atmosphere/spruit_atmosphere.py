@@ -50,6 +50,10 @@ except ImportError:
 #set up model parameters
 #==============================================================================
 local_procs=1
+#optional coordinate - resolution 
+model_pars['Nxyz'] = [64,64,128] # 3D grid
+model_pars['xyz']  = [-0.63*u.Mm,0.63*u.Mm,-0.63*u.Mm,0.63*u.Mm,0.0*u.Mm,12.7*u.Mm] #grid size
+
 #standard set of logical switches
 option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
 #standard conversion to dimensionless units and physical constants
