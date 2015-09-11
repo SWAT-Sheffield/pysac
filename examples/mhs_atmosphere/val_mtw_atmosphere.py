@@ -29,7 +29,7 @@ import os
 import numpy as np
 import pysac.mhs_atmosphere as atm
 import astropy.units as u
-from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import mfe_setup as model_pars
 #==============================================================================
 #check whether mpi is required and the number of procs = size
 #==============================================================================
@@ -66,6 +66,8 @@ table = \
         atm.hs_atmosphere.interpolate_atmosphere(empirical_data,
                                    coords['Zext']
                                   )
+if model_pars['model'] == 'mfe_setup':
+    table['rho'] = table['rho'] + table['rho'].min()*3.6
 
 #==============================================================================
 #calculate 1d hydrostatic balance from empirical density profile
@@ -205,7 +207,6 @@ if not os.path.exists(datadir):
 sourcefile = datadir + model_pars['model'] + '_sources' + option_pars['suffix']
 aux3D = datadir + model_pars['model'] + '_3Daux' + option_pars['suffix']
 aux1D = datadir + model_pars['model'] + '_1Daux' + option_pars['suffix']
-
 # save the variables for the initialisation of a SAC simulation
 atm.mhs_snapshot.save_SACvariables(
               filename,
@@ -271,3 +272,8 @@ atm.mhs_snapshot.save_auxilliary1D(
               coords,
               model_pars['Nxyz']
              )
+if rho.min()<0 or pressure.min()<0:
+    print"FAIL: negative rho.min() {} and/or pressure.min() {}.".format(
+    rho.min(),pressure.min())
+FWHM = 2*np.sqrt(np.log(2))*model_pars['radial_scale']
+print'FWHM(0) =',FWHM
