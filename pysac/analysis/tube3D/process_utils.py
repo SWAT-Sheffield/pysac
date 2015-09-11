@@ -65,7 +65,7 @@ def get_sacdata_mlab(f, cube_slice, flux=True):
         return bfield, vfield
 
 def yt_to_mlab_vector(ds, xkey, ykey, zkey, cube_slice=np.s_[:,:,:],
-                      SI_scale=1, field_name=""):
+                      field_name=""):
     """
     Convert three yt keys to a mlab vector field
 
@@ -80,9 +80,6 @@ def yt_to_mlab_vector(ds, xkey, ykey, zkey, cube_slice=np.s_[:,:,:],
     cube_slice : numpy slice
         The array slice to crop the yt fields with.
 
-    SI_scale : float
-        Conversion factor to SI units (multipled by the field).
-
     field_name : string
         The mlab name for the field.
 
@@ -92,9 +89,9 @@ def yt_to_mlab_vector(ds, xkey, ykey, zkey, cube_slice=np.s_[:,:,:],
     """
     cg = ds.index.grids[0]
 
-    return vector_field(cg[xkey][cube_slice] * SI_scale,
-                        cg[ykey][cube_slice] * SI_scale,
-                        cg[zkey][cube_slice] * SI_scale,
+    return vector_field(cg[xkey][cube_slice],
+                        cg[ykey][cube_slice],
+                        cg[zkey][cube_slice],
                         name=field_name,figure=None)
 
 
@@ -126,7 +123,7 @@ def yt_to_mlab_scalar(ds, key, cube_slice=np.s_[:,:,:], field_name=""):
 
 
 def update_yt_to_mlab_vector(field, ds, xkey, ykey, zkey,
-                             cube_slice=np.s_[:,:,:], SI_scale=1):
+                             cube_slice=np.s_[:,:,:]):
     """
     Update a mayavi field based on a yt dataset.
 
@@ -144,9 +141,6 @@ def update_yt_to_mlab_vector(field, ds, xkey, ykey, zkey,
     cube_slice : numpy slice
         The array slice to crop the yt fields with.
 
-    SI_scale : float
-        Conversion factor to SI units (multipled by the field).
-
     Returns
     -------
     field : mayavi vector field
@@ -154,9 +148,9 @@ def update_yt_to_mlab_vector(field, ds, xkey, ykey, zkey,
     cg = ds.index.grids[0]
 
     # Update Datasets
-    field.set(vector_data = np.rollaxis(np.array([cg[xkey][cube_slice] * SI_scale,
-                                                  cg[ykey][cube_slice] * SI_scale,
-                                                  cg[zkey][cube_slice] * SI_scale]),
+    field.set(vector_data = np.rollaxis(np.array([cg[xkey][cube_slice],
+                                                  cg[ykey][cube_slice],
+                                                  cg[zkey][cube_slice]]),
                                                   0, 4))
     return field
 
@@ -185,11 +179,11 @@ def get_yt_mlab(ds, cube_slice, flux=True):
 
     # Create TVTK datasets
     bfield = yt_to_mlab_vector(ds, 'mag_field_x', 'mag_field_y', 'mag_field_z',
-                               cube_slice=cube_slice, SI_scale=1e4,
+                               cube_slice=cube_slice,
                                field_name="Magnetic Field")
 
     vfield = yt_to_mlab_vector(ds, 'velocity_x', 'velocity_y', 'velocity_z',
-                               cube_slice=cube_slice, SI_scale=1e-2,
+                               cube_slice=cube_slice,
                                field_name="Velocity Field")
 
     if flux:
