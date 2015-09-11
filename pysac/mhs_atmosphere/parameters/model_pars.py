@@ -28,14 +28,17 @@ mfe_setup = {'photo_scale': 0.60*u.Mm,
              'model': 'mfe_setup',
              'phratio': 0.0*u.one,
              'pixel': 0.36562475*u.Mm,  #(HMI pixel)
-             'radial_scale': 0.14*u.Mm,
+             'radial_scale': 0.03938*u.Mm,
+             #'radial_scale': 0.14*u.Mm,
              'nftubes': 1,
-             'B_corona': 4.85e-4*u.T,
-             'pBplus': 0.0e-4*u.T}
+             #'B_corona': 4.85e-4*u.T,
+             'B_corona': 5.5e-4*u.T,
+             'pBplus': 10.0e-4*u.T}
 mfe_setup['chratio'] = 1*u.one - mfe_setup['coratio'] - mfe_setup['phratio']
 #if 1D or 2D set unused dimensions to 0, and unrequired xyz limits to 1.
 mfe_setup['Nxyz'] = [128,128,128] # 3D grid
-mfe_setup['xyz']  = [-1*u.Mm,1*u.Mm,-1*u.Mm,1*u.Mm,3.5e-2*u.Mm,1.6*u.Mm] #grid size
+mfe_setup['Nxyz'] = [129,129,128] # 3D grid
+mfe_setup['xyz']  = [-1*u.Mm,1*u.Mm,-1*u.Mm,1*u.Mm,3.6641221e-2*u.Mm,1.5877863*u.Mm] #grid size
 
 spruit = {'photo_scale': 1.5*u.Mm,
           'chrom_scale': 0.5*u.Mm,
