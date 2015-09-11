@@ -8,7 +8,7 @@ class SACGDFFieldInfo(GDFFieldInfo):
     known_other_fields = (
         ("velocity_x", ("m/s", ["velocity_x"], None)),
         ("velocity_y", ("m/s", ["velocity_y"], None)),
-        ("velocity_z", ("m/s", ["velocity_z"], None)))
+        ("velocity_z", ("m/s", ["velocity_z"], None)),)
     known_particle_fields = ()
 
     def __init__(self, *args, **kwargs):
@@ -47,14 +47,14 @@ class SACGDFFieldInfo(GDFFieldInfo):
         self.add_field(('gas','mag_pressure'), function=mag_pressure, units='Pa',
                        force_override=True)
 
-        def mag_magnitude(field, data):
+        def magnetic_field_strength(field, data):
             if data.ds.dimensionality == 2:
                 return np.sqrt(data['mag_field_x']**2 +
                         data['mag_field_y']**2)
             if data.ds.dimensionality == 3:
                 return np.sqrt(data['mag_field_x']**2 + data['mag_field_y']**2 +
                         data['mag_field_z']**2)
-        self.add_field(('gas','mag_magnitude'), function=mag_magnitude, units='T',
+        self.add_field(('gas','magnetic_field_strength'), function=magnetic_field_strength, units='T',
                        force_override=True)
 
         def thermal_pressure(field, data):

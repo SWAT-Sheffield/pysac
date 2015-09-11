@@ -97,6 +97,34 @@ def yt_to_mlab_vector(ds, xkey, ykey, zkey, cube_slice=np.s_[:,:,:],
                         cg[zkey][cube_slice] * SI_scale,
                         name=field_name,figure=None)
 
+
+def yt_to_mlab_scalar(ds, key, cube_slice=np.s_[:,:,:], field_name=""):
+    """
+    Convert obe yt keys to a mlab scalar field
+
+    Parameters
+    ----------
+    ds : yt dataset
+        The dataset to get the data from.
+
+    key : string
+        yt field names for the three vector components.
+
+    cube_slice : numpy slice
+        The array slice to crop the yt fields with.
+
+    field_name : string
+        The mlab name for the field.
+
+    Returns
+    -------
+    field : mayavi vector field
+    """
+    cg = ds.index.grids[0]
+
+    return scalar_field(cg[key][cube_slice], name=field_name, figure=None)
+
+
 def update_yt_to_mlab_vector(field, ds, xkey, ykey, zkey,
                              cube_slice=np.s_[:,:,:], SI_scale=1):
     """

@@ -8,12 +8,12 @@ Created on Thu Dec 11 11:37:39 2014
     non-magnetic atmosphere for mhs equilibrium.
 
 """
+
+import os
+import warnings
+
 import numpy as np
 import astropy.units as u
-import os
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib import cm
 from scipy.interpolate import RectBivariateSpline
 
 #============================================================================
@@ -95,8 +95,8 @@ def get_flux_tubes(
             u.Quantity([
                        [0.]] * model_pars['nftubes'], unit=u.Mm),
             u.Quantity([
-                       [0.5/model_pars['nftubes']]] * model_pars['nftubes'], 
-                       unit=u.T),                       
+                       [0.5/model_pars['nftubes']]] * model_pars['nftubes'],
+                       unit=u.T),
             )
         x1 = [-1.75, -0.75, 1.25,  1.00, -0.75]
         y1 = [-1.00,  0.50, 0.50, -1.50,  1.70]
@@ -121,8 +121,8 @@ def get_flux_tubes(
             u.Quantity([
                        [0.]] * model_pars['nftubes'], unit=u.Mm),
             u.Quantity([
-                       [0.475/model_pars['nftubes']]] * model_pars['nftubes'], 
-                       unit=u.T),                       
+                       [0.475/model_pars['nftubes']]] * model_pars['nftubes'],
+                       unit=u.T),
             )
         x1 = [-2., -1.2, -0.4, 0.4,  1.2, 2.]
         xi[  : 3] += x1[0] * u.Mm
@@ -144,27 +144,27 @@ def get_flux_tubes(
 #
 def get_hmi_flux_tubes(
                 model_pars, option_pars,
-                indx, 
-                dataset = 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits', 
+                indx,
+                dataset = 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits',
                 sunpydir = os.path.expanduser('~/sunpy/data/'),
                 savedir = os.path.expanduser('~/figs/hmi/'),
                 l_newdata = False
                ):
-    """ indx is 4 integers: lower and upper indices each of x,y coordinates 
+    """ indx is 4 integers: lower and upper indices each of x,y coordinates
 #    dataset of the form 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits'
 #    """
     from sunpy.net import vso
     import sunpy.map
     client = vso.VSOClient()
     results = client.query(vso.attrs.Time("2014/07/05 23:59:50",
-                                          "2014/07/05 23:59:55"), 
+                                          "2014/07/05 23:59:55"),
                            vso.attrs.Instrument('HMI'),
                            vso.attrs.Physobs('LOS_magnetic_field'))
-    #print results.show()                       
+    #print results.show()
 
     if l_newdata:
         if not os.path.exits(sunpydir):
-            raise ValueError("in get_hmi_map set 'sunpy' dir for vso data\n"+ 
+            raise ValueError("in get_hmi_map set 'sunpy' dir for vso data\n"+
         "for large files you may want link to local drive rather than network")
         client.get(results).wait(progress=True)
     if not os.path.exits(savedir):
@@ -177,9 +177,9 @@ def get_hmi_flux_tubes(
     s *= u.G
     nx = s.shape[0]
     ny = s.shape[1]
-    nx2, ny2 = 2*nx, 2*ny # size of interpolant 
+    nx2, ny2 = 2*nx, 2*ny # size of interpolant
     #pixel size in arc seconds
-    dx, dy = hmi_map.scale.items()[0][1],hmi_map.scale.items()[1][1] 
+    dx, dy = hmi_map.scale.items()[0][1],hmi_map.scale.items()[1][1]
     x, y = np.mgrid[
              hmi_map.xrange[0]+indx[0]*dx:hmi_map.xrange[0]+indx[1]*dx:1j*nx2,
              hmi_map.xrange[0]+indx[2]*dy:hmi_map.xrange[0]+indx[3]*dy:1j*ny2
@@ -190,21 +190,21 @@ def get_hmi_flux_tubes(
     xnew = np.linspace(x.min(),x.max(),nx2)
     ynew = np.linspace(y.min(),y.max(),ny2)
     f  = RectBivariateSpline(fx,fy,s.to(u.T))
-    #The initial model assumes a relatively small region, so a linear 
+    #The initial model assumes a relatively small region, so a linear
     #Cartesian map is applied here. Consideration may be required if larger
     #regions are of interest, where curvature or orientation near the lim
-    #of the surface is significant. 
+    #of the surface is significant.
     s_int  = f(xnew,ynew) #interpolate s and convert units to Tesla
     s_int /= 4. # rescale s as extra pixels will sum over FWHM
     x_int  = x  * 7.25e5 * u.m    #convert units to metres
     y_int  = y  * 7.25e5 * u.m
     dx_int = dx * 7.25e5 * u.m
-    dy_int = dy * 7.25e5 * u.m 
+    dy_int = dy * 7.25e5 * u.m
     FWHM  = 0.5*(dx_SI+dy_SI)
     smax  = max(abs(s.min()),abs(s.max())) # set symmetric plot scale
     cmin  = -smax*1e-4
     cmax  =  smax*1e-4
-#    
+#
 #    filename = 'hmi_map'
 #    import loop_plots as mhs
 #    mhs.plot_hmi(
@@ -302,14 +302,14 @@ def construct_magnetic_field(
     rho_1 = S**2*G02/(mu0*g0) * (
             (0.5*f02 + 2*fxyz) * B10dz*B20dz + 0.5*f02 * B0z*B30dz
              - 2. * B0z3*B10dz
-            ) + S*Bbz*G0/(mu0*g0) * (f02*B30dz/B0z + (2*f02 - 2*fxyz + 
-              4*fxyz**2/f02) * B10dz2*B10dz/B0z3 + 
-              3 * (2*fxyz - f02) * B20dz*B10dz/B0z2 
+            ) + S*Bbz*G0/(mu0*g0) * (f02*B30dz/B0z + (2*f02 - 2*fxyz +
+              4*fxyz**2/f02) * B10dz2*B10dz/B0z3 +
+              3 * (2*fxyz - f02) * B20dz*B10dz/B0z2
               - 2 * (fxyz/f02 + 1) * B10dz*B0z )
     B2x = (Bx * dxBx + By * dyBx + Bz * dzBx)/mu0
     B2y = (Bx * dxBy + By * dyBy + Bz * dzBy)/mu0
 
-    print("pbbal.max() = ",pbbal.max().decompose())
+    warnings.warn("pbbal.max() = {}".format(pbbal.max().decompose()), Warning)
     return pbbal, rho_1, Bx, By, Bz, B2x, B2y
 
 #============================================================================
