@@ -8,7 +8,7 @@ import os
 import numpy as np
 import pysac.yt as sacyt
 import pysac.mhs_atmosphere as atm
-from pysac.mhs_atmosphere.parameters.model_pars import paper1 as model_pars
+from pysac.mhs_atmosphere.parameters.model_pars import mfe_setup as model_pars
 import astropy.units as u
 
 l_mpi=False
@@ -61,7 +61,7 @@ if 'mfe_setup' in file_:
     view = (-45., 90., 6.5, np.array([0,0,0.95]))
     maxr = ds.domain_right_edge[1].in_units('Mm').value
     nrad, nangle = 5 , 5
-    maxz = 1.05#ds.domain_right_edge[2].in_units('Mm').value * 0.125
+    maxz = [1.05]#ds.domain_right_edge[2].in_units('Mm').value * 0.125
 seeds = [[xc[0][0].value,yc[0][0].value,maxz[0]]]
 for ix in range(0,xc.size):
     for ti,r in enumerate(maxr*(1.01-np.exp(-(np.linspace(0, 1, nrad))**2))):
