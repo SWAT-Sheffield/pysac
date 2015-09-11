@@ -27,11 +27,20 @@ def get_flux_tubes(
     """ Obtain an array of x,y coordinates and corresponding vertical
     component value for the photospheric magnetic field  """
 
-    xi, yi, Si = [[0.]]*u.Mm,  [[0.]]*u.Mm,  [[0.1]]*u.T  # x,y,Bz(r=0,z=0)
+    #xi, yi, Si = [[0.]]*u.Mm,  [[0.]]*u.Mm,  [[0.1]]*u.T  # x,y,Bz(r=0,z=0)
+    xi, yi, Si = (
+            u.Quantity([
+                       [0.]] * model_pars['nftubes'], unit=u.Mm),
+            u.Quantity([
+                       [0.]] * model_pars['nftubes'], unit=u.Mm),
+            u.Quantity([
+                       [0.1/model_pars['nftubes']]] * model_pars['nftubes'], 
+                       unit=u.T),                       
+            )
 
     # parameters for matching Mumford,Fedun,Erdelyi 2014
     if option_pars['l_mfe']:
-        Si = [[0.1285]]*u.T # 128.5mT SI units
+        Si = [[0.1436]]*u.T # 128.5mT SI units
     # parameters for matching Gent,Fedun,Mumford,Erdelyi 2014
     elif option_pars['l_single']:
         Si = [[0.1]]*u.T # 100mT SI units
