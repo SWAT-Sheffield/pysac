@@ -12,3 +12,6 @@ Input / Output
 
 .. automodapi:: pysac.io.legacy
 
+.. automodapi:: pysac.io.legacy.util
+
+.. automodapi:: pysac.io.legacy.gdf_converter

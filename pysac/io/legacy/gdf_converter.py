@@ -10,7 +10,7 @@ import h5py
 from ..gdf_writer import write_field, create_file, SimulationParameters
 
 __all__ = ['convert_w_3D', 'convert_w_2D', 'write_gdf']
-           
+
 
 def convert_w_3D(w, w_):
     """
@@ -190,16 +190,16 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
 
     Parameters
     ----------
-    gdf_path : string or h5py instance
+    gdf_path : `str` or `h5py.File`
         Filename to save out.
 
-    header : dict
+    header : `dict`
         A 'VACdata' like header.
 
-    x : astropy.units.Quantity
+    x : `astropy.units.Quantity`
         The x array described in header, in x,y,z order.
 
-    fields : dict
+    fields : `dict`
         A dictionary with a key for each varname in header, and a value containing a dictionary with each of
         `field` : astropy.units.Quantity, The array for this field, in x,y,z (should be in SI not code units)
         `field_name` : string, A descriptive name for the field, spaces allowed
@@ -210,10 +210,10 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
 
     data_comment : (optional) string
         A comment to write to file.
-    
+
     collective : bool
         Use mpi collective driver
-    
+
     api : string
         h5py API to use. ('high' | 'low')
 
@@ -244,7 +244,7 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     simulation_params['num_ghost_zones'] = [0]
     simulation_params['field_ordering'] = 0
     simulation_params['boundary_conditions'] = np.zeros([6], dtype=int)+2
-    
+
     simulation_params['eqpar'] = header['eqpar']
 #    simulation_params['gravity0']
 #    simulation_params['gravity1']
@@ -253,9 +253,9 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
 #    simulation_params['eta']
 #    simulation_params['gamma']
 #    simulation_params['current_iteration']
-    
 
-    create_file(f, simulation_params, x[0].shape, data_author=data_author, 
+
+    create_file(f, simulation_params, x[0].shape, data_author=data_author,
                 data_comment=data_comment)
 
     #Write the x array
