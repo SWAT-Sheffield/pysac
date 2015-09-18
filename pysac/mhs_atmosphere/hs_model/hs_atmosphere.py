@@ -127,16 +127,16 @@ def read_dalsgaard(DAL_file=None, mu=0.602):
 #============================================================================
 # interpolate the empirical data onto a Z array
 #============================================================================
-def interpolate_atmosphere(data, Z):
+def interpolate_atmosphere(data, Z, s=0.25):
     """ This module generates a 1d array for the model plasma preesure, plasma
     density, temperature and mean molecular weight.
     """
 
     hdata = np.array(u.Quantity(data['Z']).to(u.m))
     # interpolate total pressure, temperature and density profiles
-    pdata_f = UnivariateSpline(hdata,np.array(np.log(data['p'])),k=1, s=0.25)
-    Tdata_f = UnivariateSpline(hdata,np.array(np.log(data['T'])),k=1, s=0.25)
-    rdata_f = UnivariateSpline(hdata,np.array(np.log(data['rho'])),k=1, s=0.25)
+    pdata_f = UnivariateSpline(hdata,np.array(np.log(data['p'])),k=1, s=s)
+    Tdata_f = UnivariateSpline(hdata,np.array(np.log(data['T'])),k=1, s=s)
+    rdata_f = UnivariateSpline(hdata,np.array(np.log(data['rho'])),k=1, s=s)
     #s=0.0 to ensure all points are strictly used for ionisation state
     muofT_f = UnivariateSpline(hdata,np.array(np.log(data['mu'])),k=1, s=0.0)
 
