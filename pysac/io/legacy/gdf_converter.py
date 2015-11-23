@@ -227,12 +227,12 @@ def write_gdf(gdf_path, header, x, fields, arr_slice=np.s_[:],
     else:
         f = h5py.File(gdf_path, "w")
 
-    domain_left_edge = [x[0][0,0,0].to(u.cm).value,
-                        x[1][0,0,0].to(u.cm).value,
-                        x[2][0,0,0].to(u.cm).value]
-    domain_right_edge = [x[0][-1,-1,-1].to(u.cm).value,
-                         x[1][-1,-1,-1].to(u.cm).value,
-                         x[2][-1,-1,-1].to(u.cm).value]
+    domain_left_edge = [x[0][0,0,0].to(u.m).value,
+                        x[1][0,0,0].to(u.m).value,
+                        x[2][0,0,0].to(u.m).value]
+    domain_right_edge = [x[0][-1,-1,-1].to(u.m).value,
+                         x[1][-1,-1,-1].to(u.m).value,
+                         x[2][-1,-1,-1].to(u.m).value]
 
 
     simulation_params = SimulationParameters()

@@ -30,9 +30,9 @@ class SimulationParameters(dict):
         self['cosmological_simulation'] = 0
         self['unique_identifier'] = 'sacgdf2014'
         super(SimulationParameters, self).__init__(*args, **kwargs)
-    
+
     def __str__(self):
-        
+
         head = """
 Simulation Parameters Object
 ----------------------------
@@ -40,14 +40,14 @@ Simulation Parameters Object
 Required Attributes:
 
 """
-        
+
         for key in self.REQUIRED_KEYS:
             head += key+': {{{0}}}\n'.format(key)
-        
+
         others = copy.copy(self)
         for key in self.REQUIRED_KEYS:
             others.pop(key)
-        
+
         if len(others):
             tail = """
 Other Attributes:
@@ -55,19 +55,19 @@ Other Attributes:
 """
             for key in others:
                 tail += key+': {{{0}}}\n'.format(key)
-        
+
         else:
             tail = ''
-        
+
         string = head.format(**self) + tail.format(**others)
-        
+
         return string
-    
+
     def __repr__(self):
         return str(self)
 
 
-def create_file(f, simulation_parameters, grid_dimensions, 
+def create_file(f, simulation_parameters, grid_dimensions,
                 data_author=None, data_comment=None):
     """
     Do all the structral creation of a gdf file.
@@ -81,7 +81,7 @@ def create_file(f, simulation_parameters, grid_dimensions,
         Filename to save out
 
     simulation_parameters: dict
-        Key value pairs for attributes to be written to the 
+        Key value pairs for attributes to be written to the
         simulation_parameters group.
 
     grid_dimensions
@@ -181,7 +181,7 @@ def write_field(gdf_file, data, field_title, field_name, field_shape=None,
 
     if not isinstance(data, u.Quantity):
         raise TypeError("data must be an astropy Quantity")
-    
+
     # Make sure we are in SI land
     field = data.si
 
