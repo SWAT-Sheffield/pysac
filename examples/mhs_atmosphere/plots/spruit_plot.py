@@ -12,7 +12,7 @@ import pysac.mhs_atmosphere as atm
 
 l_mpi=False
 scales, physical_constants = \
-    atm.get_parameters()
+    atm.units_const.get_parameters()
 #define the models required
 spruits = ['spruit_const','spruit_sqrt','spruit_linear','spruit_square']
 #spruits = ['spruit_const']
@@ -44,7 +44,7 @@ for spruit in spruits:
             var = ds.index.grids[0][var_field]
             if max_var > 0.:
                 # save 1D slices from each variable for plotting
-                oneD_arrays = atm.make_1d_slices(ds, var_field, oneD_arrays)
+                oneD_arrays = atm.mhs_plot.make_1d_slices(ds, var_field, oneD_arrays)
                 # select the central slice to plot normal to the y-plane
                 nx_2 = ds.domain_dimensions[1]/2
                 if 'mag' in var_field:
@@ -61,7 +61,7 @@ for spruit in spruits:
                     contours = True
                 # save 2D plot in model's figures directory
                 figname  = figsdir+spruit+'_'+var_field+'.eps'
-                atm.make_2d_plot(ds, var_field, figname,
+                atm.mhs_plot.make_2d_plot(ds, var_field, figname,
                                                     normal=['y',nx_2],
                                                     aspect=0.2, lines=lines,
                                                     contours=contours,
@@ -70,7 +70,7 @@ for spruit in spruits:
             var_field = 'thermal_pressure'
             figname  = figsdir+spruit+'_'+var_field+'.eps'
             lines, contours = True, True
-            atm.make_2d_plot(ds, var_field, figname,
+            atm.mhs_plot.make_2d_plot(ds, var_field, figname,
                                                 normal=['y',nx_2],
                                                 aspect=0.2, lines=lines,
                                                 contours=contours,
@@ -79,7 +79,7 @@ for spruit in spruits:
             var_field = 'mag_pressure'
             figname  = figsdir+spruit+'_'+var_field+'.eps'
             lines, contours = True, True
-            atm.make_2d_plot(ds, var_field, figname,
+            atm.mhs_plot.make_2d_plot(ds, var_field, figname,
                                                 normal=['y',nx_2],
                                                 aspect=0.2, lines=lines,
                                                 contours=contours,
@@ -88,6 +88,6 @@ for spruit in spruits:
     plot_label = figsdir+spruit+'_axis.eps'
     keys = ['alfven_speed','sound_speed','mag_field_z_bg']
     subkeys = ['axis']
-    atm.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
+    atm.mhs_plot.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
                       ylog = True, xlog = True
                                            )
