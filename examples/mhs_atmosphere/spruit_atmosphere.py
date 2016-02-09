@@ -55,10 +55,10 @@ model_pars['Nxyz'] = [64,64,128] # 3D grid
 model_pars['xyz']  = [-0.63*u.Mm,0.63*u.Mm,-0.63*u.Mm,0.63*u.Mm,0.0*u.Mm,12.7*u.Mm] #grid size
 
 #standard set of logical switches
-option_pars = atm.set_options(model_pars, l_mpi, l_gdf=True)
+option_pars = atm.options.set_options(model_pars, l_mpi, l_gdf=True)
 #standard conversion to dimensionless units and physical constants
 scales, physical_constants = \
-    atm.get_parameters()
+    atm.units_const.get_parameters()
 # select the option in the next line
 option_pars['l_linear'] = True
 # Alfven speed constant along the axis of the flux tube
@@ -97,12 +97,12 @@ else:
 
 
 #obtain code coordinates and model parameters in astropy units
-coords = atm.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
+coords = atm.model_pars.get_coords(model_pars['Nxyz'], u.Quantity(model_pars['xyz']))
 
 #==============================================================================
 #calculate 1d hydrostatic balance from empirical density profile
 #==============================================================================
-pressure_Z, rho_Z, Rgas_Z = atm.get_spruit_hs(coords['Z'],
+pressure_Z, rho_Z, Rgas_Z = atm.hs_atmosphere.get_spruit_hs(coords['Z'],
                                                   model_pars,
                                                   physical_constants,
                                                   option_pars
@@ -111,7 +111,7 @@ pressure_Z, rho_Z, Rgas_Z = atm.get_spruit_hs(coords['Z'],
 # load flux tube footpoint parameters
 #==============================================================================
 # axial location and value of Bz at each footpoint
-xi, yi, Si = atm.get_flux_tubes(
+xi, yi, Si = atm.flux_tubes.get_flux_tubes(
                                 model_pars,
                                 coords,
                                 option_pars
@@ -161,7 +161,7 @@ for i in range(0,model_pars['nftubes']):
             print'calculating ij-pair:',i,j
         if i == j:
             pressure_mi, rho_mi, Bxi, Byi ,Bzi, B2x, B2y =\
-                atm.construct_magnetic_field(
+                atm.flux_tubes.construct_magnetic_field(
                                              x, y, z,
                                              xi[i], yi[i], Si[i],
                                              model_pars, option_pars,
@@ -175,7 +175,7 @@ for i in range(0,model_pars['nftubes']):
             rho_m += rho_mi
         else:
             pressure_mi, rho_mi, Fxi, Fyi, B2x, B2y =\
-                atm.construct_pairwise_field(
+                atm.flux_tubes.construct_pairwise_field(
                                              x, y, z,
                                              xi[i], yi[i],
                                              xi[j], yi[j], Si[i], Si[j],
@@ -202,7 +202,7 @@ indz = np.where(coords['Z'] >= z.min()-0.1*coords['dz']) and \
        np.where(coords['Z'] <= z.max()+0.1*coords['dz'])
 pressure_z, rho_z, Rgas_z = pressure_Z[indz], rho_Z[indz], Rgas_Z[indz]
 # local proc 3D mhs arrays
-pressure, rho = atm.mhs_3D_profile(z,
+pressure, rho = atm.mhs_3D.mhs_3D_profile(z,
                                    pressure_z,
                                    rho_z,
                                    pressure_m,
@@ -211,7 +211,7 @@ pressure, rho = atm.mhs_3D_profile(z,
 magp = (Bx**2 + By**2 + Bz**2)/(2.*physical_constants['mu0'])
 if rank ==0:
     print'max B corona = ',magp[:,:,-1].max().decompose()
-energy = atm.get_internal_energy(pressure,
+energy = atm.mhs_3D.get_internal_energy(pressure,
                                                   magp,
                                                   physical_constants)
 #============================================================================
@@ -228,7 +228,7 @@ aux3D = datadir + model_pars['model'] + '_3Daux' + option_pars['suffix']
 aux1D = datadir + model_pars['model'] + '_1Daux' + option_pars['suffix']
 
 # save the variables for the initialisation of a SAC simulation
-atm.save_SACvariables(
+atm.mhs_snapshot.save_SACvariables(
               filename,
               rho,
               Bx,
@@ -241,7 +241,7 @@ atm.save_SACvariables(
               model_pars['Nxyz']
              )
 # save the balancing forces as the background source terms for SAC simulation
-atm.save_SACsources(
+atm.mhs_snapshot.save_SACsources(
               sourcefile,
               Fx,
               Fy,
@@ -267,7 +267,7 @@ if rank == 0:
     alfven[model_pars['Nxyz'][0]/2,model_pars['Nxyz'][1]/2, 0].decompose(),\
     alfven[model_pars['Nxyz'][0]/2,model_pars['Nxyz'][1]/2,-1].decompose()
 cspeed = np.sqrt(physical_constants['gamma']*pressure/rho)
-atm.save_auxilliary3D(
+atm.mhs_snapshot.save_auxilliary3D(
               aux3D,
               pressure_m,
               rho_m,
@@ -282,7 +282,7 @@ atm.save_auxilliary3D(
               coords,
               model_pars['Nxyz']
              )
-atm.save_auxilliary1D(
+atm.mhs_snapshot.save_auxilliary1D(
               aux1D,
               pressure_Z,
               rho_Z,
