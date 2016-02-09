@@ -33,7 +33,7 @@ mfe_setup = {'photo_scale': 0.60*u.Mm,
              'nftubes': 1,
              #'B_corona': 4.85e-4*u.T,
              'B_corona': 5.5e-4*u.T,
-             'pBplus': 10.0e-4*u.T}
+             'pBplus': 12.0e-4*u.T}
 mfe_setup['chratio'] = 1*u.one - mfe_setup['coratio'] - mfe_setup['phratio']
 #if 1D or 2D set unused dimensions to 0, and unrequired xyz limits to 1.
 mfe_setup['Nxyz'] = [128,128,128] # 3D grid
@@ -173,6 +173,7 @@ def get_hmi_map(
     """ indx is 4 integers: lower and upper indices each of x,y coordinates 
 #    dataset of the form 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits'
 #    """
+    from scipy.interpolate import RectBivariateSpline
     from sunpy.net import vso
     import sunpy.map
     client = vso.VSOClient()
@@ -183,11 +184,11 @@ def get_hmi_map(
     #print results.show()                       
 
     if l_newdata:
-        if not os.path.exits(sunpydir):
+        if not os.path.exists(sunpydir):
             raise ValueError("in get_hmi_map set 'sunpy' dir for vso data\n"+ 
         "for large files you may want link to local drive rather than network")
         client.get(results).wait(progress=True)
-    if not os.path.exits(figsdir):
+    if not os.path.exists(figsdir):
         os.makedirs(figsdir)
 
     hmi_map = sunpy.map.Map(sunpydir+dataset)
