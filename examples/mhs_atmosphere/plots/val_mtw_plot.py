@@ -15,8 +15,8 @@ scales, physical_constants = \
     atm.units_const.get_parameters()
 #define the models required
 #papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
-#papers = ['mfe_setup']
-papers = ['paper1']
+papers = ['mfe_setup']
+#papers = ['paper1']
 oneD_arrays = {}
 oned_dataset = []
 #loop over all four models
@@ -179,12 +179,12 @@ for paper in papers:
                       ylog = True, xlog = False, loc_legend='upper right'
                                            )
     plot_label = figsdir+paper+'_compare.eps'
-    mfe_Bz = np.load('mfe_Bz.npy')
+    mfe_Bz = np.load('mfe_Bz_2015.npy')
     mfe_Z  = np.load('mfe_zz.npy')
     import matplotlib.pyplot as plt
     plt.figure(figsize=[6.47,4.0])
     if 'mfe_setup' in paper:
-        plt.plot(mfe_Z, mfe_Bz/1000.,
+        plt.plot(mfe_Z, mfe_Bz,
                  'b-', label=r"MFE '15 $B_z$(axis)"
                 )
         plt.plot(oneD_arrays['mag_field_z_bg']['Z'].in_units('Mm'),
