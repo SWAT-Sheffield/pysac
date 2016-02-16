@@ -68,32 +68,32 @@ for l_string in ('l_linear','l_const','l_sqrt','l_square'):
     if option_pars['l_const']:
         option_pars['l_B0_quadz'] = True
         option_pars['l_B0_rootz'] = False
-        model_pars['chrom_scale'] = 5.0*u.Mm
-        model_pars['radial_scale'] = 0.10979002*u.Mm
+        model_pars['chrom_scale'] = 25.0*u.Mm
+        model_pars['radial_scale'] = 0.075*u.Mm
         model_pars['p0'] = 1.758e6*u.dyne/u.cm**2
         physical_constants['gravity'] = -274*u.m/u.s**2
     # Alfven speed proportional to sqrt(Z) along the axis of the flux tube
     elif option_pars['l_sqrt']:
         option_pars['l_B0_quadz'] = False
         option_pars['l_B0_rootz'] = True
-        model_pars['chrom_scale'] = 5.65e-4*u.Mm
-        model_pars['radial_scale'] = 0.076853014*u.Mm
+        model_pars['chrom_scale'] = 2.825e-3*u.Mm
+        model_pars['radial_scale'] = 0.0525*u.Mm
         model_pars['p0'] = 1.172e5*u.dyne/u.cm**2
         physical_constants['gravity'] = -2.055e6*u.m/u.s**2
     # Alfven speed proportional to Z along the axis of the flux tube
     elif option_pars['l_linear']:
         option_pars['l_B0_quadz'] = False
         option_pars['l_B0_rootz'] = True
-        model_pars['chrom_scale'] = 6.2e-3*u.Mm
-        model_pars['radial_scale'] = 0.10979002*u.Mm
+        model_pars['chrom_scale'] = 3.1e-2*u.Mm
+        model_pars['radial_scale'] = 0.075*u.Mm
         model_pars['p0'] = 3.516e7*u.dyne/u.cm**2
         physical_constants['gravity'] = -2.192*u.m/u.s**2
     # Alfven speed proportional to Z^2 along the axis of the flux tube
     elif option_pars['l_square']:
         option_pars['l_B0_quadz'] = False
         option_pars['l_B0_rootz'] = True
-        model_pars['chrom_scale'] = 1.65e-1*u.Mm
-        model_pars['radial_scale'] = 0.10979002*u.Mm
+        model_pars['chrom_scale'] = 8.25e-1*u.Mm
+        model_pars['radial_scale'] = 0.075*u.Mm
         model_pars['p0'] = 2344e9*u.dyne/u.cm**2
         physical_constants['gravity'] = -1.37e7*u.m/u.s**2
     # Alfven speed not defined along the axis of the flux tube

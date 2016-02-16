@@ -40,8 +40,8 @@ y_axis_labels = od((
                 ('tension',r'$B\cdot\nabla B/\mu_0$ [Pa m$^{-1}$], '),
                 ('balancing',r'$B\cdot\nabla B/\mu_0$ [Pa m$^{-1}$], '),
                 ('beta',r'$\beta$, '),
-                ('alfven',r'$v_\mathrm{A}$ [m s$^{-1}$], '),
-                ('sound',r'$c_\mathrm{s}$ [m s$^{-1}$], ')))
+                ('alfven',r'$v_\mathrm{A}$ [km s$^{-1}$], '),
+                ('sound',r'$c_\mathrm{s}$ [km s$^{-1}$], ')))
 
 #match the field name to the appropriate line color for consitency between 
 #plots. Ordered to control option on, for example, 'mag_pressure'.
@@ -78,6 +78,8 @@ def make_1d_slices(ds, var_label, oneD_arrays):
     var_ = ds.index.grids[0][var_label]
     if 'density' in var_label:
         var_ = ds.index.grids[0][var_label].in_units('kg / km**3')
+    if 'sound' in var_label or 'alfven' in var_label:
+        var_ = ds.index.grids[0][var_label].in_units('km / s')
 
     #append new 1D slice to existing
     oneD_arrays.update({var_label:{}})
@@ -158,10 +160,14 @@ def make_1d_zplot(f, plot_label,
             for tag in line_widths.keys():
                 if tag in subkey:
                     linewidth = line_widths[tag]
-            #rescale density so camparable in plot with pressure/temperature
+            #rescale Bz so camparable in plot with speeds
+            if key == 'mag_field_z':
+                rescale = 1e3
+            else:
+                rescale = 1
             if nolabel: 
                 plt.plot(f[key]['Z'],
-                         f[key][subkey],color=color,
+                         f[key][subkey]*rescale,color=color,
                          linestyle=linestyle, lw=linewidth)
             else:
                 plt.plot(f[key]['Z'],
@@ -172,7 +178,10 @@ def make_1d_zplot(f, plot_label,
         plt.axhline(1., color='k', ls=':')
     ylabel = ''
     for tag in tags:
-        ylabel += y_axis_labels[tag]
+        if tag == 'mag_field_z':
+            ylabel += r'$B_z$ [mT], '
+        else:
+            ylabel += y_axis_labels[tag]
     if ylog:
         plt.gca().set_yscale('log',subsy=[5,10])
     if xlog:
