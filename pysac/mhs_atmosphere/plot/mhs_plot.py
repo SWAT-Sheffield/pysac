@@ -95,9 +95,10 @@ def make_1d_slices(ds, var_label, oneD_arrays):
     #                                   ds.domain_right_edge[2].value,
     #                                   ds.domain_dimensions[2]),
     #                                   unit=ds.domain_left_edge[2].unit)
-    oneD_arrays[var_label]['Z'   ] =   np.linspace(ds.domain_left_edge[2].in_units('Mm'),
-                                       ds.domain_right_edge[2].in_units('Mm'),
-                                       ds.domain_dimensions[2])
+    oneD_arrays[var_label]['Z'] = np.linspace(
+                                ds.domain_left_edge[2].in_units('Mm'),
+                                ds.domain_right_edge[2].in_units('Mm'),
+                                ds.domain_dimensions[2])
     return oneD_arrays
 
 def make_1d_zplot(f, plot_label,
@@ -180,8 +181,7 @@ def make_1d_zplot(f, plot_label,
     plt.xlabel('Height [Mm]')
     if empirical:
         #limit x axis to simulation data rather than empirical range
-        xmax = f[keys[0]]['Z'].in_units('Mm').max()
-        xmax /= xmax.unit_quantity
+        xmax = f[keys[0]]['Z'].max()
         plt.xlim(0,xmax)
     #tidy label string by stripping final ', ' from the end  
     plt.ylabel(ylabel[:-2])
