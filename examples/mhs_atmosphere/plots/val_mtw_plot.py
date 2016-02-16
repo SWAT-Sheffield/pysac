@@ -14,8 +14,8 @@ l_mpi=False
 scales, physical_constants = \
     atm.units_const.get_parameters()
 #define the models required
-#papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
-papers = ['mfe_setup']
+papers = ['paper1','paper2a','paper2b','paper2c','paper2d','mfe_setup']
+#papers = ['mfe_setup']
 #papers = ['paper1']
 oneD_arrays = {}
 oned_dataset = []
@@ -179,16 +179,16 @@ for paper in papers:
                       ylog = True, xlog = False, loc_legend='upper right'
                                            )
     plot_label = figsdir+paper+'_compare.eps'
-    mfe_Bz = np.load('mfe_Bz_2015.npy')
-    mfe_Z  = np.load('mfe_zz.npy')
+    mfe_Bz = np.load('plots/mfe_Bz_2015.npy')
+    mfe_Z  = np.load('plots/mfe_zz.npy')
     import matplotlib.pyplot as plt
     plt.figure(figsize=[6.47,4.0])
     if 'mfe_setup' in paper:
         plt.plot(mfe_Z, mfe_Bz,
                  'b-', label=r"MFE '15 $B_z$(axis)"
                 )
-        plt.plot(oneD_arrays['mag_field_z_bg']['Z'].in_units('Mm'),
-                 oneD_arrays['mag_field_z_bg']['axis'].in_units('T'), 'm-.',
+        plt.plot(oneD_arrays['mag_field_z_bg']['Z'],
+                 oneD_arrays['mag_field_z_bg']['axis'], 'm-.',
                  label=r"GFE '15 $B_z$(axis)", lw=2.0
                 )
         plt.gca().set_yscale('log',subsy=[5,10])
@@ -199,18 +199,18 @@ for paper in papers:
         plt.subplots_adjust(bottom=0.125)
         plt.savefig(plot_label)
     else:
-        plt.plot(mfe_Z, mfe_Bz/1000.,
+        plt.plot(mfe_Z, mfe_Bz.,
                  'b-', label=r"MFE '15 $B_z$(axis)"
                 )
-        plt.plot(oneD_arrays['mag_field_z_bg']['Z'].in_units('Mm'),
-                 oneD_arrays['mag_field_z_bg']['axis'].in_units('T'), 'm-.',
+        plt.plot(oneD_arrays['mag_field_z_bg']['Z'],
+                 oneD_arrays['mag_field_z_bg']['axis'], 'm-.',
                  label=r"GFE '15 $B_z$(axis)", lw=2.0
                 )
         plt.gca().set_yscale('log',subsy=[5,10])
         plt.xlabel('Height [Mm]')
         plt.ylabel(r'$B_z$ [T]')
         plt.legend(loc='lower left')
-        ymin = oneD_arrays['mag_field_z_bg']['axis'].in_units('T').value.min()
+        ymin = oneD_arrays['mag_field_z_bg']['axis'].min().value
         plt.ylim(0.05*ymin,1.25e-1)
         plt.subplots_adjust(bottom=0.125)
     plt.savefig(plot_label)
