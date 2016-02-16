@@ -185,10 +185,10 @@ def get_hmi_flux_tubes(
              hmi_map.xrange[0]+indx[2]*dy:hmi_map.xrange[0]+indx[3]*dy:1j*ny2
                      ]
     #arrays to interpolate s from/to
-    fx = np.linspace(x.min(),x.max(),nx)
-    fy = np.linspace(y.min(),y.max(),ny)
-    xnew = np.linspace(x.min(),x.max(),nx2)
-    ynew = np.linspace(y.min(),y.max(),ny2)
+    fx =   u.Quantity(np.linspace(x.min().value,x.max().value,nx), unit=x.unit)
+    fy =   u.Quantity(np.linspace(y.min().value,y.max().value,ny), unit=y.unit)
+    xnew = u.Quantity(np.linspace(x.min().value,x.max().value,nx2), unit=x.unit)
+    ynew = u.Quantity(np.linspace(y.min().value,y.max().value,ny2), unit=y.unit)
     f  = RectBivariateSpline(fx,fy,s.to(u.T))
     #The initial model assumes a relatively small region, so a linear
     #Cartesian map is applied here. Consideration may be required if larger

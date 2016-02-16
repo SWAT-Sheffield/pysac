@@ -8,6 +8,7 @@ Created on Thu Dec 11 17:45:48 2014
 import numpy as np
 import os
 import astropy.units as u
+
 hmi_model = {'photo_scale': 0.6*u.Mm,       #scale height for photosphere
              'chrom_scale': 0.1*u.Mm,      #scale height for chromosphere
              'corona_scale': 2.5e3*u.Mm,      #scale height for the corona
@@ -33,7 +34,7 @@ mfe_setup = {'photo_scale': 0.60*u.Mm,
              'nftubes': 1,
              #'B_corona': 4.85e-4*u.T,
              'B_corona': 5.5e-4*u.T,
-             'pBplus': 10.0e-4*u.T}
+             'pBplus': 12.0e-4*u.T}
 mfe_setup['chratio'] = 1*u.one - mfe_setup['coratio'] - mfe_setup['phratio']
 #if 1D or 2D set unused dimensions to 0, and unrequired xyz limits to 1.
 mfe_setup['Nxyz'] = [128,128,128] # 3D grid
@@ -142,9 +143,8 @@ def get_coords(Nxyz, xyz):
     coordinates.
     """
     dz=(xyz[5]-xyz[4])/(Nxyz[2]-1)
-    Z    = np.linspace(xyz[4],
-                        xyz[5],Nxyz[2])
-    Zext = np.linspace(Z.min()-4.*dz, Z.max()+4.*dz, Nxyz[2]+8)
+    Z    = u.Quantity(np.linspace(xyz[4].value, xyz[5].value, Nxyz[2]), unit=xyz.unit)
+    Zext = u.Quantity(np.linspace(Z.min().value-4.*dz.value, Z.max().value+4.*dz.value, Nxyz[2]+8), unit=Z.unit)
     coords = {
               'dx':(xyz[1]-xyz[0])/(Nxyz[0]-1),
               'dy':(xyz[3]-xyz[2])/(Nxyz[1]-1),
@@ -173,6 +173,7 @@ def get_hmi_map(
     """ indx is 4 integers: lower and upper indices each of x,y coordinates 
 #    dataset of the form 'hmi_m_45s_2014_07_06_00_00_45_tai_magnetogram_fits'
 #    """
+    from scipy.interpolate import RectBivariateSpline
     from sunpy.net import vso
     import sunpy.map
     client = vso.VSOClient()
@@ -183,11 +184,11 @@ def get_hmi_map(
     #print results.show()                       
 
     if l_newdata:
-        if not os.path.exits(sunpydir):
+        if not os.path.exists(sunpydir):
             raise ValueError("in get_hmi_map set 'sunpy' dir for vso data\n"+ 
         "for large files you may want link to local drive rather than network")
         client.get(results).wait(progress=True)
-    if not os.path.exits(figsdir):
+    if not os.path.exists(figsdir):
         os.makedirs(figsdir)
 
     hmi_map = sunpy.map.Map(sunpydir+dataset)
@@ -205,10 +206,10 @@ def get_hmi_map(
              hmi_map.xrange[0]+indx[2]*dy:hmi_map.xrange[0]+indx[3]*dy:1j*ny2
                      ]
     #arrays to interpolate s from/to
-    fx = np.linspace(x.min(),x.max(),nx)
-    fy = np.linspace(y.min(),y.max(),ny)
-    xnew = np.linspace(x.min(),x.max(),nx2)
-    ynew = np.linspace(y.min(),y.max(),ny2)
+    fx =   u.Quantity(np.linspace(x.min().value,x.max().value,nx), unit=x.unit)
+    fy =   u.Quantity(np.linspace(y.min().value,y.max().value,ny), unit=y.unit)
+    xnew = u.Quantity(np.linspace(x.min().value,x.max().value,nx2), unit=x.unit)
+    ynew = u.Quantity(np.linspace(y.min().value,y.max().value,ny2), unit=y.unit)
     f  = RectBivariateSpline(fx,fy,s.to(u.T))
     #The initial model assumes a relatively small region, so a linear 
     #Cartesian map is applied here. Consideration may be required if larger
@@ -239,9 +240,8 @@ def get_hmi_map(
 #
 #    return s_SI, x_SI, y_SI, nx2, ny2, dx_SI, dy_SI, cmin, cmax, FWHM
     dz=(xyz[5]-xyz[4])/(Nxyz[2]-1)
-    Z    = np.linspace(xyz[4],
-                        xyz[5],Nxyz[2])
-    Zext = np.linspace(Z.min()-4.*dz, Z.max()+4.*dz, Nxyz[2]+8)
+    Z    = u.Quantity(np.linspace(xyz[4].value, xyz[5].value, Nxyz[2]), unit=xyz.unit)
+    Zext = u.Quantity(np.linspace(Z.min().value-4.*dz.value, Z.max().value+4.*dz.value, Nxyz[2]+8), unit=Z.unit)
     coords = {
               'dx':(xyz[1]-xyz[0])/(Nxyz[0]-1),
               'dy':(xyz[3]-xyz[2])/(Nxyz[1]-1),

@@ -42,11 +42,11 @@ def save_SACvariables(
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
         gather_vars = [
-                       rho.to(u.Unit('kg m-3')),
+                       rho.to(u.Unit('kg/m**3')),
                        Bx.to(u.Unit('T')),
                        By.to(u.Unit('T')),
                        Bz.to(u.Unit('T')),
-                       energy.to(u.Unit('kg m-2 s-2'))
+                       energy.to(u.Unit('kg/(m s**2)'))
                       ]
         concat_vars = []
         for var in gather_vars:
@@ -99,7 +99,7 @@ def save_SACvariables(
                               'density_bg',
                               'Background Density'
                               )
-        gdf.write_field(gdf_file, dummy*u.Unit('kg/m^3'),
+        gdf.write_field(gdf_file, dummy*u.Unit('kg/m**3'),
                               'density_pert',
                               'Perturbation Density'
                               )
@@ -108,7 +108,7 @@ def save_SACvariables(
                               'internal_energy_bg',
                               'Background Internal Energy'
                               )
-        gdf.write_field(gdf_file, dummy*u.Unit('kg m-1 s-2'),
+        gdf.write_field(gdf_file, dummy*u.Unit('kg/(m s**2)'),
                               'internal_energy_pert',
                               'Perturbation Internal Energy'
                               )
@@ -395,9 +395,9 @@ def save_auxilliary1D(
         pressureHS = u.Quantity(np.zeros(grid_dimensions),
                                 unit=pressure_Z.to("Pa").unit)
         rhoHS = u.Quantity(np.zeros(grid_dimensions),
-                           unit=rho_Z.to('kg m-3').unit)
+                           unit=rho_Z.to('kg/m**3').unit)
         RgasHS = u.Quantity(np.zeros(grid_dimensions),
-                            unit=Rgas_Z.to('m2 K-1 s-2').unit)
+                            unit=Rgas_Z.to('m**2/(K s**2)').unit)
         pressureHS[:] = pressure_Z
         rhoHS[:] = rho_Z
         RgasHS[:] = Rgas_Z

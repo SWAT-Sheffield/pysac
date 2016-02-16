@@ -10,7 +10,6 @@ Created on Thu Dec 11 11:37:39 2014
 
 """
 import numpy as np
-from scipy.interpolate import UnivariateSpline
 
 import astropy.table
 from astropy.table import Table
@@ -132,6 +131,7 @@ def interpolate_atmosphere(data, Z, s=0.25):
     density, temperature and mean molecular weight.
     """
 
+    from scipy.interpolate import UnivariateSpline
     hdata = np.array(u.Quantity(data['Z']).to(u.m))
     # interpolate total pressure, temperature and density profiles
     pdata_f = UnivariateSpline(hdata,np.array(np.log(data['p'])),k=1, s=s)
@@ -178,28 +178,28 @@ def get_spruit_hs(
         rho_Z = -p0 / g0 * 3. * model_pars['chrom_scale']**3/\
                             (model_pars['chrom_scale'] + Z)**4
         rtest = -p0 / g0 * 3. / model_pars['chrom_scale']
-        model_pars['model'] += '_const'
+        model_pars['model'] = 'spruit_const'
     elif option_pars['l_sqrt']:
         pressure_Z = p0 *     model_pars['chrom_scale']**0.5/\
                              (model_pars['chrom_scale'] + Z)**0.5
         rho_Z = -0.5/g0 * p0 * model_pars['chrom_scale']**0.5/\
                              (model_pars['chrom_scale'] + Z)**1.5
         rtest = -0.5/g0 * p0 / model_pars['chrom_scale']
-        model_pars['model'] += '_sqrt'
+        model_pars['model'] = 'spruit_sqrt'
     elif option_pars['l_linear']:
         pressure_Z = p0 *     model_pars['chrom_scale']**1.5/\
                              (model_pars['chrom_scale'] + Z)**1.5
         rho_Z = -1.5/g0 * p0 * model_pars['chrom_scale']**1.5/\
                              (model_pars['chrom_scale'] + Z)**2.5
         rtest = -1.5/g0 * p0 / model_pars['chrom_scale']
-        model_pars['model'] += '_linear'
+        model_pars['model'] = 'spruit_linear'
     elif option_pars['l_square']:
         pressure_Z = p0 *     model_pars['chrom_scale']**3.5/\
                              (model_pars['chrom_scale'] + Z)**3.5
         rho_Z = -3.5/g0 * p0 * model_pars['chrom_scale']**3.5/\
                              (model_pars['chrom_scale'] + Z)**4.5
         rtest = -3.5/g0 * p0 / model_pars['chrom_scale']
-        model_pars['model'] += '_square'
+        model_pars['model'] = 'spruit_square'
     else:
         raise ValueError("in hs_model.hs_atmosphere.get_spruit_hs set \
                   option_pars True for axial Alfven speed Z dependence")

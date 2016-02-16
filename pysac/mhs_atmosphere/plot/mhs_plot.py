@@ -22,8 +22,6 @@ from collections import OrderedDict as od
 import os
 import warnings
 import astropy.units as u
-from mayavi import mlab
-from pysac.plot.mayavi_seed_streamlines import SeedStreamline
 #match the field name to the appropriate axis/colorbar labels. Ordered to 
 #control option on, for example, 'mag_pressure'.
 #add to the dictionary if variable not specified
@@ -76,7 +74,10 @@ def make_1d_slices(ds, var_label, oneD_arrays):
     ds: gdf data set, var_label: gdf field name, oneD_arrays: collection of
     1D slices to which this field's 1D slices shall be appended
     """
+
     var_ = ds.index.grids[0][var_label]
+    if 'density' in var_label:
+        var_ = ds.index.grids[0][var_label].in_units('kg / km**3')
 
     #append new 1D slice to existing
     oneD_arrays.update({var_label:{}})
@@ -89,9 +90,15 @@ def make_1d_slices(ds, var_label, oneD_arrays):
     oneD_arrays[var_label]['min' ] = np.min(np.min(var_, axis=0), axis=0)
     oneD_arrays[var_label]['max' ] = np.max(np.max(var_, axis=0), axis=0)
     #integer size and range of vertical domain may vary so match for each array
-    oneD_arrays[var_label]['Z'   ] = np.linspace(ds.domain_left_edge[2],
-                                                 ds.domain_right_edge[2],
-                                                 ds.domain_dimensions[2])
+    #oneD_arrays[var_label]['Z'   ] = u.Quantity(
+    #                                   np.linspace(ds.domain_left_edge[2].value,
+    #                                   ds.domain_right_edge[2].value,
+    #                                   ds.domain_dimensions[2]),
+    #                                   unit=ds.domain_left_edge[2].unit)
+    oneD_arrays[var_label]['Z'] = np.linspace(
+                                ds.domain_left_edge[2].in_units('Mm'),
+                                ds.domain_right_edge[2].in_units('Mm'),
+                                ds.domain_dimensions[2])
     return oneD_arrays
 
 def make_1d_zplot(f, plot_label,
@@ -152,16 +159,13 @@ def make_1d_zplot(f, plot_label,
                 if tag in subkey:
                     linewidth = line_widths[tag]
             #rescale density so camparable in plot with pressure/temperature
-            rescale = np.string_(f[key][subkey].units)
-            if 'density' in key:
-                rescale = 'kg / km**3'
             if nolabel: 
-                plt.plot(f[key]['Z'].in_units('Mm'),
-                         f[key][subkey].in_units(rescale),color=color,
+                plt.plot(f[key]['Z'],
+                         f[key][subkey],color=color,
                          linestyle=linestyle, lw=linewidth)
             else:
-                plt.plot(f[key]['Z'].in_units('Mm'),
-                         f[key][subkey].in_units(rescale),color=color,
+                plt.plot(f[key]['Z'],
+                         f[key][subkey],color=color,
                          linestyle=linestyle, lw=linewidth, label=label)
     #collate labels for y-axis and apply log scale if True
     if 'plasma_beta' in keys:
@@ -177,8 +181,7 @@ def make_1d_zplot(f, plot_label,
     plt.xlabel('Height [Mm]')
     if empirical:
         #limit x axis to simulation data rather than empirical range
-        xmax = f[keys[0]]['Z'].in_units('Mm').max()
-        xmax /= xmax.unit_quantity
+        xmax = f[keys[0]]['Z'].max()
         plt.xlim(0,xmax)
     #tidy label string by stripping final ', ' from the end  
     plt.ylabel(ylabel[:-2])
@@ -359,10 +362,14 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
         """
         if lines:
             clabel = y_axis_labels['mag_strength'][:-2]
-            X = np.linspace(extent[0],extent[1],slc.shape[0])       
-            Y = np.linspace(extent[2],extent[3],slc.shape[1])
+            X = np.linspace(extent[0], extent[1], slc.shape[0])
+            Y = np.linspace(extent[2], extent[3], slc.shape[1])
+            #X = u.Quantity(np.linspace(extent[0].value,extent[1].value,
+            #               slc.shape[0]), unit=extent[0].unit)   
+            #Y = u.Quantity(np.linspace(extent[2].value,extent[3].value,
+            #               slc.shape[1]), unit=extent[2].unit)
             U = np.sqrt(v1**2 + v2**2)
-            plt.streamplot(X.value, Y.value, v1.T, v2.T, color=U.T,
+            plt.streamplot(X, Y, v1.T, v2.T, color=U.T,
                            cmap=cm.winter, density=line_density, 
                            linewidth = 4*U.T/U.max(), minlength = 0.99
                           ) 
@@ -374,8 +381,12 @@ def make_2d_plot(ds, var_field, figname, normal = ['y',64],
             cbar2.solids.set_edgecolor("face")
         # plot contours with inline labels 
         if contours:
-            X = np.linspace(extent[0],extent[1],slc.shape[0])       
-            Y = np.linspace(extent[2],extent[3],slc.shape[1])
+            X = np.linspace(extent[0], extent[1], slc.shape[0])
+            Y = np.linspace(extent[2], extent[3], slc.shape[1])
+            #X = u.Quantity(np.linspace(extent[0].value,extent[1].value,
+            #               slc.shape[0]), unit=extent[0].unit)   
+            #Y = u.Quantity(np.linspace(extent[2].value,extent[3].value,
+            #               slc.shape[1]), unit=extent[2].unit)
             CS=plt.contour(X,Y,beta.T,4,
                            levels=[
                                    1e-2,1e-1,1.,1e1,1e2,
@@ -408,6 +419,8 @@ def make_3d_plot(ds, figname,
     fields: list of strings indicating the fields to be plotted
             first volume filling, second iso surfaces, third:fifth vector field
     """
+    from mayavi import mlab
+    from pysac.plot.mayavi_seed_streamlines import SeedStreamline
 
 #    # extract field labels for plot variables
 #    vector_field = 'magnetic field'
