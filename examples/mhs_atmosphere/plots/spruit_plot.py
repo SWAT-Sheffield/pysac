@@ -89,5 +89,5 @@ for spruit in spruits:
     keys = ['alfven_speed','sound_speed','mag_field_z_bg']
     subkeys = ['axis']
     atm.mhs_plot.make_1d_zplot(oneD_arrays, plot_label, keys=keys, subkeys=subkeys,
-                      ylog = True, xlog = True
+                      ylog = True, xlog = True, xlim = (0,12)
                                            )
