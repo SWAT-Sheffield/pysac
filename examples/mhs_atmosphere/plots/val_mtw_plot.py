@@ -199,7 +199,7 @@ for paper in papers:
         plt.subplots_adjust(bottom=0.125)
         plt.savefig(plot_label)
     else:
-        plt.plot(mfe_Z, mfe_Bz.,
+        plt.plot(mfe_Z, mfe_Bz,
                  'b-', label=r"MFE '15 $B_z$(axis)"
                 )
         plt.plot(oneD_arrays['mag_field_z_bg']['Z'],
