@@ -40,8 +40,8 @@ y_axis_labels = od((
                 ('tension',r'$B\cdot\nabla B/\mu_0$ [Pa m$^{-1}$], '),
                 ('balancing',r'$B\cdot\nabla B/\mu_0$ [Pa m$^{-1}$], '),
                 ('beta',r'$\beta$, '),
-                ('alfven',r'$v_\mathrm{A}$ [m s$^{-1}$], '),
-                ('sound',r'$c_\mathrm{s}$ [m s$^{-1}$], ')))
+                ('alfven',r'$v_\mathrm{A}$ [km s$^{-1}$], '),
+                ('sound',r'$c_\mathrm{s}$ [km s$^{-1}$], ')))
 
 #match the field name to the appropriate line color for consitency between 
 #plots. Ordered to control option on, for example, 'mag_pressure'.
