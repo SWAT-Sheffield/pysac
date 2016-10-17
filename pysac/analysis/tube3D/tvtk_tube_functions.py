@@ -460,15 +460,17 @@ def write_wave_flux(file_name, surface_poly, parallels, normals, torsionals,
     tvtk_common.configure_input(w, poly_out)
     w.write()
 
+
 def read_step(filename):
     """ Read back in a saved surface file"""
     r = tvtk.XMLPolyDataReader(file_name=filename)
     r.update()
     return r.output
 
-def get_data(poly_out,name):
+
+def get_data(poly_out, name):
     names = {}
-    #Extract varibles from file
+    # Extract varibles from file
     for i in xrange(0,poly_out.point_data.number_of_arrays):
         names.update({poly_out.point_data.get_array_name(i):i})
 

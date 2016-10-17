@@ -23,9 +23,10 @@ from traits.api import Instance, TraitPrefixList, Trait, Array
 import mayavi
 from mayavi.modules.streamline import Streamline
 
+from distutils.version import LooseVersion
+
 __all__ = ['SeedStreamline']
 
-from distutils.version import LooseVersion
 
 class SeedStreamline44(Streamline):
     """
@@ -69,6 +70,7 @@ class SeedStreamline44(Streamline):
                                                )
         self.ribbon_filter = tvtk.RibbonFilter()
         self.tube_filter = tvtk.TubeFilter()
+        self.clean_filter = tvtk.CleanPolyData()
 
         self.actor = mayavi.components.actor.Actor()
         # Setup the actor suitably for this module.
